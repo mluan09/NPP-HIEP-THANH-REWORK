@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Users, Trash2, X, UserPlus, Shield } from 'lucide-react';
 import type { Profile } from '../lib/db';
-import { deleteAuthUser } from '../lib/db';
-import { supabase } from '../lib/supabase';
+import { createAuthUser, deleteAuthUser } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from './ConfirmModal';
 import { useToast } from './Toast';
@@ -25,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { showToast } = useToast();
   const [showUserPanel, setShowUserPanel] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
+  const [newEmployeeId, setNewEmployeeId] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newName, setNewName] = useState('');
   const [newRole, setNewRole] = useState<'owner' | 'manager' | 'staff'>('staff');
@@ -80,45 +79,44 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim() || !newPassword.trim() || !newName.trim()) {
-      showAlert('Thiếu thông tin', 'Vui lòng điền đầy đủ email, mật khẩu và tên.', 'warning');
+    const employeeId = newEmployeeId.trim().toUpperCase();
+    const fullName = newName.trim();
+    const password = newPassword.trim();
+
+    if (!employeeId || !password || !fullName) {
+      showAlert('Thiếu thông tin', 'Vui lòng điền đầy đủ Mã NV, mật khẩu và tên.', 'warning');
       return;
     }
+
+    if (password.length < 6) {
+      showAlert('Mật khẩu quá ngắn', 'Mật khẩu phải có ít nhất 6 ký tự.', 'warning');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Sign up new user
-      const { data, error } = await supabase.auth.signUp({
-        email: newEmail.trim(),
-        password: newPassword.trim(),
-        options: {
-          data: { full_name: newName.trim(), role: newRole }
-        }
+      const result = await createAuthUser({
+        employee_id: employeeId,
+        password,
+        full_name: fullName,
+        role: newRole,
       });
-      if (error) throw error;
-      if (data.user) {
-        // Upsert profile manually in case trigger hasn't fired
-        await supabase.from('profiles').upsert({
-          id: data.user.id,
-          full_name: newName.trim(),
-          role: newRole,
-          created_at: new Date().toISOString()
-        });
-        const newProfile: Profile = {
-          id: data.user.id,
-          full_name: newName.trim(),
-          role: newRole,
-          created_at: new Date().toISOString()
-        };
-        onProfilesChange?.([...profiles, newProfile]);
-        showToast(`Đã tạo tài khoản ${newName.trim()} thành công`);
-        setNewEmail('');
-        setNewPassword('');
-        setNewName('');
-        setNewRole('staff');
-        setIsCreating(false);
-      }
+
+      const newProfile: Profile = {
+        id: result.id,
+        full_name: result.full_name,
+        role: result.role as 'owner' | 'manager' | 'staff',
+        created_at: new Date().toISOString(),
+      };
+      onProfilesChange?.([...profiles, newProfile]);
+      showToast(`Đã tạo tài khoản ${fullName} (${employeeId}) thành công`);
+      setNewEmployeeId('');
+      setNewPassword('');
+      setNewName('');
+      setNewRole('staff');
+      setIsCreating(false);
     } catch (err: unknown) {
-      showAlert('Lỗi', err instanceof Error ? err.message : 'Không thể tạo tài khoản', 'danger');
+      showAlert('Lỗi tạo tài khoản', err instanceof Error ? err.message : 'Không thể tạo tài khoản', 'danger');
     } finally {
       setLoading(false);
     }
@@ -214,15 +212,15 @@ export const Header: React.FC<HeaderProps> = ({
                           className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:outline-none dark:text-slate-100"
                         />
                         <input
-                          type="email"
-                          placeholder="Email"
-                          value={newEmail}
-                          onChange={e => setNewEmail(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:outline-none dark:text-slate-100"
+                          type="text"
+                          placeholder="Mã nhân viên (VD: NV004)"
+                          value={newEmployeeId}
+                          onChange={e => setNewEmployeeId(e.target.value.toUpperCase())}
+                          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:outline-none dark:text-slate-100 uppercase"
                         />
                         <input
                           type="password"
-                          placeholder="Mật khẩu"
+                          placeholder="Mật khẩu (tối thiểu 6 ký tự)"
                           value={newPassword}
                           onChange={e => setNewPassword(e.target.value)}
                           className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs focus:outline-none dark:text-slate-100"
@@ -236,6 +234,9 @@ export const Header: React.FC<HeaderProps> = ({
                           <option value="manager">Quản Lý</option>
                           <option value="owner">Chủ Cửa Hàng</option>
                         </select>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                          Tài khoản sẽ đăng nhập bằng Mã NV và mật khẩu đã đặt.
+                        </p>
                         <div className="flex gap-2">
                           <button
                             type="button"

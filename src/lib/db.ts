@@ -198,24 +198,44 @@ export const deleteCashbookEntry = async (id: string) => {
   if (error) throw error;
 };
 
-// Delete auth user via Edge Function (owner only)
-export const deleteAuthUser = async (userId: string): Promise<void> => {
+// Helper to call Edge Functions with auth
+const callEdgeFunction = async (
+  functionName: string,
+  body: Record<string, unknown>
+): Promise<Record<string, unknown>> => {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authenticated');
+  if (!session) throw new Error('Chưa đăng nhập');
 
   const res = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${functionName}`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ user_id: userId }),
+      body: JSON.stringify(body),
     }
   );
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error ?? 'Failed to delete user');
+  if (!res.ok) throw new Error(json.error ?? `Lỗi ${functionName}`);
+  return json;
+};
+
+// Create auth user via Edge Function (owner only)
+export const createAuthUser = async (params: {
+  employee_id: string;
+  password: string;
+  full_name: string;
+  role: 'owner' | 'manager' | 'staff';
+}): Promise<{ id: string; email: string; full_name: string; role: string; employee_id: string }> => {
+  const result = await callEdgeFunction('create-user', params);
+  return result.user as { id: string; email: string; full_name: string; role: string; employee_id: string };
+};
+
+// Delete auth user via Edge Function (owner only)
+export const deleteAuthUser = async (userId: string): Promise<void> => {
+  await callEdgeFunction('delete-user', { user_id: userId });
 };
 
 // Auto increment codes
