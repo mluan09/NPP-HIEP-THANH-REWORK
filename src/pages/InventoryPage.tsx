@@ -16,6 +16,7 @@ import {
 import type { InventoryItem, Profile } from '../lib/db';
 import { upsertInventory, deleteInventoryItem } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
+import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { useToast } from '../components/Toast';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -112,16 +113,22 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     showConfirm(
       'Xác nhận xóa sản phẩm',
       `Bạn có chắc chắn muốn xóa "${item?.product_name || 'sản phẩm này'}" khỏi kho hàng?\nThao tác này không thể hoàn tác.`,
-      () => {
-        setInventory((prev) => prev.filter((i) => i.id !== id));
-        deleteInventoryItem(id).catch(console.error);
-        showToast('Xóa sản phẩm thành công');
+      async () => {
+        try {
+          await deleteInventoryItem(id);
+          setInventory((prev) => prev.filter((i) => i.id !== id));
+          logActivity(currentUser, 'Xóa sản phẩm', 'inventory', `${item?.product_name} (${item?.sku})`);
+          showToast('Xóa sản phẩm thành công');
+        } catch (err) {
+          console.error(err);
+          showToast('Lỗi: Không thể xóa sản phẩm. Vui lòng thử lại.');
+        }
       },
       { type: 'danger', confirmText: 'Xóa sản phẩm', cancelText: 'Hủy' }
     );
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productName.trim() || !sku.trim()) {
       showAlert('Thiếu thông tin', 'Vui lòng điền đầy đủ Mã SKU và Tên sản phẩm.', 'warning');
@@ -129,28 +136,27 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     }
 
     if (editingItem) {
-      // Update
-      setInventory(prev => prev.map(item => {
-        if (item.id === editingItem.id) {
-          const updated = {
-            ...item,
-            sku,
-            product_name: productName,
-            unit,
-            cost_price: Number(costPrice),
-            selling_price: Number(sellingPrice),
-            initial_stock: Number(initialStock),
-            import_qty: Number(importQty),
-            export_qty: Number(exportQty)
-          };
-          upsertInventory(updated).catch(console.error);
-          return updated;
-        }
-        return item;
-      }));
-      showToast('Cập nhật sản phẩm thành công');
+      const updated: InventoryItem = {
+        ...editingItem,
+        sku,
+        product_name: productName,
+        unit,
+        cost_price: Number(costPrice),
+        selling_price: Number(sellingPrice),
+        initial_stock: Number(initialStock),
+        import_qty: Number(importQty),
+        export_qty: Number(exportQty),};
+      try {
+        await upsertInventory(updated);
+        setInventory(prev => prev.map(item => item.id === editingItem.id ? updated : item));
+        logActivity(currentUser, 'Cập nhật sản phẩm', 'inventory', `${productName} (${sku})`);
+        showToast('Cập nhật sản phẩm thành công');
+        setIsDialogOpen(false);
+      } catch (err) {
+        console.error(err);
+        showToast('Lỗi: Không thể cập nhật sản phẩm. Vui lòng thử lại.');
+      }
     } else {
-      // Create new
       const newItem: InventoryItem = {
         id: `p-${Date.now()}`,
         sku,
@@ -161,13 +167,19 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         initial_stock: Number(initialStock),
         import_qty: Number(importQty),
         export_qty: Number(exportQty),
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
-      setInventory(prev => [newItem, ...prev]);
-      upsertInventory(newItem).catch(console.error);
-      showToast('Thêm sản phẩm mới thành công');
+      try {
+        await upsertInventory(newItem);
+        setInventory(prev => [newItem, ...prev]);
+        logActivity(currentUser, 'Thêm sản phẩm', 'inventory', `${productName} (${sku})`);
+        showToast('Thêm sản phẩm mới thành công');
+        setIsDialogOpen(false);
+      } catch (err) {
+        console.error(err);
+        showToast('Lỗi: Không thể thêm sản phẩm. Vui lòng thử lại.');
+      }
     }
-    setIsDialogOpen(false);
   };
 
   // CSV Export

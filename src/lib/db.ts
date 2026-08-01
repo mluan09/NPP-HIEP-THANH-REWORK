@@ -19,6 +19,7 @@ export interface InventoryItem {
   import_qty: number;
   export_qty: number;
   created_at: string;
+  deleted_at?: string | null;
 }
 
 export interface Customer {
@@ -87,7 +88,10 @@ export const fetchProfiles = async (): Promise<Profile[]> => {
 };
 
 export const fetchInventory = async (): Promise<InventoryItem[]> => {
-  const { data, error } = await supabase.from('inventory').select('*');
+  const { data, error } = await supabase
+    .from('inventory')
+    .select('*')
+    .is('deleted_at', null);
   if (error) throw error;
   return data ?? [];
 };
@@ -145,7 +149,10 @@ export const upsertInventory = async (item: InventoryItem) => {
 };
 
 export const deleteInventoryItem = async (id: string) => {
-  const { error } = await supabase.from('inventory').delete().eq('id', id);
+  const { error } = await supabase
+    .from('inventory')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
   if (error) throw error;
 };
 
