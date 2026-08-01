@@ -1,6 +1,0 @@
-[
-  {"employeeId":"NV001","password":"123456","profileId":"u-1"},
-  {"employeeId":"NV002","password":"abcdef","profileId":"u-2"},
-  {"employeeId":"admin","password":"admin123","profileId":"u-1"},
-  {"employeeId":"NV003","password":"123456","profileId":"u-3"}
-]
