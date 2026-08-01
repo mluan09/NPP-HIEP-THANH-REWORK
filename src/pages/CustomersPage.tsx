@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { Customer, Sale, SaleItem, InventoryItem, Debt, Profile } from '../lib/db';
 import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt } from '../lib/db';
+import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -115,10 +116,15 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     showConfirm(
       'Xác nhận xóa khách hàng',
       `Bạn có chắc chắn muốn xóa khách hàng "${customer?.customer_name || 'này'}"?\nCác dữ liệu liên quan có thể bị đứt gãy.`,
-      () => {
-        setCustomers((prev) => prev.filter((c) => c.id !== id));
-        deleteCustomer(id).catch(console.error);
-        showToast(`Đã xoá khách hàng ${customer?.customer_name || 'này'} thành công`);
+      async () => {
+        try {
+          await deleteCustomer(id);
+          setCustomers((prev) => prev.filter((c) => c.id !== id));
+          logActivity(currentUser, 'Xóa khách hàng', 'customer', customer?.customer_name || 'không rõ');
+          showToast(`Đã xoá khách hàng ${customer?.customer_name || 'này'} thành công`);
+        } catch (error) {
+          console.error(error);
+        }
       },
       { type: 'danger', confirmText: 'Xóa khách hàng', cancelText: 'Hủy' }
     );
@@ -129,57 +135,61 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     showConfirm(
       'Xác nhận xoá nhật ký giao dịch',
       `Bạn có chắc chắn muốn xoá nhật ký giao dịch ngày ${sale.sale_date}?\n\nSản phẩm: ${productSummary}\nTổng thanh toán: ${sale.total_revenue.toLocaleString('vi-VN')}đ\n\nHành động này sẽ xoá đơn hàng, sản phẩm trong đơn và công nợ liên quan.`,
-      () => {
-        setSales((prev) => prev.filter((s) => s.id !== sale.id));
-        setSaleItems((prev) => prev.filter((item) => item.sale_id !== sale.id));
-        setDebts((prev) => prev.filter((debt) => debt.sale_id !== sale.id));
-        deleteSale(sale.id).catch(console.error);
-        deleteSaleItem(sale.id).catch(console.error);
-        deleteDebt(sale.id).catch(console.error);
-        showToast(`Đã xoá nhật ký giao dịch ngày ${sale.sale_date} thành công`);
+      async () => {
+        try {
+          await deleteSale(sale.id);
+          await deleteSaleItem(sale.id);
+          await deleteDebt(sale.id);
+          setSales((prev) => prev.filter((s) => s.id !== sale.id));
+          setSaleItems((prev) => prev.filter((item) => item.sale_id !== sale.id));
+          setDebts((prev) => prev.filter((debt) => debt.sale_id !== sale.id));
+          logActivity(currentUser, 'Xóa nhật ký giao dịch', 'customer', `Ngày ${sale.sale_date}`);
+          showToast(`Đã xoá nhật ký giao dịch ngày ${sale.sale_date} thành công`);
+        } catch (error) {
+          console.error(error);
+        }
       },
       { type: 'danger', confirmText: 'Xoá nhật ký', cancelText: 'Huỷ' }
     );
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim()) {
       showAlert('Thiếu thông tin', 'Vui lòng điền tên khách hàng.', 'warning');
       return;
     }
 
-    if (editingCustomer) {
-      // Update
-      setCustomers(prev => prev.map(c => {
-        if (c.id === editingCustomer.id) {
-          const updated = {
-            ...c,
-            customer_name: customerName,
-            phone,
-            address,
-            notes
-          };
-          upsertCustomer(updated).catch(console.error);
-          return updated;
-        }
-        return c;
-      }));
-    } else {
-      // Create new
-      const newCustomer: Customer = {
-        id: `c-${Date.now()}`,
-        customer_code: `KH-${(customers.length + 1).toString().padStart(3, '0')}`,
-        customer_name: customerName,
-        phone,
-        address,
-        notes,
-        created_at: new Date().toISOString()
-      };
-      setCustomers(prev => [...prev, newCustomer]);
-      upsertCustomer(newCustomer).catch(console.error);
+    try {
+      if (editingCustomer) {
+        const updated = {
+          ...editingCustomer,
+          customer_name: customerName,
+          phone,
+          address,
+          notes
+        };
+        await upsertCustomer(updated);
+        setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? updated : c));
+        logActivity(currentUser, 'Cập nhật khách hàng', 'customer', updated.customer_name);
+      } else {
+        const newCustomer: Customer = {
+          id: `c-${Date.now()}`,
+          customer_code: `KH-${(customers.length + 1).toString().padStart(3, '0')}`,
+          customer_name: customerName,
+          phone,
+          address,
+          notes,
+          created_at: new Date().toISOString()
+        };
+        await upsertCustomer(newCustomer);
+        setCustomers(prev => [...prev, newCustomer]);
+        logActivity(currentUser, 'Tạo khách hàng', 'customer', newCustomer.customer_name);
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error(error);
     }
-    setIsDialogOpen(false);
   };
 
   // Get product names for a sale

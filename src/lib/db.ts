@@ -186,6 +186,12 @@ export const deleteSaleItem = async (saleId: string) => {
   if (error) throw error;
 };
 
+export const deleteSaleItemsBySaleIds = async (saleIds: string[]) => {
+  if (saleIds.length === 0) return;
+  const { error } = await supabase.from('sale_items').delete().in('sale_id', saleIds);
+  if (error) throw error;
+};
+
 export const upsertDebt = async (debt: Debt) => {
   const { error } = await supabase.from('debts').upsert(debt);
   if (error) throw error;
@@ -193,6 +199,21 @@ export const upsertDebt = async (debt: Debt) => {
 
 export const deleteDebt = async (saleId: string) => {
   const { error } = await supabase.from('debts').delete().eq('sale_id', saleId);
+  if (error) throw error;
+};
+
+export const deleteDebtById = async (id: string) => {
+  const { error } = await supabase.from('debts').delete().eq('id', id);
+  if (error) throw error;
+};
+
+export const deleteDebtsByCustomer = async (customerId: string) => {
+  const { error } = await supabase.from('debts').delete().eq('customer_id', customerId);
+  if (error) throw error;
+};
+
+export const deleteSalesByCustomer = async (customerId: string) => {
+  const { error } = await supabase.from('sales').delete().eq('customer_id', customerId);
   if (error) throw error;
 };
 

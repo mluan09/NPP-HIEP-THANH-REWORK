@@ -12,7 +12,7 @@ import {
   Edit3,
   Trash2
 } from 'lucide-react';
-import { generateCashbookCode, upsertDebt, upsertCashbookEntry, deleteDebt } from '../lib/db';
+import { generateCashbookCode, upsertDebt, upsertCashbookEntry, deleteDebtById } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { Debt, Customer, Profile, CashbookEntry, Sale } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -33,6 +33,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
   debts,
   setDebts,
   customers,
+  cashbook,
   setCashbook,
   sales,
   currentUser
@@ -94,7 +95,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     setPaymentNotes(`Thu hồi công nợ đơn hàng ${debt.sale_id ? debt.sale_id.toUpperCase() : 'KHÁC'}`);
   };
 
-  const handlePayDebt = (e: React.FormEvent) => {
+  const handlePayDebt = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDebt) return;
 
@@ -111,42 +112,34 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     const customerName = getCustomerName(selectedDebt.customer_id);
 
     // 1. Update Debts Table state
-    setDebts(prev => prev.map(d => {
-      if (d.id === selectedDebt.id) {
-        const nextPaid = d.paid_amount + payAmount;
-        const nextRemaining = d.total_amount - nextPaid;
-        const updated: typeof d = {
-          ...d,
-          paid_amount: nextPaid,
-          remaining_debt: nextRemaining,
-          status: (nextRemaining <= 0 ? 'PAID' : 'PENDING') as 'PAID' | 'PENDING',
-          updated_at: new Date().toISOString()
-        };
-        upsertDebt(updated).catch(console.error);
-        return updated;
-      }
-      return d;
-    }));
+    const nextDebt = {
+      ...selectedDebt,
+      paid_amount: selectedDebt.paid_amount + payAmount,
+      remaining_debt: Math.max(0, selectedDebt.total_amount - (selectedDebt.paid_amount + payAmount)),
+      status: Math.max(0, selectedDebt.total_amount - (selectedDebt.paid_amount + payAmount)) <= 0 ? 'PAID' : 'PENDING',
+      updated_at: new Date().toISOString()
+    } as Debt;
 
-    // 2. Log payment transaction in Cashbook Sổ Quỹ
-    setCashbook(prev => {
-      const entryCode = generateCashbookCode(prev, 'income');
-      const newEntry: CashbookEntry = {
-        id: `cb-${Date.now()}`,
-        code: entryCode,
-        transaction_date: new Date().toISOString().slice(0, 10),
-        description: `Thu nợ KH: ${customerName} (Đơn hàng: ${selectedDebt.sale_id ? selectedDebt.sale_id.toUpperCase() : 'KHÁC'})`,
-        income: payAmount,
-        expense_purchase: 0,
-        expense_operation: 0,
-        expense_other: 0,
-        total_expense: 0,
-        notes: paymentNotes || 'Thu hồi công nợ',
-        created_at: new Date().toISOString()
-      };
-      upsertCashbookEntry(newEntry).catch(console.error);
-      return [newEntry, ...prev];
-    });
+    const entryCode = generateCashbookCode(cashbook, 'income');
+    const newEntry: CashbookEntry = {
+      id: `cb-${Date.now()}`,
+      code: entryCode,
+      transaction_date: new Date().toISOString().slice(0, 10),
+      description: `Thu nợ KH: ${customerName} (Đơn hàng: ${selectedDebt.sale_id ? selectedDebt.sale_id.toUpperCase() : 'KHÁC'})`,
+      income: payAmount,
+      expense_purchase: 0,
+      expense_operation: 0,
+      expense_other: 0,
+      total_expense: 0,
+      notes: paymentNotes || 'Thu hồi công nợ',
+      created_at: new Date().toISOString()
+    };
+
+    await upsertDebt(nextDebt);
+    await upsertCashbookEntry(newEntry);
+
+    setDebts(prev => prev.map(d => d.id === selectedDebt.id ? nextDebt : d));
+    setCashbook(prev => [newEntry, ...prev]);
 
     showToast(`Đã thu công nợ ${customerName} thành công`);
     setSelectedDebt(null);
@@ -158,7 +151,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     setEditPaidAmount(debt.paid_amount);
   };
 
-  const handleSaveEditDebt = (e: React.FormEvent) => {
+  const handleSaveEditDebt = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDebt) return;
 
@@ -187,8 +180,8 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       updated_at: new Date().toISOString()
     };
 
+    await upsertDebt(updatedDebt);
     setDebts(prev => prev.map(d => d.id === editingDebt.id ? updatedDebt : d));
-    upsertDebt(updatedDebt).catch(console.error);
     showToast(`Đã điều chỉnh công nợ ${getCustomerName(editingDebt.customer_id)} thành công`);
     setEditingDebt(null);
   };
@@ -199,9 +192,12 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       'Xác nhận xoá công nợ',
       `Bạn có chắc chắn muốn xoá khoản công nợ của khách hàng "${customerName}" không?`,
       () => {
-        setDebts(prev => prev.filter(d => d.id !== debt.id));
-        deleteDebt(debt.id).catch(console.error);
-        showToast(`Đã xoá công nợ ${customerName} thành công`);
+        deleteDebtById(debt.id)
+          .then(() => {
+            setDebts(prev => prev.filter(d => d.id !== debt.id));
+            showToast(`Đã xoá công nợ ${customerName} thành công`);
+          })
+          .catch(console.error);
       },
       { type: 'danger', confirmText: 'Xoá công nợ', cancelText: 'Huỷ' }
     );
