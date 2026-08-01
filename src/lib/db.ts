@@ -198,6 +198,26 @@ export const deleteCashbookEntry = async (id: string) => {
   if (error) throw error;
 };
 
+// Delete auth user via Edge Function (owner only)
+export const deleteAuthUser = async (userId: string): Promise<void> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+
+  const res = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ user_id: userId }),
+    }
+  );
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? 'Failed to delete user');
+};
+
 // Auto increment codes
 export const generateCustomerCode = (customers: Customer[]): string => {
   const maxNum = customers.reduce((max, c) => {

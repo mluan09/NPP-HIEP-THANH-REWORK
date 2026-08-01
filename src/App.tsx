@@ -172,6 +172,7 @@ function AppInner() {
           currentUser={currentUser}
           profiles={profiles}
           onRoleSwitch={handleRoleSwitch}
+          onProfilesChange={setProfiles}
         />
 
         <main className="p-8 flex-1 overflow-y-auto">
