@@ -8,13 +8,16 @@ import {
   AlertCircle,
   X,
   Wallet,
-  ArrowRight
+  ArrowRight,
+  Edit3,
+  Trash2
 } from 'lucide-react';
-import { generateCashbookCode, upsertDebt, upsertCashbookEntry } from '../lib/db';
+import { generateCashbookCode, upsertDebt, upsertCashbookEntry, deleteDebt } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { Debt, Customer, Profile, CashbookEntry, Sale } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
 
 interface DebtsPageProps {
   debts: Debt[];
@@ -32,8 +35,10 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
   customers,
   setCashbook,
   sales,
+  currentUser
 }) => {
-  const { modalState, showAlert } = useModal();
+  const { modalState, showAlert, showConfirm } = useModal();
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'paid'>('pending');
 
@@ -41,6 +46,13 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
   const [payAmount, setPayAmount] = useState<number>(0);
   const [paymentNotes, setPaymentNotes] = useState('');
+
+  // Edit Dialog state
+  const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
+  const [editTotalAmount, setEditTotalAmount] = useState<number>(0);
+  const [editPaidAmount, setEditPaidAmount] = useState<number>(0);
+
+  const isOwner = currentUser.role === 'owner';
 
   // Get customer name helper
   const getCustomerName = (customerId: string) => {
@@ -97,8 +109,6 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     }
 
     const customerName = getCustomerName(selectedDebt.customer_id);
-    const oldDebt = selectedDebt.remaining_debt;
-    const newRemaining = oldDebt - payAmount;
 
     // 1. Update Debts Table state
     setDebts(prev => prev.map(d => {
@@ -138,12 +148,63 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       return [newEntry, ...prev];
     });
 
-    showAlert(
-      'Thành công',
-      `Thanh toán công nợ thành công!\n\nThu quỹ: +${payAmount.toLocaleString('vi-VN')}đ.\nNợ còn lại: ${newRemaining.toLocaleString('vi-VN')}đ.`,
-      'success'
-    );
+    showToast(`Đã thu công nợ ${customerName} thành công`);
     setSelectedDebt(null);
+  };
+
+  const openEditDialog = (debt: Debt) => {
+    setEditingDebt(debt);
+    setEditTotalAmount(debt.total_amount);
+    setEditPaidAmount(debt.paid_amount);
+  };
+
+  const handleSaveEditDebt = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDebt) return;
+
+    if (editTotalAmount <= 0) {
+      showAlert('Số tiền không hợp lệ', 'Tổng công nợ phải lớn hơn 0đ.', 'warning');
+      return;
+    }
+
+    if (editPaidAmount < 0) {
+      showAlert('Số tiền không hợp lệ', 'Số tiền đã thanh toán không được nhỏ hơn 0đ.', 'warning');
+      return;
+    }
+
+    if (editPaidAmount > editTotalAmount) {
+      showAlert('Số tiền không hợp lệ', 'Số tiền đã thanh toán không được lớn hơn tổng công nợ.', 'warning');
+      return;
+    }
+
+    const remaining = editTotalAmount - editPaidAmount;
+    const updatedDebt: Debt = {
+      ...editingDebt,
+      total_amount: editTotalAmount,
+      paid_amount: editPaidAmount,
+      remaining_debt: remaining,
+      status: remaining <= 0 ? 'PAID' : 'PENDING',
+      updated_at: new Date().toISOString()
+    };
+
+    setDebts(prev => prev.map(d => d.id === editingDebt.id ? updatedDebt : d));
+    upsertDebt(updatedDebt).catch(console.error);
+    showToast(`Đã điều chỉnh công nợ ${getCustomerName(editingDebt.customer_id)} thành công`);
+    setEditingDebt(null);
+  };
+
+  const handleDeleteDebt = (debt: Debt) => {
+    const customerName = getCustomerName(debt.customer_id);
+    showConfirm(
+      'Xác nhận xoá công nợ',
+      `Bạn có chắc chắn muốn xoá khoản công nợ của khách hàng "${customerName}" không?`,
+      () => {
+        setDebts(prev => prev.filter(d => d.id !== debt.id));
+        deleteDebt(debt.id).catch(console.error);
+        showToast(`Đã xoá công nợ ${customerName} thành công`);
+      },
+      { type: 'danger', confirmText: 'Xoá công nợ', cancelText: 'Huỷ' }
+    );
   };
 
   return (
@@ -286,17 +347,37 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        {!isPaid ? (
-                          <button
-                            onClick={() => openPaymentDialog(debt)}
-                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1 cursor-pointer shadow-sm shadow-amber-500/10"
-                          >
-                            <DollarSign className="w-3.5 h-3.5" />
-                            <span>Thu nợ</span>
-                          </button>
-                        ) : (
-                          <span className="text-slate-400 text-xs font-semibold">Đã hoàn thành</span>
-                        )}
+                        <div className="flex items-center justify-center gap-1.5">
+                          {!isPaid ? (
+                            <button
+                              onClick={() => openPaymentDialog(debt)}
+                              className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1 cursor-pointer shadow-sm shadow-amber-500/10"
+                            >
+                              <DollarSign className="w-3.5 h-3.5" />
+                              <span>Thu nợ</span>
+                            </button>
+                          ) : (
+                            <span className="text-slate-400 text-xs font-semibold">Đã hoàn thành</span>
+                          )}
+                          {isOwner && (
+                            <>
+                              <button
+                                onClick={() => openEditDialog(debt)}
+                                className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg cursor-pointer transition-colors"
+                                title="Điều chỉnh công nợ"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteDebt(debt)}
+                                className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
+                                title="Xoá công nợ"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -412,6 +493,102 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
                     className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs cursor-pointer shadow-md shadow-amber-500/10 flex items-center gap-1"
                   >
                     <span>Thu tiền quỹ</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Debt Modal */}
+      <AnimatePresence>
+        {editingDebt && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingDebt(null)}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl flex flex-col gap-5 z-10"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Điều chỉnh công nợ</h3>
+                </div>
+                <button
+                  onClick={() => setEditingDebt(null)}
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                >
+                  <X className="w-5 h-5 dark:text-slate-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEditDebt} className="space-y-4">
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800">
+                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(editingDebt.customer_id)}</p>
+                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Ngày giao dịch:</span> {getTransactionDate(editingDebt)}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Tổng công nợ (đ)</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatCurrencyInput(editTotalAmount)}
+                    onChange={(e) => setEditTotalAmount(parseCurrencyInput(e.target.value))}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Đã thanh toán (đ)</label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formatCurrencyInput(editPaidAmount)}
+                    onChange={(e) => setEditPaidAmount(parseCurrencyInput(e.target.value))}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 bg-amber-500/5 p-3.5 rounded-xl border border-dashed border-amber-500/20 text-xs">
+                  <div>
+                    <span className="text-slate-400 block">Dư nợ mới:</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{Math.max(0, editTotalAmount - editPaidAmount).toLocaleString()}đ</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-slate-400 block">Trạng thái:</span>
+                    <span className="font-extrabold text-amber-600 dark:text-amber-450">
+                      {editTotalAmount - editPaidAmount <= 0 ? 'Đã thu xong' : 'Chờ thu nợ'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditingDebt(null)}
+                    className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50"
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs cursor-pointer shadow-md shadow-amber-500/10 flex items-center gap-1"
+                  >
+                    <span>Lưu điều chỉnh</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>

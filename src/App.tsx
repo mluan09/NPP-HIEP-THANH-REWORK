@@ -17,6 +17,7 @@ const DebtsPage = lazy(() => import('./pages/DebtsPage').then((module) => ({ def
 const CashbookPage = lazy(() => import('./pages/CashbookPage').then((module) => ({ default: module.CashbookPage })));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage').then((module) => ({ default: module.FeedbackPage })));
 const AccountsPage = lazy(() => import('./pages/AccountsPage').then((module) => ({ default: module.AccountsPage })));
+const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage').then((module) => ({ default: module.ActivityLogPage })));
 
 function PageLoader() {
   return (
@@ -181,7 +182,7 @@ function AppInner() {
   if (currentUser.role === 'staff' && location.pathname === '/cashbook') {
     return <Navigate to="/sales" replace />;
   }
-  if (currentUser.role !== 'owner' && location.pathname === '/accounts') {
+  if (currentUser.role !== 'owner' && (location.pathname === '/accounts' || location.pathname === '/activity-log')) {
     return <Navigate to="/sales" replace />;
   }
 
@@ -306,6 +307,14 @@ function AppInner() {
                         currentUser={currentUser}
                         profiles={profiles}
                         onProfilesChange={setProfiles}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/activity-log"
+                    element={
+                      <ActivityLogPage
+                        currentUser={currentUser}
                       />
                     }
                   />

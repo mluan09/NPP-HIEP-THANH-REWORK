@@ -118,6 +118,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       () => {
         setCustomers((prev) => prev.filter((c) => c.id !== id));
         deleteCustomer(id).catch(console.error);
+        showToast(`Đã xoá khách hàng ${customer?.customer_name || 'này'} thành công`);
       },
       { type: 'danger', confirmText: 'Xóa khách hàng', cancelText: 'Hủy' }
     );

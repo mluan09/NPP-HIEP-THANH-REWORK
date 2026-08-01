@@ -18,6 +18,7 @@ import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { CashbookEntry, Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { useToast } from '../components/Toast';
 
 interface CashbookPageProps {
   cashbook: CashbookEntry[];
@@ -31,6 +32,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   currentUser
 }) => {
   const { modalState, showAlert, showConfirm } = useModal();
+  const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
@@ -115,7 +117,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       () => {
         setCashbook(prev => prev.filter(e => e.id !== entry.id));
         deleteCashbookEntry(entry.id).catch(console.error);
-        showAlert('Đã xóa', `Phiếu ${entry.code} đã được xóa thành công.`, 'success');
+        showToast(`Đã xoá phiếu ${entry.code} thành công`);
       },
       { type: 'danger', confirmText: 'Xóa phiếu', cancelText: 'Hủy bỏ' }
     );
@@ -151,6 +153,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       }));
       setIsDialogOpen(false);
       setEditingEntry(null);
+      showToast(`Đã điều chỉnh phiếu ${editingEntry.code} thành công`);
       return;
     }
 

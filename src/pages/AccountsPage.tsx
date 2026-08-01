@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Trash2, UserPlus, Users, Pencil, X, Check, Save, Crown, Briefcase, User } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { createAuthUser, deleteAuthUser, updateAuthUser } from '../lib/db';
+import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -57,7 +58,7 @@ const roleOptions: RoleOption[] = [
   },
 ];
 
-function RoleSelector({ value, onChange }: { value: 'owner' | 'manager' | 'staff'; onChange: (v: 'owner' | 'manager' | 'staff') => void }) {
+function RoleSelector({ value, onChange, disabled = false }: { value: 'owner' | 'manager' | 'staff'; onChange: (v: 'owner' | 'manager' | 'staff') => void; disabled?: boolean }) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {roleOptions.map((opt) => {
@@ -68,8 +69,11 @@ function RoleSelector({ value, onChange }: { value: 'owner' | 'manager' | 'staff
             type="button"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onChange(opt.value)}
-            className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all cursor-pointer ${
+            onClick={() => !disabled && onChange(opt.value)}
+            disabled={disabled}
+            className={`relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all ${
+              disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+            } ${
               selected
                 ? `${opt.bg} ${opt.border} ring-2`
                 : 'border-slate-800 bg-slate-950 hover:border-slate-700'
@@ -166,6 +170,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         try {
           await deleteAuthUser(profile.id);
           onProfilesChange(profiles.filter((p) => p.id !== profile.id));
+          logActivity(currentUser, 'Xóa tài khoản', 'account', `${profile.full_name} (${profile.employee_id ?? 'không có mã'})`);
           showToast(`Đã xóa tài khoản ${profile.full_name}`);
         } catch (err: unknown) {
           showAlert('Lỗi', err instanceof Error ? err.message : 'Không thể xóa tài khoản', 'danger');
@@ -197,6 +202,9 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
     if (!fullName) { showAlert('Thiếu thông tin', 'Vui lòng nhập tên nhân viên.', 'warning'); return; }
     if (employeeId && !/^[A-Z0-9]+$/.test(employeeId)) { showAlert('Mã NV không hợp lệ', 'Mã nhân viên chỉ gồm chữ cái và số.', 'warning'); return; }
     if (password && password.length < 6) { showAlert('Mật khẩu quá ngắn', 'Mật khẩu phải có ít nhất 6 ký tự.', 'warning'); return; }
+    if (editing.profile.id === currentUser.id && editing.role !== editing.profile.role) {
+      showAlert('Không thể đổi quyền', 'Owner không thể tự điều chỉnh role của bản thân.', 'warning'); return;
+    }
     if (profiles.some((p) => p.id !== editing.profile.id && p.employee_id?.toUpperCase() === employeeId)) {
       showAlert('Mã nhân viên đã tồn tại', `Mã ${employeeId} đã được sử dụng bởi tài khoản khác.`, 'warning'); return;
     }
@@ -210,6 +218,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         ...(password ? { password } : {}),
       });
       onProfilesChange(profiles.map((p) => p.id === editing.profile.id ? { ...p, full_name: fullName, employee_id: employeeId || p.employee_id, role: editing.role } : p));
+      logActivity(currentUser, 'Cập nhật tài khoản', 'account', `${fullName} • role: ${editing.role} • mã NV: ${employeeId || 'không có'}`);
       showToast(`Đã cập nhật tài khoản ${fullName}`);
       setEditing(null);
     } catch (err: unknown) {
@@ -234,6 +243,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       const result = await createAuthUser({ employee_id: employeeId, password, full_name: fullName, role: creating.role });
       const newProfile: Profile = { id: result.id, full_name: result.full_name, role: result.role as 'owner' | 'manager' | 'staff', employee_id: result.employee_id, created_at: new Date().toISOString() };
       onProfilesChange([...profiles, newProfile]);
+      logActivity(currentUser, 'Tạo tài khoản', 'account', `${fullName} (${employeeId}) • role: ${creating.role}`);
       showToast(`Đã tạo tài khoản ${fullName} (${employeeId}) thành công`);
       setCreating(null);
     } catch (err: unknown) {
@@ -431,8 +441,11 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Vai trò</label>
-                  <RoleSelector value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} />
+                  <RoleSelector value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} disabled={editing.profile.id === currentUser.id} />
                 </div>
+                {editing.profile.id === currentUser.id && (
+                  <p className="text-xs text-amber-500">Owner không thể tự điều chỉnh role của bản thân.</p>
+                )}
                 <p className="text-xs text-slate-500">Thay đổi sẽ được cập nhật lên Supabase ngay lập tức.</p>
               </form>
 

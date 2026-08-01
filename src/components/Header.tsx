@@ -13,6 +13,7 @@ const getTabTitle = (tab: string) => {
     case 'debts': return 'Quản Lý & Thu Hồi Công Nợ';
     case 'cashbook': return 'Sổ Quỹ Thu Chi';
     case 'accounts': return 'Quản Lý Tài Khoản';
+    case 'activity-log': return 'Nhật Ký Hoạt Động';
     case 'feedback': return 'Góp Ý & Báo Lỗi';
     default: return 'Trang Chủ';
   }
