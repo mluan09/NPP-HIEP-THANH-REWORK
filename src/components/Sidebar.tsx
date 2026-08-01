@@ -147,28 +147,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* User Session Area */}
-      <div className="p-4 border-t border-slate-200/40 dark:border-slate-800/40 space-y-3 bg-slate-50/50 dark:bg-slate-900/20">
-        <div className="flex items-center gap-3 p-2 rounded-xl">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-            {currentUser.full_name.charAt(0)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate leading-none mb-1">
-              {currentUser.full_name}
-            </h4>
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getRoleColor(currentUser.role)}`}>
-              {getRoleLabel(currentUser.role)}
-            </span>
-          </div>
-        </div>
-
-        <button
+      <div className="p-4 border-t border-slate-200/40 dark:border-slate-800/40 bg-slate-50/40 dark:bg-slate-900/20">
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.97 }}
           onClick={handleLogoutConfirm}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-950/30 dark:text-red-400 dark:hover:bg-red-950/20 text-xs font-semibold transition-colors duration-200 cursor-pointer"
+          className="group relative w-full overflow-hidden rounded-2xl border border-red-200/70 dark:border-red-950/40 bg-white/80 dark:bg-slate-900/70 px-3 py-2.5 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer"
         >
-          <LogOut className="w-4 h-4" />
-          <span>Đăng xuất</span>
-        </button>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-red-500/8 via-orange-500/8 to-amber-500/8 opacity-0 group-hover:opacity-100"
+            initial={false}
+            animate={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+          />
+          <div className="relative z-10 flex items-center justify-center gap-2">
+            <motion.div
+              className="w-8 h-8 rounded-xl bg-gradient-to-tr from-red-500 to-orange-500 flex items-center justify-center text-white shadow-sm"
+              whileHover={{ rotate: 8 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+            >
+              <LogOut className="w-4 h-4" />
+            </motion.div>
+            <div className="text-left">
+              <div className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-none">
+                Đăng xuất
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                Thoát phiên hiện tại
+              </div>
+            </div>
+          </div>
+        </motion.button>
       </div>
 
       {/* Logout Confirm Modal */}
