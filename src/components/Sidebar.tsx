@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Package, 
-  Users, 
-  ShoppingCart, 
-  CreditCard, 
-  BookOpen, 
+import {
+  Package,
+  Users,
+  ShoppingCart,
+  CreditCard,
+  BookOpen,
   LogOut,
-  MessageCircle
+  MessageCircle,
+  Shield,
 } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -57,6 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'customers', label: 'Khách Hàng', icon: Users, allowed: ['owner', 'manager', 'staff'] },
     { id: 'debts', label: 'Quản Lý Công Nợ', icon: CreditCard, allowed: ['owner', 'manager', 'staff'] },
     { id: 'cashbook', label: 'Sổ Quỹ Thu Chi', icon: BookOpen, allowed: ['owner', 'manager'] },
+    { id: 'accounts', label: 'Quản Lý Tài Khoản', icon: Shield, allowed: ['owner'] },
     { id: 'feedback', label: 'Góp Ý & Báo Lỗi', icon: MessageCircle, allowed: ['owner', 'manager', 'staff'] },
   ];
 

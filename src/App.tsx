@@ -16,6 +16,7 @@ const SalesPage = lazy(() => import('./pages/SalesPage').then((module) => ({ def
 const DebtsPage = lazy(() => import('./pages/DebtsPage').then((module) => ({ default: module.DebtsPage })));
 const CashbookPage = lazy(() => import('./pages/CashbookPage').then((module) => ({ default: module.CashbookPage })));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage').then((module) => ({ default: module.FeedbackPage })));
+const AccountsPage = lazy(() => import('./pages/AccountsPage').then((module) => ({ default: module.AccountsPage })));
 
 function PageLoader() {
   return (
@@ -122,13 +123,6 @@ function AppInner() {
     navigate(`/${tab}`);
   };
 
-  const handleRoleSwitch = (profile: Profile) => {
-    setCurrentUser(profile);
-    if (profile.role === 'staff' && location.pathname === '/cashbook') {
-      navigate('/sales');
-    }
-  };
-
   const handleLoginSuccess = (profile: Profile) => {
     setCurrentUser(profile);
     navigate('/sales');
@@ -161,6 +155,9 @@ function AppInner() {
   if (currentUser.role === 'staff' && location.pathname === '/cashbook') {
     return <Navigate to="/sales" replace />;
   }
+  if (currentUser.role !== 'owner' && location.pathname === '/accounts') {
+    return <Navigate to="/sales" replace />;
+  }
 
   if (dbLoading) {
     return (
@@ -185,9 +182,6 @@ function AppInner() {
         <Header
           activeTab={activeTab}
           currentUser={currentUser}
-          profiles={profiles}
-          onRoleSwitch={handleRoleSwitch}
-          onProfilesChange={setProfiles}
         />
 
         <main className="p-8 flex-1 overflow-y-auto">
@@ -279,6 +273,16 @@ function AppInner() {
                     }
                   />
 
+                  <Route
+                    path="/accounts"
+                    element={
+                      <AccountsPage
+                        currentUser={currentUser}
+                        profiles={profiles}
+                        onProfilesChange={setProfiles}
+                      />
+                    }
+                  />
                   <Route path="/feedback" element={<FeedbackPage />} />
                   <Route path="*" element={<Navigate to="/sales" replace />} />
                 </Routes>
