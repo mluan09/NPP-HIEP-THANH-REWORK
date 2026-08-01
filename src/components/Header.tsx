@@ -106,6 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
         id: result.id,
         full_name: result.full_name,
         role: result.role as 'owner' | 'manager' | 'staff',
+        employee_id: result.employee_id,
         created_at: new Date().toISOString(),
       };
       onProfilesChange?.([...profiles, newProfile]);
@@ -177,6 +178,11 @@ export const Header: React.FC<HeaderProps> = ({
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${roleBadge(p.role)}`}>
                               {roleLabel(p.role)}
                             </span>
+                            {p.employee_id && (
+                              <span className="ml-1 text-[10px] font-semibold text-slate-400">
+                                {p.employee_id}
+                              </span>
+                            )}
                           </div>
                         </div>
                         {p.id !== currentUser?.id && (

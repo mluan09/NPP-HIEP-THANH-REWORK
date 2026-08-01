@@ -4,6 +4,7 @@ export interface Profile {
   id: string;
   full_name: string;
   role: 'owner' | 'manager' | 'staff';
+  employee_id?: string | null;
   created_at: string;
 }
 
