@@ -36,23 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       { type: 'warning', confirmText: 'Đăng xuất', cancelText: 'Ở lại' }
     );
   };
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'owner': return 'Chủ Cửa Hàng';
-      case 'manager': return 'Quản Lý';
-      default: return 'Nhân Viên';
-    }
-  };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'owner': return 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/30';
-      case 'manager': return 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/30';
-      default: return 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700/50';
-    }
-  };
-
-  // Check roles permissions
   const menuItems = [
     { id: 'sales', label: 'Tạo Đơn Hàng', icon: ShoppingCart, allowed: ['owner', 'manager', 'staff'] },
     { id: 'inventory', label: 'Kho Hàng', icon: Package, allowed: ['owner', 'manager', 'staff'] },
