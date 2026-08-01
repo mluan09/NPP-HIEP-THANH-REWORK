@@ -239,6 +239,18 @@ export const deleteAuthUser = async (userId: string): Promise<void> => {
   await callEdgeFunction('delete-user', { user_id: userId });
 };
 
+// Update auth user via Edge Function (owner only)
+export const updateAuthUser = async (params: {
+  user_id: string;
+  password?: string;
+  full_name?: string;
+  employee_id?: string;
+  role?: 'owner' | 'manager' | 'staff';
+}): Promise<{ id: string; email: string; full_name: string; role: string; employee_id: string }> => {
+  const result = await callEdgeFunction('update-user', params);
+  return result.user as { id: string; email: string; full_name: string; role: string; employee_id: string };
+};
+
 // Auto increment codes
 export const generateCustomerCode = (customers: Customer[]): string => {
   const maxNum = customers.reduce((max, c) => {

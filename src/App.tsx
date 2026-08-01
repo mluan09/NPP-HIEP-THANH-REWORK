@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDb } from './lib/db';
@@ -56,6 +56,7 @@ function AppInner() {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [cashbook, setCashbook] = useState<CashbookEntry[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
+  const hasLoadedOnce = useRef(false);
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -99,7 +100,10 @@ function AppInner() {
       setDbLoading(false);
       return;
     }
-    setDbLoading(true);
+    // Only show full-screen loader on first load
+    if (!hasLoadedOnce.current) {
+      setDbLoading(true);
+    }
     getDb()
       .then((db) => {
         setProfiles(db.profiles);
@@ -109,10 +113,32 @@ function AppInner() {
         setSaleItems(db.sale_items);
         setDebts(db.debts);
         setCashbook(db.cashbook);
+        hasLoadedOnce.current = true;
       })
       .catch(console.error)
       .finally(() => setDbLoading(false));
   }, [currentUser, authLoading]);
+
+  // Refresh data silently when tab becomes visible again
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && currentUser && hasLoadedOnce.current) {
+        getDb()
+          .then((db) => {
+            setProfiles(db.profiles);
+            setInventory(db.inventory);
+            setCustomers(db.customers);
+            setSales(db.sales);
+            setSaleItems(db.sale_items);
+            setDebts(db.debts);
+            setCashbook(db.cashbook);
+          })
+          .catch(console.error);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [currentUser]);
 
   // Force Dark Mode always on
   useEffect(() => {
