@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Shield, Trash2, UserPlus, Users, Pencil, X, Check } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Shield, Trash2, UserPlus, Users, Pencil, X, Check, Save } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { createAuthUser, deleteAuthUser, updateAuthUser } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -12,7 +13,7 @@ interface AccountsPageProps {
   onProfilesChange: (profiles: Profile[]) => void;
 }
 
-interface EditingState {
+interface EditForm {
   profile: Profile;
   full_name: string;
   employee_id: string;
@@ -33,8 +34,15 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
   const [newName, setNewName] = useState('');
   const [newRole, setNewRole] = useState<'owner' | 'manager' | 'staff'>('staff');
   const [loading, setLoading] = useState(false);
-  const [editing, setEditing] = useState<EditingState | null>(null);
+  const [editing, setEditing] = useState<EditForm | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = editing ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [editing]);
 
   const sortedProfiles = useMemo(() => {
     const roleOrder = { owner: 0, manager: 1, staff: 2 };
@@ -57,6 +65,12 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
     return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
   };
 
+  const roleIconColor = (role: string) => {
+    if (role === 'owner') return 'from-amber-400 to-orange-500';
+    if (role === 'manager') return 'from-blue-400 to-indigo-500';
+    return 'from-slate-400 to-slate-600';
+  };
+
   const handleDeleteUser = (profile: Profile) => {
     if (profile.id === currentUser.id) {
       showAlert('Không thể xóa', 'Không thể xóa tài khoản đang đăng nhập.', 'warning');
@@ -67,12 +81,15 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       'Xác nhận xóa tài khoản',
       `Xóa tài khoản "${profile.full_name}" (${roleLabel(profile.role)})?\n\nHành động này không thể hoàn tác.`,
       async () => {
+        setDeletingId(profile.id);
         try {
           await deleteAuthUser(profile.id);
           onProfilesChange(profiles.filter((p) => p.id !== profile.id));
           showToast(`Đã xóa tài khoản ${profile.full_name}`);
         } catch (err: unknown) {
           showAlert('Lỗi', err instanceof Error ? err.message : 'Không thể xóa tài khoản', 'danger');
+        } finally {
+          setDeletingId(null);
         }
       },
       { type: 'danger', confirmText: 'Xóa tài khoản', cancelText: 'Hủy' }
@@ -159,7 +176,6 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       showAlert('Thiếu thông tin', 'Vui lòng điền đầy đủ Mã NV, mật khẩu và tên.', 'warning');
       return;
     }
-
     if (password.length < 6) {
       showAlert('Mật khẩu quá ngắn', 'Mật khẩu phải có ít nhất 6 ký tự.', 'warning');
       return;
@@ -204,12 +220,22 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
 
   return (
     <div className="space-y-6">
-      <section className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6">
+      {/* Header + Create toggle */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6"
+      >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+            <motion.div
+              whileHover={{ rotate: 8, scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center"
+            >
               <Shield className="w-6 h-6" />
-            </div>
+            </motion.div>
             <div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Quản Lý Tài Khoản
@@ -220,125 +246,99 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
             </div>
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsCreating((value) => !value)}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-lg shadow-amber-500/20 transition-colors cursor-pointer"
           >
-            <UserPlus className="w-4 h-4" />
+            <motion.span
+              animate={{ rotate: isCreating ? 45 : 0 }}
+              transition={{ duration: 0.25 }}
+              className="inline-flex"
+            >
+              <UserPlus className="w-4 h-4" />
+            </motion.span>
             <span>{isCreating ? 'Đóng form' : 'Thêm tài khoản mới'}</span>
-          </button>
+          </motion.button>
         </div>
 
-        {isCreating && (
-          <form onSubmit={handleCreateUser} className="mt-6 grid grid-cols-1 lg:grid-cols-5 gap-3 p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/70">
-            <input
-              type="text"
-              placeholder="Họ và tên"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
-            />
-            <input
-              type="text"
-              placeholder="Mã nhân viên (VD: NV005)"
-              value={newEmployeeId}
-              onChange={(e) => setNewEmployeeId(e.target.value.toUpperCase())}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 uppercase"
-            />
-            <input
-              type="password"
-              placeholder="Mật khẩu (tối thiểu 6 ký tự)"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
-            />
-            <select
-              value={newRole}
-              onChange={(e) => setNewRole(e.target.value as 'owner' | 'manager' | 'staff')}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
+        {/* Create form with collapse animation */}
+        <AnimatePresence initial={false}>
+          {isCreating && (
+            <motion.form
+              key="create-form"
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              onSubmit={handleCreateUser}
+              className="overflow-hidden"
             >
-              <option value="staff">Nhân Viên</option>
-              <option value="manager">Quản Lý</option>
-              <option value="owner">Chủ Cửa Hàng</option>
-            </select>
-            <button
-              type="submit"
-              disabled={loading}
-              className="lg:col-span-1 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {loading ? 'Đang tạo...' : 'Tạo tài khoản'}
-            </button>
-            <p className="lg:col-span-5 text-xs text-slate-500 dark:text-slate-400">
-              Tài khoản sẽ đăng nhập bằng Mã NV và mật khẩu đã đặt. Email nội bộ được tạo theo dạng MãNV@npp.local.
-            </p>
-          </form>
-        )}
-      </section>
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/70">
+                <input
+                  type="text"
+                  placeholder="Họ và tên"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                />
+                <input
+                  type="text"
+                  placeholder="Mã nhân viên (VD: NV005)"
+                  value={newEmployeeId}
+                  onChange={(e) => setNewEmployeeId(e.target.value.toUpperCase())}
+                  className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 uppercase transition-shadow"
+                />
+                <input
+                  type="password"
+                  placeholder="Mật khẩu (tối thiểu 6 ký tự)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                />
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value as 'owner' | 'manager' | 'staff')}
+                  className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                >
+                  <option value="staff">Nhân Viên</option>
+                  <option value="manager">Quản Lý</option>
+                  <option value="owner">Chủ Cửa Hàng</option>
+                </select>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  disabled={loading}
+                  className="lg:col-span-1 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-amber-500 dark:hover:bg-amber-600 text-white text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {loading ? 'Đang tạo...' : 'Tạo tài khoản'}
+                </motion.button>
+                <p className="lg:col-span-5 text-xs text-slate-500 dark:text-slate-400">
+                  Tài khoản sẽ đăng nhập bằng Mã NV và mật khẩu đã đặt. Email nội bộ được tạo theo dạng MãNV@npp.local.
+                </p>
+              </div>
+            </motion.form>
+          )}
+        </AnimatePresence>
+      </motion.section>
 
-      {/* Edit user form */}
-      {editing && (
-        <section className="glass-panel rounded-3xl border border-amber-500/30 dark:border-amber-500/20 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-              Chỉnh sửa tài khoản: <span className="text-amber-600 dark:text-amber-400">{editing.profile.full_name}</span>
-            </h3>
-            <button
-              onClick={() => setEditing(null)}
-              className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <form onSubmit={handleSaveEdit} className="grid grid-cols-1 lg:grid-cols-6 gap-3">
-            <input
-              type="text"
-              placeholder="Họ và tên"
-              value={editing.full_name}
-              onChange={(e) => setEditing({ ...editing, full_name: e.target.value })}
-              className="lg:col-span-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
-            />
-            <input
-              type="text"
-              placeholder="Mã nhân viên"
-              value={editing.employee_id}
-              onChange={(e) => setEditing({ ...editing, employee_id: e.target.value.toUpperCase() })}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 uppercase"
-            />
-            <select
-              value={editing.role}
-              onChange={(e) => setEditing({ ...editing, role: e.target.value as 'owner' | 'manager' | 'staff' })}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
-            >
-              <option value="staff">Nhân Viên</option>
-              <option value="manager">Quản Lý</option>
-              <option value="owner">Chủ Cửa Hàng</option>
-            </select>
-            <input
-              type="password"
-              placeholder="Mật khẩu mới (để trống nếu không đổi)"
-              value={editing.password}
-              onChange={(e) => setEditing({ ...editing, password: e.target.value })}
-              className="lg:col-span-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
-            />
-            <button
-              type="submit"
-              disabled={savingEdit}
-              className="lg:col-span-1 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold transition-colors cursor-pointer disabled:opacity-50"
-            >
-              <Check className="w-4 h-4" />
-              <span>{savingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
-            </button>
-            <p className="lg:col-span-6 text-xs text-slate-500 dark:text-slate-400">
-              Thay đổi sẽ được cập nhật lên Supabase ngay lập tức. Bỏ trống mật khẩu nếu không muốn đổi mật khẩu.
-            </p>
-          </form>
-        </section>
-      )}
-
-      <section className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden">
+      {/* Account list */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.1, ease: 'easeOut' }}
+        className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden"
+      >
         <div className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-amber-500" />
+            <motion.div
+              animate={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Users className="w-5 h-5 text-amber-500" />
+            </motion.div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Danh sách tài khoản
             </h3>
@@ -349,55 +349,237 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         </div>
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {sortedProfiles.map((profile) => (
-            <div key={profile.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold shadow-inner shrink-0">
-                  {profile.full_name.charAt(0)}
+          <AnimatePresence initial={false}>
+            {sortedProfiles.map((profile) => (
+              <motion.div
+                key={profile.id}
+                layout
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20, height: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <motion.div
+                    whileHover={{ scale: 1.08 }}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${roleIconColor(profile.role)} flex items-center justify-center text-white font-bold shadow-inner shrink-0`}
+                  >
+                    {profile.full_name.charAt(0)}
+                  </motion.div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {profile.full_name}
+                      </h4>
+                      {profile.id === currentUser.id && (
+                        <span className="text-[10px] font-bold text-amber-500">(bạn)</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className={`text-[10px] font-bold px-2 py-1 rounded ${roleBadge(profile.role)} transition-colors`}>
+                        {roleLabel(profile.role)}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-400">
+                        {profile.employee_id ?? 'Chưa có Mã NV'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                      {profile.full_name}
-                    </h4>
-                    {profile.id === currentUser.id && (
-                      <span className="text-[10px] font-bold text-amber-500">(bạn)</span>
+
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => handleEditUser(profile)}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20 transition-colors cursor-pointer"
+                    title="Chỉnh sửa tài khoản"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    <span>Sửa</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => handleDeleteUser(profile)}
+                    disabled={profile.id === currentUser.id || deletingId === profile.id}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    title={profile.id === currentUser.id ? 'Không thể xóa tài khoản đang đăng nhập' : 'Xóa tài khoản'}
+                  >
+                    {deletingId === profile.id ? (
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                        className="inline-flex"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.span>
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
                     )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded ${roleBadge(profile.role)}`}>
-                      {roleLabel(profile.role)}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-400">
-                      {profile.employee_id ?? 'Chưa có Mã NV'}
-                    </span>
-                  </div>
+                    <span>{deletingId === profile.id ? 'Đang xóa...' : 'Xóa'}</span>
+                  </motion.button>
                 </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </motion.section>
+
+      {/* Edit modal */}
+      <AnimatePresence>
+        {editing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => !savingEdit && setEditing(null)}
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+            />
+
+            {/* Modal Window */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+              className="relative w-full max-w-lg bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-10"
+            >
+              {/* Top Bar */}
+              <div className="p-5 border-b border-amber-500/20 bg-amber-500/10 flex items-center gap-3.5">
+                <motion.div
+                  initial={{ rotate: -20, scale: 0.7 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+                  className="p-2 rounded-xl bg-slate-900/80 shadow-inner"
+                >
+                  <Pencil className="w-6 h-6 text-amber-500" />
+                </motion.div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-bold text-slate-100 truncate">
+                    Chỉnh sửa tài khoản
+                  </h3>
+                  <p className="text-xs text-slate-400 truncate">
+                    {editing.profile.full_name} · {editing.profile.employee_id ?? 'Chưa có Mã NV'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => !savingEdit && setEditing(null)}
+                  disabled={savingEdit}
+                  className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Body */}
+              <form id="edit-account-form" onSubmit={handleSaveEdit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Họ và tên
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Họ và tên"
+                    value={editing.full_name}
+                    onChange={(e) => setEditing({ ...editing, full_name: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Mã nhân viên
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Mã nhân viên"
+                      value={editing.employee_id}
+                      onChange={(e) => setEditing({ ...editing, employee_id: e.target.value.toUpperCase() })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 uppercase transition-shadow"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                      Vai trò
+                    </label>
+                    <select
+                      value={editing.role}
+                      onChange={(e) => setEditing({ ...editing, role: e.target.value as 'owner' | 'manager' | 'staff' })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                    >
+                      <option value="staff">Nhân Viên</option>
+                      <option value="manager">Quản Lý</option>
+                      <option value="owner">Chủ Cửa Hàng</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                    Mật khẩu mới
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Để trống nếu không đổi mật khẩu"
+                    value={editing.password}
+                    onChange={(e) => setEditing({ ...editing, password: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100 transition-shadow"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Thay đổi sẽ được cập nhật lên Supabase ngay lập tức. Bỏ trống mật khẩu nếu không muốn đổi.
+                  </p>
+                </div>
+              </form>
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3">
                 <button
-                  onClick={() => handleEditUser(profile)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20 transition-colors cursor-pointer"
-                  title="Chỉnh sửa tài khoản"
+                  type="button"
+                  onClick={() => setEditing(null)}
+                  disabled={savingEdit}
+                  className="px-4 py-2 rounded-xl border border-slate-700/60 text-slate-300 hover:bg-slate-800/70 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <Pencil className="w-4 h-4" />
-                  <span>Sửa</span>
+                  Hủy
                 </button>
-                <button
-                  onClick={() => handleDeleteUser(profile)}
-                  disabled={profile.id === currentUser.id}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                  title={profile.id === currentUser.id ? 'Không thể xóa tài khoản đang đăng nhập' : 'Xóa tài khoản'}
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  form="edit-account-form"
+                  disabled={savingEdit}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg shadow-amber-900/30 transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Xóa</span>
-                </button>
+                  {savingEdit ? (
+                    <>
+                      <motion.span
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                        className="inline-flex"
+                      >
+                        <Save className="w-4 h-4" />
+                      </motion.span>
+                      <span>Đang lưu...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Lưu thay đổi</span>
+                    </>
+                  )}
+                </motion.button>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <ConfirmModal {...modalState} />
     </div>
