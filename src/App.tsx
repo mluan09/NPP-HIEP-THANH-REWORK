@@ -1,8 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getDb, saveDb } from './lib/db';
+import { getDb } from './lib/db';
 import type { Profile, InventoryItem, Customer, Sale, SaleItem, Debt, CashbookEntry } from './lib/db';
+import { supabase } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ToastProvider } from './components/Toast';
@@ -27,68 +28,87 @@ function PageLoader() {
   );
 }
 
-// ─── Inner App (needs router context) ───────────────────────────────────────
 function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load database state
-  const db = getDb();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
+  const [debts, setDebts] = useState<Debt[]>([]);
+  const [cashbook, setCashbook] = useState<CashbookEntry[]>([]);
+  const [dbLoading, setDbLoading] = useState(true);
 
-  const [profiles] = useState<Profile[]>(db.profiles);
-  const [inventory, setInventory] = useState<InventoryItem[]>(db.inventory);
-  const [customers, setCustomers] = useState<Customer[]>(db.customers);
-  const [sales, setSales] = useState<Sale[]>(db.sales);
-  const [saleItems, setSaleItems] = useState<SaleItem[]>(db.sale_items);
-  const [debts, setDebts] = useState<Debt[]>(db.debts);
-  const [cashbook, setCashbook] = useState<CashbookEntry[]>(db.cashbook);
+  const [currentUser, setCurrentUser] = useState<Profile | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // App UI State
-  const [currentUser, setCurrentUser] = useState<Profile | null>(() => {
-    const saved = localStorage.getItem('hiepthanh_npp_current_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  // Derive activeTab from current URL path
   const activeTab = location.pathname.replace('/', '') || 'sales';
 
-  // Sync to database
+  // Restore Supabase session on mount
   useEffect(() => {
-    saveDb({
-      profiles,
-      inventory,
-      customers,
-      sales,
-      sale_items: saleItems,
-      debts,
-      cashbook,
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        if (profileData) setCurrentUser(profileData as Profile);
+      }
+      setAuthLoading(false);
     });
-  }, [inventory, customers, sales, saleItems, debts, cashbook, profiles]);
 
-  // Sync user session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setCurrentUser(null);
+      } else if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        if (profileData) setCurrentUser(profileData as Profile);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load all DB data from Supabase once auth is resolved
   useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('hiepthanh_npp_current_user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('hiepthanh_npp_current_user');
+    if (authLoading) return;
+    if (!currentUser) {
+      setDbLoading(false);
+      return;
     }
-  }, [currentUser]);
+    setDbLoading(true);
+    getDb()
+      .then((db) => {
+        setProfiles(db.profiles);
+        setInventory(db.inventory);
+        setCustomers(db.customers);
+        setSales(db.sales);
+        setSaleItems(db.sale_items);
+        setDebts(db.debts);
+        setCashbook(db.cashbook);
+      })
+      .catch(console.error)
+      .finally(() => setDbLoading(false));
+  }, [currentUser, authLoading]);
 
   // Force Dark Mode always on
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
 
-  // Navigate via sidebar
   const handleTabChange = (tab: string) => {
     navigate(`/${tab}`);
   };
 
-  // Handles quick role switches
   const handleRoleSwitch = (profile: Profile) => {
     setCurrentUser(profile);
-
-    // Auto-redirect if switching to a role that cannot see cashbook
     if (profile.role === 'staff' && location.pathname === '/cashbook') {
       navigate('/sales');
     }
@@ -99,39 +119,53 @@ function AppInner() {
     navigate('/sales');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setCurrentUser(null);
     navigate('/login');
   };
 
-  // If user is at /login route
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="w-9 h-9 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
+      </div>
+    );
+  }
+
   if (location.pathname === '/login') {
-    if (currentUser) {
-      return <Navigate to="/sales" replace />;
-    }
-    return <LoginPage profiles={profiles} onLoginSuccess={handleLoginSuccess} />;
+    if (currentUser) return <Navigate to="/sales" replace />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      </Suspense>
+    );
   }
 
-  // ── Guard: redirect to /login if not authenticated ──
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // ── Guard: staff cannot access /cashbook ──
+  if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role === 'staff' && location.pathname === '/cashbook') {
     return <Navigate to="/sales" replace />;
   }
 
+  if (dbLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <div className="w-9 h-9 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
+          <span className="text-sm font-medium">Đang tải dữ liệu...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-300">
-      {/* Navigation Sidebar */}
       <Sidebar
         setActiveTab={handleTabChange}
         currentUser={currentUser}
         onLogout={handleLogout}
       />
 
-      {/* Main Workspace */}
       <div className="flex-1 pl-68 min-h-screen flex flex-col">
         <Header
           activeTab={activeTab}
@@ -152,89 +186,86 @@ function AppInner() {
             >
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location}>
-                {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/sales" replace />} />
+                  <Route path="/" element={<Navigate to="/sales" replace />} />
 
-                <Route
-                  path="/sales"
-                  element={
-                    <SalesPage
-                      customers={customers}
-                      inventory={inventory}
-                      setInventory={setInventory}
-                      sales={sales}
-                      setSales={setSales}
-                      saleItems={saleItems}
-                      setSaleItems={setSaleItems}
-                      debts={debts}
-                      setDebts={setDebts}
-                      cashbook={cashbook}
-                      setCashbook={setCashbook}
-                      currentUser={currentUser}
-                    />
-                  }
-                />
+                  <Route
+                    path="/sales"
+                    element={
+                      <SalesPage
+                        customers={customers}
+                        inventory={inventory}
+                        setInventory={setInventory}
+                        sales={sales}
+                        setSales={setSales}
+                        saleItems={saleItems}
+                        setSaleItems={setSaleItems}
+                        debts={debts}
+                        setDebts={setDebts}
+                        cashbook={cashbook}
+                        setCashbook={setCashbook}
+                        currentUser={currentUser}
+                      />
+                    }
+                  />
 
-                <Route
-                  path="/inventory"
-                  element={
-                    <InventoryPage
-                      inventory={inventory}
-                      setInventory={setInventory}
-                      currentUser={currentUser}
-                    />
-                  }
-                />
+                  <Route
+                    path="/inventory"
+                    element={
+                      <InventoryPage
+                        inventory={inventory}
+                        setInventory={setInventory}
+                        currentUser={currentUser}
+                      />
+                    }
+                  />
 
-                <Route
-                  path="/customers"
-                  element={
-                    <CustomersPage
-                      customers={customers}
-                      setCustomers={setCustomers}
-                      sales={sales}
-                      setSales={setSales}
-                      saleItems={saleItems}
-                      setSaleItems={setSaleItems}
-                      inventory={inventory}
-                      debts={debts}
-                      setDebts={setDebts}
-                      currentUser={currentUser}
-                    />
-                  }
-                />
+                  <Route
+                    path="/customers"
+                    element={
+                      <CustomersPage
+                        customers={customers}
+                        setCustomers={setCustomers}
+                        sales={sales}
+                        setSales={setSales}
+                        saleItems={saleItems}
+                        setSaleItems={setSaleItems}
+                        inventory={inventory}
+                        debts={debts}
+                        setDebts={setDebts}
+                        currentUser={currentUser}
+                      />
+                    }
+                  />
 
-                <Route
-                  path="/debts"
-                  element={
-                    <DebtsPage
-                      debts={debts}
-                      setDebts={setDebts}
-                      customers={customers}
-                      cashbook={cashbook}
-                      setCashbook={setCashbook}
-                      sales={sales}
-                      currentUser={currentUser}
-                    />
-                  }
-                />
+                  <Route
+                    path="/debts"
+                    element={
+                      <DebtsPage
+                        debts={debts}
+                        setDebts={setDebts}
+                        customers={customers}
+                        cashbook={cashbook}
+                        setCashbook={setCashbook}
+                        sales={sales}
+                        currentUser={currentUser}
+                      />
+                    }
+                  />
 
-                <Route
-                  path="/cashbook"
-                  element={
-                    <CashbookPage
-                      cashbook={cashbook}
-                      setCashbook={setCashbook}
-                      currentUser={currentUser}
-                    />
-                  }
-                />
+                  <Route
+                    path="/cashbook"
+                    element={
+                      <CashbookPage
+                        cashbook={cashbook}
+                        setCashbook={setCashbook}
+                        currentUser={currentUser}
+                      />
+                    }
+                  />
 
-                <Route path="/feedback" element={<FeedbackPage />} />
-
-                {/* Fallback: redirect unknown paths to sales */}
-                <Route path="*" element={<Navigate to="/sales" replace />} />
-              </Routes>
+                  <Route path="/feedback" element={<FeedbackPage />} />
+                  <Route path="*" element={<Navigate to="/sales" replace />} />
+                </Routes>
               </Suspense>
             </motion.div>
           </AnimatePresence>
@@ -244,7 +275,6 @@ function AppInner() {
   );
 }
 
-// ─── Root App with Router provider ──────────────────────────────────────────
 function App() {
   return (
     <ToastProvider>

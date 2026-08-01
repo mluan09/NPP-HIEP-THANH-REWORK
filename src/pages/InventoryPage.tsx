@@ -14,6 +14,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import type { InventoryItem, Profile } from '../lib/db';
+import { upsertInventory, deleteInventoryItem } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import { useModal } from '../hooks/useModal';
 import { useToast } from '../components/Toast';
@@ -113,6 +114,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       `Bạn có chắc chắn muốn xóa "${item?.product_name || 'sản phẩm này'}" khỏi kho hàng?\nThao tác này không thể hoàn tác.`,
       () => {
         setInventory((prev) => prev.filter((i) => i.id !== id));
+        deleteInventoryItem(id).catch(console.error);
         showToast('Xóa sản phẩm thành công');
       },
       { type: 'danger', confirmText: 'Xóa sản phẩm', cancelText: 'Hủy' }
@@ -130,7 +132,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       // Update
       setInventory(prev => prev.map(item => {
         if (item.id === editingItem.id) {
-          return {
+          const updated = {
             ...item,
             sku,
             product_name: productName,
@@ -141,6 +143,8 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             import_qty: Number(importQty),
             export_qty: Number(exportQty)
           };
+          upsertInventory(updated).catch(console.error);
+          return updated;
         }
         return item;
       }));
@@ -160,6 +164,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         created_at: new Date().toISOString()
       };
       setInventory(prev => [newItem, ...prev]);
+      upsertInventory(newItem).catch(console.error);
       showToast('Thêm sản phẩm mới thành công');
     }
     setIsDialogOpen(false);
@@ -271,6 +276,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       if (newItems.length < importPreview.length) {
         showAlert('Thông báo Import', `Đã bỏ qua ${importPreview.length - newItems.length} sản phẩm bị trùng SKU trong hệ thống.`, 'info');
       }
+      newItems.forEach(item => upsertInventory(item).catch(console.error));
       showToast(`Import thành công ${newItems.length} sản phẩm`);
       return [...newItems, ...prev];
     });

@@ -10,7 +10,7 @@ import {
   Wallet,
   ArrowRight
 } from 'lucide-react';
-import { generateCashbookCode } from '../lib/db';
+import { generateCashbookCode, upsertDebt, upsertCashbookEntry } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { Debt, Customer, Profile, CashbookEntry, Sale } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -105,13 +105,15 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       if (d.id === selectedDebt.id) {
         const nextPaid = d.paid_amount + payAmount;
         const nextRemaining = d.total_amount - nextPaid;
-        return {
+        const updated: typeof d = {
           ...d,
           paid_amount: nextPaid,
           remaining_debt: nextRemaining,
-          status: nextRemaining <= 0 ? 'PAID' : 'PENDING',
+          status: (nextRemaining <= 0 ? 'PAID' : 'PENDING') as 'PAID' | 'PENDING',
           updated_at: new Date().toISOString()
         };
+        upsertDebt(updated).catch(console.error);
+        return updated;
       }
       return d;
     }));
@@ -132,6 +134,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
         notes: paymentNotes || 'Thu hồi công nợ',
         created_at: new Date().toISOString()
       };
+      upsertCashbookEntry(newEntry).catch(console.error);
       return [newEntry, ...prev];
     });
 

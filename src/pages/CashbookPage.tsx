@@ -13,7 +13,7 @@ import {
   Edit3,
   Trash2
 } from 'lucide-react';
-import { generateCashbookCode } from '../lib/db';
+import { generateCashbookCode, upsertCashbookEntry, deleteCashbookEntry } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { CashbookEntry, Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -114,8 +114,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       `Bạn có chắc chắn muốn xóa phiếu [${entry.code}] - "${entry.description}" không? Hành động này không thể hoàn tác.`,
       () => {
         setCashbook(prev => prev.filter(e => e.id !== entry.id));
-
-
+        deleteCashbookEntry(entry.id).catch(console.error);
         showAlert('Đã xóa', `Phiếu ${entry.code} đã được xóa thành công.`, 'success');
       },
       { type: 'danger', confirmText: 'Xóa phiếu', cancelText: 'Hủy bỏ' }
@@ -137,7 +136,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       // Update existing entry
       setCashbook(prev => prev.map(e => {
         if (e.id !== editingEntry.id) return e;
-        return {
+        const updated = {
           ...e,
           description,
           notes,
@@ -147,6 +146,8 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
           expense_other: txType === 'expense' && expenseCategory === 'other' ? Number(amount) : 0,
           total_expense: txType === 'expense' ? Number(amount) : 0,
         };
+        upsertCashbookEntry(updated).catch(console.error);
+        return updated;
       }));
       setIsDialogOpen(false);
       setEditingEntry(null);
@@ -170,6 +171,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
     };
 
     setCashbook(prev => [newEntry, ...prev]);
+    upsertCashbookEntry(newEntry).catch(console.error);
     setIsDialogOpen(false);
   };
 

@@ -16,6 +16,7 @@ import {
   Clock
 } from 'lucide-react';
 import type { Customer, Sale, SaleItem, InventoryItem, Debt, Profile } from '../lib/db';
+import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -116,6 +117,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       `Bạn có chắc chắn muốn xóa khách hàng "${customer?.customer_name || 'này'}"?\nCác dữ liệu liên quan có thể bị đứt gãy.`,
       () => {
         setCustomers((prev) => prev.filter((c) => c.id !== id));
+        deleteCustomer(id).catch(console.error);
       },
       { type: 'danger', confirmText: 'Xóa khách hàng', cancelText: 'Hủy' }
     );
@@ -130,6 +132,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
         setSales((prev) => prev.filter((s) => s.id !== sale.id));
         setSaleItems((prev) => prev.filter((item) => item.sale_id !== sale.id));
         setDebts((prev) => prev.filter((debt) => debt.sale_id !== sale.id));
+        deleteSale(sale.id).catch(console.error);
+        deleteSaleItem(sale.id).catch(console.error);
+        deleteDebt(sale.id).catch(console.error);
         showToast(`Đã xoá nhật ký giao dịch ngày ${sale.sale_date} thành công`);
       },
       { type: 'danger', confirmText: 'Xoá nhật ký', cancelText: 'Huỷ' }
@@ -147,13 +152,15 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       // Update
       setCustomers(prev => prev.map(c => {
         if (c.id === editingCustomer.id) {
-          return {
+          const updated = {
             ...c,
             customer_name: customerName,
             phone,
             address,
             notes
           };
+          upsertCustomer(updated).catch(console.error);
+          return updated;
         }
         return c;
       }));
@@ -169,6 +176,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
         created_at: new Date().toISOString()
       };
       setCustomers(prev => [...prev, newCustomer]);
+      upsertCustomer(newCustomer).catch(console.error);
     }
     setIsDialogOpen(false);
   };

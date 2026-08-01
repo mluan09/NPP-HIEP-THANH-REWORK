@@ -2,15 +2,14 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, User, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import type { Profile } from '../lib/db';
-import testUsers from '../data/test-users.json';
+import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 
 interface LoginPageProps {
-  profiles: Profile[];
   onLoginSuccess: (profile: Profile) => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ profiles, onLoginSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const { showToast } = useToast();
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
@@ -23,10 +22,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ profiles, onLoginSuccess }
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
-
-    // Maintain focus and keep cursor at the end
     setTimeout(() => {
-
       if (passwordInputRef.current) {
         passwordInputRef.current.focus();
         const length = passwordInputRef.current.value.length;
@@ -35,7 +31,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ profiles, onLoginSuccess }
     }, 0);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextFieldErrors = {
@@ -52,22 +48,40 @@ export const LoginPage: React.FC<LoginPageProps> = ({ profiles, onLoginSuccess }
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const matchedUser = testUsers.find(
-        (u) =>
-          u.employeeId.trim().toUpperCase() === employeeId.trim().toUpperCase() &&
-          u.password === password
-      );
+    try {
+      // Email format: <employeeId>@npp.local
+      const email = `${employeeId.trim().toUpperCase()}@npp.local`;
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      if (matchedUser) {
-        const profile = profiles.find((p) => p.id === matchedUser.profileId) || profiles[0];
-        showToast('Đăng nhập thành công!');
-        onLoginSuccess(profile);
-      } else {
+      if (authError || !data.user) {
         setError('Mã nhân viên hoặc Mật khẩu không chính xác.');
+        setIsLoading(false);
+        return;
       }
+
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !profileData) {
+        setError('Không tìm thấy thông tin tài khoản.');
+        setIsLoading(false);
+        return;
+      }
+
+      showToast('Đăng nhập thành công!');
+      onLoginSuccess(profileData as Profile);
+    } catch {
+      setError('Đã xảy ra lỗi. Vui lòng thử lại.');
+    } finally {
       setIsLoading(false);
-    }, 400);
+    }
   };
 
   return (
@@ -106,7 +120,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ profiles, onLoginSuccess }
               Hệ Thống Quản Lý Phân Phối
             </h2>
             <p className="text-xs text-slate-500">
-              Dành cho Nhà phân phối Bia &amp; Nước giải khát Hiệp Thành
+              Dành cho Nhà phân phối Bia & Nước giải khát Hiệp Thành
             </p>
           </div>
         </div>

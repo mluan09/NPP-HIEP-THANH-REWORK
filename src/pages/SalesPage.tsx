@@ -12,7 +12,14 @@ import {
   TrendingUp,
   FileCheck
 } from 'lucide-react';
-import { generateCashbookCode } from '../lib/db';
+import {
+  generateCashbookCode,
+  upsertInventory,
+  upsertSale,
+  upsertSaleItems,
+  upsertDebt,
+  upsertCashbookEntry,
+} from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import type { Customer, InventoryItem, Sale, SaleItem, Debt, CashbookEntry, Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
@@ -187,10 +194,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       setInventory(prev => prev.map(invItem => {
         const cartItem = cart.find(cItem => cItem.product.id === invItem.id);
         if (cartItem) {
-          return {
+          const updated = {
             ...invItem,
             export_qty: invItem.export_qty + cartItem.quantity
           };
+          upsertInventory(updated).catch(console.error);
+          return updated;
         }
         return invItem;
       }));
@@ -224,6 +233,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({
 
     setSales(prev => [newSale, ...prev]);
     setSaleItems(prev => [...newSaleItems, ...prev]);
+    upsertSale(newSale).catch(console.error);
+    upsertSaleItems(newSaleItems).catch(console.error);
 
     // Handle Debt & Cashbook if status is confirmed
     if (status === 'CONFIRMED') {
@@ -240,6 +251,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
           updated_at: new Date().toISOString()
         };
         setDebts(prev => [newDebt, ...prev]);
+        upsertDebt(newDebt).catch(console.error);
       } else {
         // Fully paid debt record
         const newDebt: Debt = {
@@ -253,6 +265,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
           updated_at: new Date().toISOString()
         };
         setDebts(prev => [newDebt, ...prev]);
+        upsertDebt(newDebt).catch(console.error);
       }
 
       // 2. Log Cashbook ledger if paid amount > 0
@@ -272,6 +285,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
             notes: notes || 'Thanh toán trực tiếp',
             created_at: new Date().toISOString()
           };
+          upsertCashbookEntry(newEntry).catch(console.error);
           return [newEntry, ...prev];
         });
       }
