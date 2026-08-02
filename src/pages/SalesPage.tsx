@@ -21,6 +21,7 @@ import {
   upsertCashbookEntry,
 } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
+import { logActivity } from '../lib/activityLog';
 import type { Customer, InventoryItem, Sale, SaleItem, Debt, CashbookEntry, Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { useToast } from '../components/Toast';
@@ -291,6 +292,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       }
     }
 
+    logActivity(
+      currentUser,
+      status === 'CONFIRMED' ? 'Tạo đơn hàng' : 'Tạo đơn nháp',
+      'sale',
+      `${customer.customer_name} • ${totalRevenue.toLocaleString('vi-VN')}đ • ${cart.length} sản phẩm`
+    );
     showToast(
       status === 'CONFIRMED' ? 'Tạo đơn và xác nhận xuất kho thành công!' : 'Đã lưu đơn nháp thành công.'
     );

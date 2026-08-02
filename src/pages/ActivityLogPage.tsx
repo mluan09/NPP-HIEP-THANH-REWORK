@@ -61,7 +61,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    setEntries(getActivityLog());
+    getActivityLog().then(setEntries);
   }, []);
 
   const totalPages = useMemo(() => {

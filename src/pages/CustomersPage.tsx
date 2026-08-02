@@ -16,7 +16,7 @@ import {
   Clock
 } from 'lucide-react';
 import type { Customer, Sale, SaleItem, InventoryItem, Debt, Profile } from '../lib/db';
-import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt } from '../lib/db';
+import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt, deleteDebtsByCustomer, deleteSalesByCustomer, deleteSaleItemsBySaleIds } from '../lib/db';
 import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -115,15 +115,28 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     const customer = customers.find((c) => c.id === id);
     showConfirm(
       'Xác nhận xóa khách hàng',
-      `Bạn có chắc chắn muốn xóa khách hàng "${customer?.customer_name || 'này'}"?\nCác dữ liệu liên quan có thể bị đứt gãy.`,
+      `Bạn có chắc chắn muốn xóa khách hàng "${customer?.customer_name || 'này'}"?\nTất cả đơn hàng và công nợ liên quan cũng sẽ bị xóa.`,
       async () => {
         try {
+          // Lấy sale IDs của khách hàng để xóa sale_items
+          const customerSaleIds = sales.filter(s => s.customer_id === id).map(s => s.id);
+          // Xóa theo thứ tự: sale_items → debts → sales → customer
+          if (customerSaleIds.length > 0) {
+            await deleteSaleItemsBySaleIds(customerSaleIds);
+          }
+          await deleteDebtsByCustomer(id);
+          await deleteSalesByCustomer(id);
           await deleteCustomer(id);
+          // Cập nhật state
           setCustomers((prev) => prev.filter((c) => c.id !== id));
+          setSales((prev) => prev.filter((s) => s.customer_id !== id));
+          setSaleItems((prev) => prev.filter((si) => !customerSaleIds.includes(si.sale_id)));
+          setDebts((prev) => prev.filter((d) => d.customer_id !== id));
           logActivity(currentUser, 'Xóa khách hàng', 'customer', customer?.customer_name || 'không rõ');
           showToast(`Đã xoá khách hàng ${customer?.customer_name || 'này'} thành công`);
         } catch (error) {
           console.error(error);
+          showAlert('Xóa thất bại', 'Không thể xóa khách hàng. Vui lòng thử lại.', 'danger');
         }
       },
       { type: 'danger', confirmText: 'Xóa khách hàng', cancelText: 'Hủy' }

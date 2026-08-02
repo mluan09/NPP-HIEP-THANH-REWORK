@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { generateCashbookCode, upsertDebt, upsertCashbookEntry, deleteDebtById } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
+import { logActivity } from '../lib/activityLog';
 import type { Debt, Customer, Profile, CashbookEntry, Sale } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -141,6 +142,12 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     setDebts(prev => prev.map(d => d.id === selectedDebt.id ? nextDebt : d));
     setCashbook(prev => [newEntry, ...prev]);
 
+    logActivity(
+      currentUser,
+      'Thu công nợ',
+      'debt',
+      `${customerName} • ${payAmount.toLocaleString('vi-VN')}đ`
+    );
     showToast(`Đã thu công nợ ${customerName} thành công`);
     setSelectedDebt(null);
   };
@@ -182,6 +189,12 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
 
     await upsertDebt(updatedDebt);
     setDebts(prev => prev.map(d => d.id === editingDebt.id ? updatedDebt : d));
+    logActivity(
+      currentUser,
+      'Điều chỉnh công nợ',
+      'debt',
+      `${getCustomerName(editingDebt.customer_id)} • ${updatedDebt.remaining_debt.toLocaleString('vi-VN')}đ còn lại`
+    );
     showToast(`Đã điều chỉnh công nợ ${getCustomerName(editingDebt.customer_id)} thành công`);
     setEditingDebt(null);
   };
@@ -195,6 +208,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
         deleteDebtById(debt.id)
           .then(() => {
             setDebts(prev => prev.filter(d => d.id !== debt.id));
+            logActivity(currentUser, 'Xoá công nợ', 'debt', customerName);
             showToast(`Đã xoá công nợ ${customerName} thành công`);
           })
           .catch(console.error);
