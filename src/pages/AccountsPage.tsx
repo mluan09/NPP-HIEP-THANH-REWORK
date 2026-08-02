@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Trash2, UserPlus, Users, Pencil, X, Check, Save, Crown, Briefcase, User } from 'lucide-react';
+import { Shield, Trash2, UserPlus, Users, Pencil, X, Check, Save, Crown, Briefcase, User, Lock, LockOpen } from 'lucide-react';
 import type { Profile } from '../lib/db';
-import { createAuthUser, deleteAuthUser, updateAuthUser } from '../lib/db';
+import { createAuthUser, deleteAuthUser, updateAuthUser, lockProfile, unlockProfile } from '../lib/db';
 import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -121,6 +121,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
   const [editing, setEditing] = useState<EditForm | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [lockingId, setLockingId] = useState<string | null>(null);
 
   const hasModal = !!(editing || creating);
 
@@ -154,6 +155,42 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
     if (role === 'owner') return 'from-amber-400 to-orange-500';
     if (role === 'manager') return 'from-blue-400 to-indigo-500';
     return 'from-slate-400 to-slate-600';
+  };
+
+  // ─── Lock / Unlock ───────────────────────────────
+  const handleToggleLock = (profile: Profile) => {
+    if (profile.id === currentUser.id) {
+      showAlert('Không thể khoá', 'Không thể tự khoá tài khoản đang đăng nhập.', 'warning');
+      return;
+    }
+    const isLocked = profile.is_locked ?? false;
+    showConfirm(
+      isLocked ? 'Mở khoá tài khoản' : 'Khoá tài khoản',
+      isLocked
+        ? `Mở khoá tài khoản "${profile.full_name}"?\n\nTài khoản sẽ đăng nhập bình thường trở lại.`
+        : `Khoá tạm thời tài khoản "${profile.full_name}"?\n\nTài khoản sẽ không thể đăng nhập cho đến khi được mở khoá.`,
+      async () => {
+        setLockingId(profile.id);
+        try {
+          if (isLocked) {
+            await unlockProfile(profile.id);
+            onProfilesChange(profiles.map((p) => p.id === profile.id ? { ...p, is_locked: false, concurrent_attempts: 0 } : p));
+            logActivity(currentUser, 'Mở khoá tài khoản', 'account', profile.full_name);
+            showToast(`Đã mở khoá tài khoản ${profile.full_name}`);
+          } else {
+            await lockProfile(profile.id, 'Owner khoá thủ công');
+            onProfilesChange(profiles.map((p) => p.id === profile.id ? { ...p, is_locked: true } : p));
+            logActivity(currentUser, 'Khoá tài khoản', 'account', profile.full_name);
+            showToast(`Đã khoá tài khoản ${profile.full_name}`);
+          }
+        } catch (err: unknown) {
+          showAlert('Lỗi', err instanceof Error ? err.message : 'Không thể thay đổi trạng thái khoá', 'danger');
+        } finally {
+          setLockingId(null);
+        }
+      },
+      { type: isLocked ? 'warning' : 'danger', confirmText: isLocked ? 'Mở khoá' : 'Khoá tài khoản', cancelText: 'Hủy' }
+    );
   };
 
   // ─── Delete ─────────────────────────────────────
@@ -324,6 +361,11 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{profile.full_name}</h4>
                       {profile.id === currentUser.id && <span className="text-[10px] font-bold text-amber-500">(bạn)</span>}
+                      {profile.is_locked && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
+                          <Lock className="w-2.5 h-2.5" />Bị khoá
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className={`text-[10px] font-bold px-2 py-1 rounded ${roleBadge(profile.role)} transition-colors`}>{roleLabel(profile.role)}</span>
@@ -332,6 +374,32 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  {/* Nút khoá/mở khoá — chỉ Owner thấy, không áp dụng cho chính mình */}
+                  {currentUser.role === 'owner' && profile.id !== currentUser.id && (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.92 }}
+                      onClick={() => handleToggleLock(profile)}
+                      disabled={lockingId === profile.id}
+                      className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                        profile.is_locked
+                          ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/20'
+                          : 'text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/20'
+                      }`}
+                      title={profile.is_locked ? 'Mở khoá tài khoản' : 'Khoá tài khoản'}
+                    >
+                      {lockingId === profile.id ? (
+                        <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="inline-flex">
+                          <Lock className="w-4 h-4" />
+                        </motion.span>
+                      ) : profile.is_locked ? (
+                        <LockOpen className="w-4 h-4" />
+                      ) : (
+                        <Lock className="w-4 h-4" />
+                      )}
+                      <span>{profile.is_locked ? 'Mở khoá' : 'Khoá'}</span>
+                    </motion.button>
+                  )}
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }} onClick={() => handleEditUser(profile)} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/20 transition-colors cursor-pointer" title="Chỉnh sửa tài khoản">
                     <Pencil className="w-4 h-4" /><span>Sửa</span>
                   </motion.button>

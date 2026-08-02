@@ -2,11 +2,29 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, User, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import type { Profile } from '../lib/db';
+import {
+  getActiveSessions,
+  upsertUserSession,
+  deleteAllUserSessions,
+  incrementConcurrentAttempts,
+  lockProfile,
+} from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 
 interface LoginPageProps {
-  onLoginSuccess: (profile: Profile) => void;
+  onLoginSuccess: (profile: Profile, sessionToken: string) => void;
+}
+
+/** Lấy IP công khai qua api.ipify.org, trả null nếu lỗi */
+async function getPublicIp(): Promise<string | null> {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) });
+    const json = await res.json();
+    return json.ip ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
@@ -71,12 +89,65 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
       if (profileError || !profileData) {
         setError('Không tìm thấy thông tin tài khoản.');
+        await supabase.auth.signOut();
         setIsLoading(false);
         return;
       }
 
+      const profile = profileData as Profile;
+
+      // ── Kiểm tra tài khoản bị khoá ──
+      if (profile.is_locked) {
+        setError('Tài khoản bị khoá tạm thời do đăng nhập đồng thời từ nhiều nơi. Liên hệ Owner để mở khoá.');
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      // ── Kiểm tra session đang hoạt động ──
+      const [currentIp, activeSessions] = await Promise.all([
+        getPublicIp(),
+        getActiveSessions(data.user.id),
+      ]);
+
+      const otherIpSessions = activeSessions.filter(
+        (s) => s.ip_address && currentIp && s.ip_address !== currentIp
+      );
+
+      if (otherIpSessions.length > 0) {
+        // Có session từ IP khác → tăng bộ đếm
+        const attempts = await incrementConcurrentAttempts(data.user.id);
+
+        if (attempts >= 2) {
+          // Khoá tài khoản
+          await lockProfile(data.user.id);
+          await supabase.auth.signOut();
+          setError(
+            'Tài khoản bị khoá tạm thời do liên tục đăng nhập từ nhiều thiết bị khác nhau. Liên hệ Owner để mở khoá.'
+          );
+          setIsLoading(false);
+          return;
+        }
+
+        // Xoá tất cả session cũ (kick khỏi các thiết bị khác)
+        await deleteAllUserSessions(data.user.id);
+        showToast('⚠️ Đã đăng xuất thiết bị khác vì phát hiện đăng nhập đồng thời.');
+      } else if (activeSessions.length > 0) {
+        // Session cùng IP hoặc không có IP → kick session cũ, tiếp tục
+        await deleteAllUserSessions(data.user.id);
+      }
+
+      // ── Tạo session mới ──
+      const sessionToken = crypto.randomUUID();
+      await upsertUserSession({
+        user_id: data.user.id,
+        session_token: sessionToken,
+        ip_address: currentIp,
+        user_agent: navigator.userAgent,
+      });
+
       showToast('Đăng nhập thành công!');
-      onLoginSuccess(profileData as Profile);
+      onLoginSuccess(profile, sessionToken);
     } catch {
       setError('Đã xảy ra lỗi. Vui lòng thử lại.');
     } finally {
@@ -142,7 +213,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 autoComplete="username"
                 value={employeeId}
                 onChange={(e) => {
-                  setEmployeeId(e.target.value);
+                  setEmployeeId(e.target.value.toUpperCase());
                   if (fieldErrors.employeeId) {
                     setFieldErrors((prev) => ({ ...prev, employeeId: '' }));
                   }
@@ -150,7 +221,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder="Nhập mã nhân viên được ADMIN cấp"
                 aria-invalid={Boolean(fieldErrors.employeeId)}
                 aria-describedby={fieldErrors.employeeId ? 'employee-id-error' : undefined}
-                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 ${fieldErrors.employeeId
+                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 uppercase tracking-wider ${fieldErrors.employeeId
                   ? 'border-rose-500/80 focus:ring-rose-500/40 animate-[pulse_1.2s_ease-in-out_1]'
                   : 'border-slate-700/50 focus:ring-amber-500/50'
                   }`}

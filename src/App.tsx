@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getDb } from './lib/db';
+import { getDb, deleteUserSession } from './lib/db';
 import type { Profile, InventoryItem, Customer, Sale, SaleItem, Debt, CashbookEntry } from './lib/db';
 import { supabase, supabaseConfigError } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { ToastProvider } from './components/Toast';
+import { ToastProvider, useToast } from './components/Toast';
 
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
@@ -61,6 +61,8 @@ function AppInner() {
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const sessionTokenRef = useRef<string | null>(null);
+  const { showToast } = useToast();
 
   const activeTab = location.pathname.replace('/', '') || 'sales';
 
@@ -150,16 +152,48 @@ function AppInner() {
     navigate(`/${tab}`);
   };
 
-  const handleLoginSuccess = (profile: Profile) => {
+  const handleLoginSuccess = (profile: Profile, sessionToken: string) => {
+    sessionTokenRef.current = sessionToken;
     setCurrentUser(profile);
     navigate('/sales');
   };
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async (reason?: string) => {
+    const token = sessionTokenRef.current;
+    sessionTokenRef.current = null;
+    if (token) {
+      try { await deleteUserSession(token); } catch { /* ignore */ }
+    }
     await supabase.auth.signOut();
     setCurrentUser(null);
+    if (reason) showToast(reason);
     navigate('/login');
-  };
+  }, [navigate, showToast]);
+
+  // ── Realtime: force-logout khi session bị xoá bởi thiết bị khác ──
+  useEffect(() => {
+    if (!currentUser) return;
+    const channel = supabase
+      .channel(`session-watch-${currentUser.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'user_sessions', filter: `user_id=eq.${currentUser.id}` },
+        () => {
+          // Session bị xoá → có thiết bị khác đăng nhập → force logout
+          if (sessionTokenRef.current) {
+            sessionTokenRef.current = null;
+            supabase.auth.signOut().then(() => {
+              setCurrentUser(null);
+              showToast('⚠️ Tài khoản vừa đăng nhập ở thiết bị khác. Phiên này đã bị đăng xuất.');
+              navigate('/login');
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [currentUser, navigate, showToast]);
 
   if (authLoading) {
     return (

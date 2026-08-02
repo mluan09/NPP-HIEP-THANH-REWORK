@@ -6,6 +6,18 @@ export interface Profile {
   role: 'owner' | 'manager' | 'staff';
   employee_id?: string | null;
   created_at: string;
+  is_locked?: boolean;
+  concurrent_attempts?: number;
+}
+
+export interface UserSession {
+  id: string;
+  user_id: string;
+  session_token: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+  last_seen: string;
 }
 
 export interface InventoryItem {
@@ -225,6 +237,73 @@ export const upsertCashbookEntry = async (entry: CashbookEntry) => {
 export const deleteCashbookEntry = async (id: string) => {
   const { error } = await supabase.from('cashbook').delete().eq('id', id);
   if (error) throw error;
+};
+
+// ─── Lock/Unlock account ───────────────────────────────────────────────────
+export const lockProfile = async (userId: string, reason = 'Đăng nhập đồng thời từ nhiều nơi') => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_locked: true, concurrent_attempts: 0 })
+    .eq('id', userId);
+  if (error) throw error;
+  // Xoá tất cả sessions của user bị khoá
+  await supabase.from('user_sessions').delete().eq('user_id', userId);
+  console.info(`Profile ${userId} locked: ${reason}`);
+};
+
+export const unlockProfile = async (userId: string) => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ is_locked: false, concurrent_attempts: 0 })
+    .eq('id', userId);
+  if (error) throw error;
+};
+
+// ─── User Sessions ────────────────────────────────────────────────────────
+export const upsertUserSession = async (session: {
+  user_id: string;
+  session_token: string;
+  ip_address: string | null;
+  user_agent: string | null;
+}) => {
+  const { error } = await supabase.from('user_sessions').upsert(
+    { ...session, last_seen: new Date().toISOString() },
+    { onConflict: 'session_token' }
+  );
+  if (error) throw error;
+};
+
+export const deleteUserSession = async (sessionToken: string) => {
+  const { error } = await supabase.from('user_sessions').delete().eq('session_token', sessionToken);
+  if (error) throw error;
+};
+
+export const deleteAllUserSessions = async (userId: string) => {
+  const { error } = await supabase.from('user_sessions').delete().eq('user_id', userId);
+  if (error) throw error;
+};
+
+export const getActiveSessions = async (userId: string): Promise<UserSession[]> => {
+  const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 phút
+  const { data, error } = await supabase
+    .from('user_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('last_seen', cutoff);
+  if (error) throw error;
+  return (data ?? []) as UserSession[];
+};
+
+export const incrementConcurrentAttempts = async (userId: string): Promise<number> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('concurrent_attempts')
+    .eq('id', userId)
+    .single();
+  if (error) throw error;
+  const next = ((data?.concurrent_attempts ?? 0) as number) + 1;
+  await supabase.from('profiles').update({ concurrent_attempts: next }).eq('id', userId);
+  return next;
 };
 
 // Helper to call Edge Functions with auth
