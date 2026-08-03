@@ -6,25 +6,12 @@ import {
   getActiveSessions,
   upsertUserSession,
   deleteAllUserSessions,
-  incrementConcurrentAttempts,
-  lockProfile,
 } from '../lib/db';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../components/Toast';
 
 interface LoginPageProps {
   onLoginSuccess: (profile: Profile, sessionToken: string) => void;
-}
-
-/** Lấy IP công khai qua api.ipify.org, trả null nếu lỗi */
-async function getPublicIp(): Promise<string | null> {
-  try {
-    const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) });
-    const json = await res.json();
-    return json.ip ?? null;
-  } catch {
-    return null;
-  }
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
@@ -98,43 +85,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
       // ── Kiểm tra tài khoản bị khoá ──
       if (profile.is_locked) {
-        setError('Tài khoản bị khoá tạm thời do đăng nhập đồng thời từ nhiều nơi. Liên hệ Owner để mở khoá.');
+        setError('Tài khoản đang bị khoá tạm thời. Liên hệ Owner để mở khoá.');
         await supabase.auth.signOut();
         setIsLoading(false);
         return;
       }
 
-      // ── Kiểm tra session đang hoạt động ──
-      const [currentIp, activeSessions] = await Promise.all([
-        getPublicIp(),
-        getActiveSessions(data.user.id),
-      ]);
+      // ── Kiểm tra đăng nhập đồng thời ──
+      const activeSessions = await getActiveSessions(data.user.id);
 
-      const otherIpSessions = activeSessions.filter(
-        (s) => s.ip_address && currentIp && s.ip_address !== currentIp
-      );
-
-      if (otherIpSessions.length > 0) {
-        // Có session từ IP khác → tăng bộ đếm
-        const attempts = await incrementConcurrentAttempts(data.user.id);
-
-        if (attempts >= 2) {
-          // Khoá tài khoản
-          await lockProfile(data.user.id);
-          await supabase.auth.signOut();
-          setError(
-            'Tài khoản bị khoá tạm thời do liên tục đăng nhập từ nhiều thiết bị khác nhau. Liên hệ Owner để mở khoá.'
-          );
-          setIsLoading(false);
-          return;
-        }
-
-        // Xoá tất cả session cũ (kick khỏi các thiết bị khác)
+      if (activeSessions.length > 0) {
+        // Xoá session cũ để force logout thiết bị trước, đồng thời đăng xuất thiết bị mới.
         await deleteAllUserSessions(data.user.id);
-        showToast('⚠️ Đã đăng xuất thiết bị khác vì phát hiện đăng nhập đồng thời.');
-      } else if (activeSessions.length > 0) {
-        // Session cùng IP hoặc không có IP → kick session cũ, tiếp tục
-        await deleteAllUserSessions(data.user.id);
+        await supabase.auth.signOut();
+        setError('Phát hiện tài khoản đăng nhập đồng thời ở 2 nơi. Cả hai phiên đã bị đăng xuất. Vui lòng đăng nhập lại.');
+        setIsLoading(false);
+        return;
       }
 
       // ── Tạo session mới ──
@@ -142,7 +108,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       await upsertUserSession({
         user_id: data.user.id,
         session_token: sessionToken,
-        ip_address: currentIp,
+        ip_address: null,
         user_agent: navigator.userAgent,
       });
 

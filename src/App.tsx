@@ -7,6 +7,7 @@ import { supabase, supabaseConfigError } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ToastProvider, useToast } from './components/Toast';
+import { RotateLockOverlay } from './components/RotateLockOverlay';
 
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
@@ -61,7 +62,7 @@ function AppInner() {
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const sessionTokenRef = useRef<string | null>(null);
+  const sessionTokenRef = useRef<string | null>(localStorage.getItem('npp_session_token'));
   const { showToast } = useToast();
 
   const activeTab = location.pathname.replace('/', '') || 'sales';
@@ -154,6 +155,7 @@ function AppInner() {
 
   const handleLoginSuccess = (profile: Profile, sessionToken: string) => {
     sessionTokenRef.current = sessionToken;
+    localStorage.setItem('npp_session_token', sessionToken);
     setCurrentUser(profile);
     navigate('/sales');
   };
@@ -161,6 +163,7 @@ function AppInner() {
   const handleLogout = useCallback(async (reason?: string) => {
     const token = sessionTokenRef.current;
     sessionTokenRef.current = null;
+    localStorage.removeItem('npp_session_token');
     if (token) {
       try { await deleteUserSession(token); } catch { /* ignore */ }
     }
@@ -182,9 +185,10 @@ function AppInner() {
           // Session bị xoá → có thiết bị khác đăng nhập → force logout
           if (sessionTokenRef.current) {
             sessionTokenRef.current = null;
+            localStorage.removeItem('npp_session_token');
             supabase.auth.signOut().then(() => {
               setCurrentUser(null);
-              showToast('⚠️ Tài khoản vừa đăng nhập ở thiết bị khác. Phiên này đã bị đăng xuất.');
+              showToast('⚠️ Tài khoản vừa đăng nhập ở nơi khác. Phiên này đã bị đăng xuất.');
               navigate('/login');
             });
           }
@@ -232,7 +236,7 @@ function AppInner() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-300">
+    <div className="min-h-screen bg-slate-950 flex transition-colors duration-300">
       <Sidebar
         setActiveTab={handleTabChange}
         currentUser={currentUser}
@@ -368,6 +372,7 @@ function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <RotateLockOverlay />
         <AppInner />
       </BrowserRouter>
     </ToastProvider>
