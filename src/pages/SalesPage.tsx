@@ -206,6 +206,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       }));
     }
 
+    const productSummary = cart
+      .map(item => `${item.product.product_name} (x${item.quantity})`)
+      .join(', ');
+
     // Create Sale record
     const saleId = `s-${Date.now()}`;
     const newSale: Sale = {
@@ -277,7 +281,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
             id: `cb-${Date.now()}`,
             code: entryCode,
             transaction_date: new Date().toISOString().slice(0, 10),
-            description: `Thu tiền đơn hàng ${saleId.toUpperCase()} (KH: ${customer.customer_name})`,
+            description: `Thu tiền đơn hàng ${productSummary} (KH: ${customer.customer_name})`,
             income: paidAmount,
             expense_purchase: 0,
             expense_operation: 0,
@@ -413,7 +417,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-8 text-xs font-bold text-slate-800 dark:text-slate-250">
+                          <span className="w-8 text-center text-sm font-extrabold text-amber-700 dark:text-amber-300">
                             {item.quantity}
                           </span>
                           <button

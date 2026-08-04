@@ -356,7 +356,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                       <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100">{c.customer_name}</td>
                       <td className="p-4 text-sm text-slate-600 dark:text-slate-400">{c.phone || '---'}</td>
                       <td className="p-4 text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">{c.address || '---'}</td>
-                      <td className="p-4 text-sm font-bold text-white text-right">
+                      <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100 text-right">
                         {stats.totalPurchased.toLocaleString('vi-VN')}đ
                       </td>
                       <td className="p-4 text-right">
@@ -492,9 +492,24 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       </AnimatePresence>
 
       {/* Customer Ledger / Details Modal */}
-      {selectedCustomer && details && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-3xl shadow-2xl flex flex-col gap-5 max-h-[90vh]">
+      <AnimatePresence>
+        {selectedCustomer && details && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+            onClick={() => setSelectedCustomer(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-3xl shadow-2xl flex flex-col gap-5 max-h-[90vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="flex justify-between items-center pb-3 border-b border-slate-150 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm">
@@ -599,7 +614,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                         return (
                           <tr key={sale.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                             <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-300 max-w-[220px]">
-                              <span className="line-clamp-2">{getProductsForSale(sale.id)}</span>
+                               <span className="break-words whitespace-normal">{getProductsForSale(sale.id)}</span>
                             </td>
                             <td className="p-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">{sale.sale_date}</td>
                             <td className="p-2.5 text-center">
@@ -649,9 +664,10 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                 Đóng sổ quỹ
               </button>
             </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Global Confirmation / Alert Modal */}
       <ConfirmModal {...modalState} />

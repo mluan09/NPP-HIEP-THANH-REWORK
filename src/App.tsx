@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getDb, deleteUserSession } from './lib/db';
+import { getDb, deleteUserSession, checkSessionExists } from './lib/db';
 import type { Profile, InventoryItem, Customer, Sale, SaleItem, Debt, CashbookEntry } from './lib/db';
 import { supabase, supabaseConfigError } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
@@ -123,10 +123,26 @@ function AppInner() {
       .finally(() => setDbLoading(false));
   }, [currentUser, authLoading]);
 
-  // Refresh data silently when tab becomes visible again
+  // Refresh data silently when tab becomes visible again, also re-validate session
   useEffect(() => {
-    const handleVisibility = () => {
+    const handleVisibility = async () => {
       if (document.visibilityState === 'visible' && currentUser && hasLoadedOnce.current) {
+        // Session validity check: if session was revoked on another device while this tab was hidden
+        const token = sessionTokenRef.current;
+        if (token) {
+          try {
+            const exists = await checkSessionExists(token);
+            if (!exists) {
+              sessionTokenRef.current = null;
+              localStorage.removeItem('npp_session_token');
+              await supabase.auth.signOut();
+              setCurrentUser(null);
+              showToast('⚠️ Phiên đăng nhập đã bị thu hồi do đăng nhập ở thiết bị khác. Vui lòng đăng nhập lại.', 'warning');
+              navigate('/login');
+              return;
+            }
+          } catch { /* ignore network errors */ }
+        }
         getDb()
           .then((db) => {
             setProfiles(db.profiles);
@@ -142,7 +158,7 @@ function AppInner() {
     };
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentUser]);
+  }, [currentUser, navigate, showToast]);
 
   // Force Dark Mode always on
   useEffect(() => {
@@ -173,26 +189,31 @@ function AppInner() {
     navigate('/login');
   }, [navigate, showToast]);
 
-  // ── Realtime: force-logout khi session bị xoá bởi thiết bị khác ──
+  // ── Realtime: force-logout khi đăng nhập đồng thời ──
+  // Dùng cả Broadcast (nhanh, không cần realtime table) và postgres_changes (fallback)
   useEffect(() => {
     if (!currentUser) return;
+
+    const handleForcedLogout = () => {
+      if (!sessionTokenRef.current) return; // đã logout rồi
+      sessionTokenRef.current = null;
+      localStorage.removeItem('npp_session_token');
+      supabase.auth.signOut().then(() => {
+        setCurrentUser(null);
+        showToast('⚠️ Tài khoản vừa đăng nhập ở thiết bị khác. Phiên này đã bị đăng xuất ngay lập tức.', 'warning');
+        navigate('/login');
+      });
+    };
+
     const channel = supabase
-      .channel(`session-watch-${currentUser.id}`)
+      .channel(`session-monitor-${currentUser.id}`)
+      // Broadcast: cơ chế chính — phát hiện ngay khi thiết bị kia gửi tín hiệu
+      .on('broadcast', { event: 'force_logout' }, handleForcedLogout)
+      // postgres_changes: fallback — khi thiết bị kia xoá session trong DB
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'user_sessions', filter: `user_id=eq.${currentUser.id}` },
-        () => {
-          // Session bị xoá → có thiết bị khác đăng nhập → force logout
-          if (sessionTokenRef.current) {
-            sessionTokenRef.current = null;
-            localStorage.removeItem('npp_session_token');
-            supabase.auth.signOut().then(() => {
-              setCurrentUser(null);
-              showToast('⚠️ Tài khoản vừa đăng nhập ở nơi khác. Phiên này đã bị đăng xuất.');
-              navigate('/login');
-            });
-          }
-        }
+        handleForcedLogout
       )
       .subscribe();
 

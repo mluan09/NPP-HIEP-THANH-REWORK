@@ -283,6 +283,15 @@ export const deleteAllUserSessions = async (userId: string) => {
   if (error) throw error;
 };
 
+export const checkSessionExists = async (sessionToken: string): Promise<boolean> => {
+  const { data } = await supabase
+    .from('user_sessions')
+    .select('session_token')
+    .eq('session_token', sessionToken)
+    .maybeSingle();
+  return data !== null;
+};
+
 export const getActiveSessions = async (userId: string): Promise<UserSession[]> => {
   const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 phút
   const { data, error } = await supabase

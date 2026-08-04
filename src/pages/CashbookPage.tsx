@@ -315,7 +315,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
                       <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-300">{e.code}</td>
                       <td className="p-4 text-sm text-slate-500 dark:text-slate-400">{e.transaction_date}</td>
                       <td className="p-4">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-start gap-1.5">
                           {isIncome ? (
                             <div className="p-1 bg-emerald-500/10 text-emerald-600 rounded-md">
                               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -325,7 +325,9 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
                               <ArrowDownRight className="w-3.5 h-3.5" />
                             </div>
                           )}
-                          <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{e.description}</span>
+                          <span className="text-sm font-bold text-slate-900 dark:text-slate-100 break-words whitespace-normal leading-relaxed">
+                            {e.description}
+                          </span>
                         </div>
                       </td>
                       <td className="p-4 text-sm font-bold text-emerald-600 dark:text-emerald-400 text-right">

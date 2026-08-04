@@ -190,12 +190,6 @@ export const FeedbackPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-5 text-amber-700 dark:text-amber-300">
-            <p className="text-sm font-semibold">Cách đổi Gmail và SĐT Zalo</p>
-            <p className="text-sm mt-2 text-amber-700/80 dark:text-amber-300/80">
-              Mở file <span className="font-mono font-bold">src/data/contact-config.ts</span>, sửa <span className="font-mono">gmail</span> và <span className="font-mono">zaloPhone</span>.
-            </p>
-          </div>
         </aside>
       </div>
     </div>

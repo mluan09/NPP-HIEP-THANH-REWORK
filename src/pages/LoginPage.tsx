@@ -95,10 +95,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       const activeSessions = await getActiveSessions(data.user.id);
 
       if (activeSessions.length > 0) {
-        // Xoá session cũ để force logout thiết bị trước, đồng thời đăng xuất thiết bị mới.
+        // Broadcast first for immediate logout; database deletion remains fallback.
+        try {
+          const broadcastChannel = supabase.channel(`session-monitor-${data.user.id}`);
+          await new Promise<void>((resolve) => {
+            let settled = false;
+            const finish = () => {
+              if (settled) return;
+              settled = true;
+              resolve();
+            };
+
+            broadcastChannel.subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                broadcastChannel
+                  .send({
+                    type: 'broadcast',
+                    event: 'force_logout',
+                    payload: { reason: 'concurrent_login' },
+                  })
+                  .finally(finish);
+              }
+            });
+
+            window.setTimeout(finish, 2000);
+          });
+          await supabase.removeChannel(broadcastChannel);
+        } catch {
+          // Database session deletion still forces logout when broadcast is unavailable.
+        }
+
         await deleteAllUserSessions(data.user.id);
         await supabase.auth.signOut();
-        setError('Phát hiện tài khoản đăng nhập đồng thời ở 2 nơi. Cả hai phiên đã bị đăng xuất. Vui lòng đăng nhập lại.');
+        setError('⚠️ Phát hiện tài khoản đang đăng nhập ở nơi khác. Tất cả thiết bị đã bị đăng xuất ngay lập tức. Vui lòng đăng nhập lại.');
         setIsLoading(false);
         return;
       }

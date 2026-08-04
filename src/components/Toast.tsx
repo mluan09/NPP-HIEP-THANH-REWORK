@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, X } from 'lucide-react';
+import { CheckCircle2, X, AlertTriangle } from 'lucide-react';
 
 export interface ToastMessage {
   id: string;
   message: string;
-  type?: 'success' | 'info';
+  type?: 'success' | 'info' | 'warning';
   duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: 'success' | 'info') => void;
+  showToast: (message: string, type?: 'success' | 'info' | 'warning') => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -29,7 +29,7 @@ interface SingleToastProps {
 }
 
 const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
-  const duration = toast.duration || 4000;
+  const duration = toast.duration || (toast.type === 'warning' ? 8000 : 4000);
   const remainingTimeRef = useRef<number>(duration);
   const [isPaused, setIsPaused] = useState(false);
   const lastTimeRef = useRef<number>(Date.now());
@@ -76,10 +76,14 @@ const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
       onFocus={handleFocus}
       onBlur={handleBlur}
       tabIndex={0}
-      className="flex items-center gap-3 bg-slate-900/95 text-slate-100 border border-emerald-500/40 shadow-xl shadow-emerald-950/30 px-4 py-3 rounded-2xl backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-emerald-500/50 max-w-sm w-full cursor-default"
+      className={`flex items-center gap-3 bg-slate-900/95 text-slate-100 border shadow-xl px-4 py-3 rounded-2xl backdrop-blur-md focus:outline-none focus:ring-2 max-w-sm w-full cursor-default ${
+        toast.type === 'warning'
+          ? 'border-red-500/60 shadow-red-950/40 focus:ring-red-500/50'
+          : 'border-emerald-500/40 shadow-emerald-950/30 focus:ring-emerald-500/50'
+      }`}
     >
-      <div className="p-1 bg-emerald-500/20 text-emerald-400 rounded-lg flex-shrink-0">
-        <CheckCircle2 className="w-5 h-5" />
+      <div className={`p-1 rounded-lg flex-shrink-0 ${toast.type === 'warning' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+        {toast.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
       </div>
       <p className="text-sm font-medium flex-1 text-slate-200 leading-snug">{toast.message}</p>
       <button
@@ -97,7 +101,7 @@ const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+  const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
   };
