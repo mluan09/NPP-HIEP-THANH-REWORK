@@ -343,6 +343,8 @@ function AppInner() {
                         cashbook={cashbook}
                         setCashbook={setCashbook}
                         sales={sales}
+                        saleItems={saleItems}
+                        inventory={inventory}
                         currentUser={currentUser}
                       />
                     }

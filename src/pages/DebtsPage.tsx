@@ -15,7 +15,7 @@ import {
 import { generateCashbookCode, upsertDebt, upsertCashbookEntry, deleteDebtById } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import { logActivity } from '../lib/activityLog';
-import type { Debt, Customer, Profile, CashbookEntry, Sale } from '../lib/db';
+import type { Debt, Customer, Profile, CashbookEntry, Sale, SaleItem, InventoryItem } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -27,6 +27,8 @@ interface DebtsPageProps {
   cashbook: CashbookEntry[];
   setCashbook: React.Dispatch<React.SetStateAction<CashbookEntry[]>>;
   sales: Sale[];
+  saleItems: SaleItem[];
+  inventory: InventoryItem[];
   currentUser: Profile;
 }
 
@@ -37,6 +39,8 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
   cashbook,
   setCashbook,
   sales,
+  saleItems,
+  inventory,
   currentUser
 }) => {
   const { modalState, showAlert, showConfirm } = useModal();
@@ -69,6 +73,19 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       if (sale) return sale.sale_date;
     }
     return (debt.updated_at || '').slice(0, 10);
+  };
+
+  const getProductsForSale = (saleId?: string): string => {
+    if (!saleId) return 'KHÁC';
+    const items = saleItems.filter(si => si.sale_id === saleId);
+    if (items.length === 0) return saleId.toUpperCase();
+
+    return items
+      .map(si => {
+        const product = inventory.find(p => p.id === si.product_id);
+        return product ? `${product.product_name} (x${si.quantity})` : `SP không xác định (x${si.quantity})`;
+      })
+      .join(', ');
   };
 
   // Compute remaining debt dynamically from total - paid
@@ -111,6 +128,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     }
 
     const customerName = getCustomerName(selectedDebt.customer_id);
+    const productSummary = getProductsForSale(selectedDebt.sale_id);
 
     // 1. Update Debts Table state
     const nextDebt = {
@@ -126,7 +144,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       id: `cb-${Date.now()}`,
       code: entryCode,
       transaction_date: new Date().toISOString().slice(0, 10),
-      description: `Thu nợ KH: ${customerName} (Đơn hàng: ${selectedDebt.sale_id ? selectedDebt.sale_id.toUpperCase() : 'KHÁC'})`,
+      description: `Thu nợ KH: ${customerName} (Sản phẩm: ${productSummary})`,
       income: payAmount,
       expense_purchase: 0,
       expense_operation: 0,

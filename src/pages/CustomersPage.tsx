@@ -209,10 +209,24 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
   const getProductsForSale = (saleId: string): string => {
     const items = saleItems.filter(si => si.sale_id === saleId);
     if (items.length === 0) return '—';
-    return items.map(si => {
+
+    const uniqueProducts = items.reduce<Array<{ name: string; quantity: number }>>((acc, si) => {
       const product = inventory.find(p => p.id === si.product_id);
-      return product ? `${product.product_name} (x${si.quantity})` : `SP không xác định (x${si.quantity})`;
-    }).join(', ');
+      const productName = product ? product.product_name : 'SP không xác định';
+      const existing = acc.find(item => item.name === productName);
+
+      if (existing) {
+        existing.quantity += si.quantity;
+      } else {
+        acc.push({ name: productName, quantity: si.quantity });
+      }
+
+      return acc;
+    }, []);
+
+    return uniqueProducts
+      .map(item => `${item.name} (x${item.quantity})`)
+      .join(', ');
   };
 
   // Get debt amount for a specific sale
@@ -613,8 +627,10 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
 
                         return (
                           <tr key={sale.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                            <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-300 max-w-[220px]">
-                               <span className="break-words whitespace-normal">{getProductsForSale(sale.id)}</span>
+                            <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-300 max-w-[220px] align-top">
+                              <div className="whitespace-normal break-words leading-relaxed">
+                                {getProductsForSale(sale.id)}
+                              </div>
                             </td>
                             <td className="p-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">{sale.sale_date}</td>
                             <td className="p-2.5 text-center">

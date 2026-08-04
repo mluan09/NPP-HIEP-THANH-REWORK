@@ -417,7 +417,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="w-8 text-center text-sm font-extrabold text-amber-700 dark:text-amber-300">
+                          <span className="min-w-[2.5rem] text-center text-base font-black text-slate-900 dark:text-slate-50 drop-shadow-[0_1px_1px_rgba(255,255,255,0.08)]">
                             {item.quantity}
                           </span>
                           <button
@@ -566,12 +566,23 @@ export const SalesPage: React.FC<SalesPageProps> = ({
               </AnimatePresence>
             </div>
 
-            {selectedCustomerId && (
-              <div className="p-3 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl border border-slate-200/30 dark:border-slate-850 text-xs space-y-1.5 text-slate-600 dark:text-slate-400">
-                <p><span className="font-bold text-slate-700 dark:text-slate-300">Điện thoại:</span> {customers.find(c => c.id === selectedCustomerId)?.phone || '---'}</p>
-                <p><span className="font-bold text-slate-700 dark:text-slate-300">Địa chỉ:</span> {customers.find(c => c.id === selectedCustomerId)?.address || '---'}</p>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {selectedCustomerId && (
+                <motion.div
+                  key={selectedCustomerId}
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3.5 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-slate-950/70 dark:via-slate-900 dark:to-amber-950/20 rounded-2xl border border-amber-200/60 dark:border-amber-500/15 text-xs space-y-2 text-slate-600 dark:text-slate-300 shadow-sm shadow-amber-500/5">
+                    <p><span className="font-bold text-slate-800 dark:text-slate-100">Điện thoại:</span> {customers.find(c => c.id === selectedCustomerId)?.phone || '---'}</p>
+                    <p className="leading-relaxed"><span className="font-bold text-slate-800 dark:text-slate-100">Địa chỉ:</span> {customers.find(c => c.id === selectedCustomerId)?.address || '---'}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
