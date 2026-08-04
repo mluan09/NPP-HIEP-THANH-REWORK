@@ -75,7 +75,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     return (debt.updated_at || '').slice(0, 10);
   };
 
-  const getProductsForSale = (saleId?: string): string => {
+  const getProductsForSale = (saleId?: string | null): string => {
     if (!saleId) return 'KHÁC';
     const items = saleItems.filter(si => si.sale_id === saleId);
     if (items.length === 0) return saleId.toUpperCase();
