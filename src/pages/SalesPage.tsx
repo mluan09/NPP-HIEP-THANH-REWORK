@@ -144,6 +144,29 @@ export const SalesPage: React.FC<SalesPageProps> = ({
     ));
   };
 
+  const updateCartQtyDirect = (productId: string, raw: string) => {
+    const target = cart.find(i => i.product.id === productId);
+    if (!target) return;
+
+    const available = getItemStock(target.product);
+    const parsed = parseInt(raw.replace(/[^\d]/g, ''), 10);
+
+    if (isNaN(parsed) || parsed <= 0) {
+      // Cho phép xoá hết số để gõ lại; không xoá dòng khi đang nhập
+      if (raw === '') {
+        setCart(prev => prev.map(i =>
+          i.product.id === productId ? { ...i, quantity: 0 } : i
+        ));
+      }
+      return;
+    }
+
+    const newQty = Math.min(parsed, available);
+    setCart(prev => prev.map(i =>
+      i.product.id === productId ? { ...i, quantity: newQty } : i
+    ));
+  };
+
   const updateCartPrice = (productId: string, price: number) => {
     setCart(prev => prev.map(item =>
       item.product.id === productId
@@ -417,9 +440,17 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="min-w-[2.5rem] text-center text-base font-black text-slate-900 dark:text-slate-50 drop-shadow-[0_1px_1px_rgba(255,255,255,0.08)]">
-                            {item.quantity}
-                          </span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={item.quantity === 0 ? '' : String(item.quantity)}
+                            onChange={(e) => updateCartQtyDirect(item.product.id, e.target.value)}
+                            onBlur={() => {
+                              // Nếu để trống hoặc 0 thì bỏ dòng khỏi đơn
+                              setCart(prev => prev.filter(i => i.quantity > 0));
+                            }}
+                            className="w-14 text-center text-base font-black text-slate-900 dark:text-slate-50 bg-transparent focus:outline-none focus:ring-1 focus:ring-amber-500/40 rounded-md"
+                          />
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.product.id, 1)}

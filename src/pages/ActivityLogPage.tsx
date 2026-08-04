@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ClipboardList, ChevronLeft, ChevronRight, Shield, Clock3, UserCircle2, Package, CreditCard, BookOpen, ShoppingCart, Users, BadgeInfo } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { getActivityLog, LOG_MAX_PAGES, LOG_PAGE_SIZE, type ActivityLogEntry } from '../lib/activityLog';
+import { supabase } from '../lib/supabase';
 
 interface ActivityLogPageProps {
   currentUser: Profile;
@@ -60,9 +61,37 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
   const [entries, setEntries] = useState<ActivityLogEntry[]>([]);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    getActivityLog().then(setEntries);
+  const loadEntries = useCallback(() => {
+    getActivityLog().then(setEntries).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    loadEntries();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadEntries();
+      }
+    };
+
+    const channel = supabase
+      .channel('activity-log-feed')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'activity_logs' },
+        () => {
+          loadEntries();
+        }
+      )
+      .subscribe();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      supabase.removeChannel(channel);
+    };
+  }, [loadEntries]);
 
   const totalPages = useMemo(() => {
     const rawPages = Math.ceil(entries.length / LOG_PAGE_SIZE);

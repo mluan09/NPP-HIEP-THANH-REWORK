@@ -12,38 +12,13 @@ export interface ActivityLogEntry {
   category: 'sale' | 'inventory' | 'customer' | 'debt' | 'cashbook' | 'account';
 }
 
-const STORAGE_KEY = 'npp_activity_log';
 export const LOG_PAGE_SIZE = 20;
 export const LOG_MAX_PAGES = 5;
 export const LOG_MAX_ENTRIES = LOG_PAGE_SIZE * LOG_MAX_PAGES; // 100
 
-// Local fallback only — used when Supabase insert fails
-const getLocalLog = (): ActivityLogEntry[] => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ActivityLogEntry[]) : [];
-  } catch {
-    return [];
-  }
-};
-
-const pushLocalLog = (entry: ActivityLogEntry) => {
-  const entries = getLocalLog();
-  const updated = [entry, ...entries];
-  while (updated.length > LOG_MAX_ENTRIES) {
-    updated.pop();
-  }
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch {
-    const trimmed = updated.slice(0, Math.floor(LOG_MAX_ENTRIES / 2));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-  }
-};
-
 /**
  * Ghi nhật ký hoạt động lên Supabase.
- * Fallback localStorage nếu insert lỗi (offline / RLS).
+ * Không fallback localStorage để tránh lệch dữ liệu giữa các thiết bị.
  */
 export const logActivity = (
   actor: Profile,
@@ -62,26 +37,23 @@ export const logActivity = (
     category,
   };
 
-  // Fire-and-forget insert; fallback local nếu lỗi
-  try {
-    supabase
-      .from('activity_logs')
-      .insert(newEntry)
-      .then(({ error }: { error: Error | null }) => {
+  supabase
+    .from('activity_logs')
+    .insert(newEntry)
+    .then(
+      ({ error }: { error: Error | null }) => {
         if (error) {
-          console.warn('logActivity: Supabase insert failed, fallback localStorage', error.message);
-          pushLocalLog(newEntry);
+          console.warn('logActivity: Supabase insert failed', error.message);
         }
-      });
-  } catch (err) {
-    console.warn('logActivity: network error, fallback localStorage', err);
-    pushLocalLog(newEntry);
-  }
+      },
+      (err) => {
+        console.warn('logActivity: network error', err);
+      }
+    );
 };
 
 /**
- * Fetch nhật ký từ Supabase. Gộp thêm local fallback để không mất log
- * khi insert trước đó bị lỗi mạng.
+ * Fetch nhật ký từ Supabase.
  */
 export const getActivityLog = async (): Promise<ActivityLogEntry[]> => {
   try {
@@ -92,19 +64,15 @@ export const getActivityLog = async (): Promise<ActivityLogEntry[]> => {
       .limit(LOG_MAX_ENTRIES);
 
     if (error) throw error;
-    if (data && data.length > 0) {
-      return data as ActivityLogEntry[];
-    }
+    return (data ?? []) as ActivityLogEntry[];
   } catch (err) {
-    console.warn('getActivityLog: Supabase fetch failed, using localStorage', err);
+    console.warn('getActivityLog: Supabase fetch failed', err);
+    return [];
   }
-
-  // Fallback: chỉ trả local khi Supabase trống hoặc lỗi
-  return getLocalLog();
 };
 
 /**
- * Xoá toàn bộ nhật ký (owner only). Xoá trên Supabase + local.
+ * Xoá toàn bộ nhật ký (owner only).
  */
 export const clearActivityLog = async (): Promise<void> => {
   try {
@@ -113,5 +81,4 @@ export const clearActivityLog = async (): Promise<void> => {
   } catch (err) {
     console.warn('clearActivityLog: Supabase delete failed', err);
   }
-  localStorage.removeItem(STORAGE_KEY);
 };
