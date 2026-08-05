@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { generateCashbookCode, upsertCashbookEntry, deleteCashbookEntry } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
+import { logActivity } from '../lib/activityLog';
 import type { CashbookEntry, Profile } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -113,11 +114,17 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   const handleDelete = (entry: CashbookEntry) => {
     showConfirm(
       'Xác nhận xóa phiếu',
-      `Bạn có chắc chắn muốn xóa phiếu [${entry.code}] - "${entry.description}" không? Hành động này không thể hoàn tác.`,
-      () => {
-        setCashbook(prev => prev.filter(e => e.id !== entry.id));
-        deleteCashbookEntry(entry.id).catch(console.error);
-        showToast(`Đã xoá phiếu ${entry.code} thành công`);
+      `Bạn có chắc chắn muốn xóa phiếu "${entry.description}" không? Hành động này không thể hoàn tác.`,
+      async () => {
+        try {
+          await deleteCashbookEntry(entry.id);
+          setCashbook(prev => prev.filter(e => e.id !== entry.id));
+          logActivity(currentUser, 'Xóa phiếu thu/chi','cashbook', `${entry.code} - ${entry.description}`);
+          showToast(`Đã xoá phiếu thành công`);
+        } catch (err) {
+          console.error('Xoá phiếu thất bại:', err);
+          showAlert('Lỗi', 'Không thể xoá phiếu. Vui lòng thử lại.', 'danger');
+        }
       },
       { type: 'danger', confirmText: 'Xóa phiếu', cancelText: 'Hủy bỏ' }
     );
@@ -151,6 +158,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         upsertCashbookEntry(updated).catch(console.error);
         return updated;
       }));
+      logActivity(currentUser, 'Điều chỉnh phiếu thu/chi', 'cashbook', `${editingEntry.code} - ${description}`);
       setIsDialogOpen(false);
       setEditingEntry(null);
       showToast(`Đã điều chỉnh phiếu ${editingEntry.code} thành công`);
@@ -175,6 +183,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
 
     setCashbook(prev => [newEntry, ...prev]);
     upsertCashbookEntry(newEntry).catch(console.error);
+    logActivity(currentUser, txType === 'income' ? 'Tạo phiếu thu' : 'Tạo phiếu chi', 'cashbook', `${newEntry.code} - ${description}`);
     setIsDialogOpen(false);
   };
 
@@ -290,8 +299,8 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/55">
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Số phiếu</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày giao dịch</th>
+                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">STT</th>
+                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày giờ giao dịch</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Lý do thu chi</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Thu quỹ (+)</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Chi quỹ (-)</th>
@@ -307,13 +316,19 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredEntries.map((e) => {
+                filteredEntries.map((e, idx) => {
                   const isIncome = e.income > 0;
+                  const formattedDateTime = e.created_at
+                    ? new Intl.DateTimeFormat('vi-VN', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit',
+                      }).format(new Date(e.created_at))
+                    : e.transaction_date;
 
                   return (
                     <tr key={e.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10 transition-colors">
-                      <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-300">{e.code}</td>
-                      <td className="p-4 text-sm text-slate-500 dark:text-slate-400">{e.transaction_date}</td>
+                      <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-300">{idx + 1}</td>
+                      <td className="p-4 text-sm text-slate-500 dark:text-slate-400">{formattedDateTime}</td>
                       <td className="p-4">
                         <div className="flex items-start gap-1.5">
                           {isIncome ? (

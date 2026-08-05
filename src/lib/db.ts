@@ -174,8 +174,9 @@ export const upsertCustomer = async (customer: Customer) => {
 };
 
 export const deleteCustomer = async (id: string) => {
-  const { error } = await supabase.from('customers').delete().eq('id', id);
+  const { data, error } = await supabase.from('customers').delete().eq('id', id).select('id');
   if (error) throw error;
+  if (!data || data.length === 0) throw new Error('Không thể xóa: không có quyền hoặc bản ghi không tồn tại');
 };
 
 export const upsertSale = async (sale: Sale) => {
@@ -184,8 +185,9 @@ export const upsertSale = async (sale: Sale) => {
 };
 
 export const deleteSale = async (id: string) => {
-  const { error } = await supabase.from('sales').delete().eq('id', id);
+  const { data, error } = await supabase.from('sales').delete().eq('id', id).select('id');
   if (error) throw error;
+  if (!data || data.length === 0) throw new Error('Không thể xóa đơn hàng: không có quyền hoặc bản ghi không tồn tại');
 };
 
 export const upsertSaleItems = async (items: SaleItem[]) => {
@@ -222,11 +224,13 @@ export const deleteDebtById = async (id: string) => {
 export const deleteDebtsByCustomer = async (customerId: string) => {
   const { error } = await supabase.from('debts').delete().eq('customer_id', customerId);
   if (error) throw error;
+  // No row count check: customer may have 0 debts, that's valid
 };
 
 export const deleteSalesByCustomer = async (customerId: string) => {
   const { error } = await supabase.from('sales').delete().eq('customer_id', customerId);
   if (error) throw error;
+  // No row count check: customer may have 0 sales, that's valid
 };
 
 export const upsertCashbookEntry = async (entry: CashbookEntry) => {
