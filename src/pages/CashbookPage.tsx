@@ -77,8 +77,9 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
 
   // Filter transactions
   const filteredEntries = cashbook.filter(entry => {
-    const matchesSearch = entry.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = entry.description.toLowerCase().includes(term) ||
+      (entry.notes || '').toLowerCase().includes(term);
 
     if (filterType === 'income') {
       return matchesSearch && entry.income > 0;
@@ -119,7 +120,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         try {
           await deleteCashbookEntry(entry.id);
           setCashbook(prev => prev.filter(e => e.id !== entry.id));
-          logActivity(currentUser, 'Xóa phiếu thu/chi','cashbook', `${entry.code} - ${entry.description}`);
+          logActivity(currentUser, 'Xóa phiếu thu/chi','cashbook', `${entry.description}`);
           showToast(`Đã xoá phiếu thành công`);
         } catch (err) {
           console.error('Xoá phiếu thất bại:', err);
@@ -158,7 +159,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         upsertCashbookEntry(updated).catch(console.error);
         return updated;
       }));
-      logActivity(currentUser, 'Điều chỉnh phiếu thu/chi', 'cashbook', `${editingEntry.code} - ${description}`);
+      logActivity(currentUser, 'Điều chỉnh phiếu thu/chi', 'cashbook', `${description}`);
       setIsDialogOpen(false);
       setEditingEntry(null);
       showToast(`Đã điều chỉnh phiếu ${editingEntry.code} thành công`);
@@ -183,7 +184,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
 
     setCashbook(prev => [newEntry, ...prev]);
     upsertCashbookEntry(newEntry).catch(console.error);
-    logActivity(currentUser, txType === 'income' ? 'Tạo phiếu thu' : 'Tạo phiếu chi', 'cashbook', `${newEntry.code} - ${description}`);
+    logActivity(currentUser, txType === 'income' ? 'Tạo phiếu thu' : 'Tạo phiếu chi', 'cashbook', `${description}`);
     setIsDialogOpen(false);
   };
 
@@ -235,7 +236,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         <div className="relative w-full md:w-72">
           <input
             type="text"
-            placeholder="Tìm theo mã phiếu, lý do..."
+            placeholder="Tìm theo lý do, ghi chú..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
@@ -321,7 +322,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
                   const formattedDateTime = e.created_at
                     ? new Intl.DateTimeFormat('vi-VN', {
                         day: '2-digit', month: '2-digit', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
                       }).format(new Date(e.created_at))
                     : e.transaction_date;
 
@@ -400,7 +401,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
               <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
                   {editingEntry
-                    ? `Chỉnh Sửa Phiếu [${editingEntry.code}]`
+                    ? `Chỉnh Sửa Phiếu`
                     : txType === 'income' ? 'Lập Phiếu Thu Quỹ' : 'Lập Phiếu Chi Quỹ'
                   }
                 </h3>

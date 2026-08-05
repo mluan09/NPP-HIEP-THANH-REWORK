@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClipboardList, ChevronLeft, ChevronRight, Shield, Clock3, UserCircle2, Package, CreditCard, BookOpen, ShoppingCart, Users, BadgeInfo } from 'lucide-react';
+import { ClipboardList, ChevronLeft, ChevronRight, Shield, Clock3, UserCircle2, Package, CreditCard, BookOpen, ShoppingCart, Users, BadgeInfo, Trash2, PlusCircle, Pencil } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { getActivityLog, LOG_MAX_PAGES, LOG_PAGE_SIZE, type ActivityLogEntry } from '../lib/activityLog';
 import { supabase } from '../lib/supabase';
@@ -39,6 +39,51 @@ const categoryMeta: Record<ActivityLogEntry['category'], { label: string; icon: 
     label: 'Tài khoản',
     icon: <Shield className="w-4 h-4" />,
     badge: 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300',
+  },
+};
+
+type ActionType = 'delete' | 'create' | 'update' | 'other';
+
+const detectActionType = (action: string): ActionType => {
+  const lower = action.toLowerCase();
+  if (lower.includes('xoá') || lower.includes('xóa') || lower.includes('huỷ') || lower.includes('hủy')) return 'delete';
+  if (lower.includes('thêm') || lower.includes('tạo') || lower.includes('lập')) return 'create';
+  if (lower.includes('sửa') || lower.includes('điều chỉnh') || lower.includes('cập nhật') || lower.includes('thay đổi') || lower.includes('chỉnh sửa')) return 'update';
+  return 'other';
+};
+
+const actionTypeMeta: Record<ActionType, { label: string; icon: React.ReactNode; badge: string; border: string; bg: string; iconBg: string }> = {
+  delete: {
+    label: 'Xoá',
+    icon: <Trash2 className="w-3.5 h-3.5" />,
+    badge: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-900/50',
+    border: 'border-l-red-500',
+    bg: 'bg-red-50/60 dark:bg-red-950/20',
+    iconBg: 'bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400',
+  },
+  create: {
+    label: 'Thêm mới',
+    icon: <PlusCircle className="w-3.5 h-3.5" />,
+    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-900/50',
+    border: 'border-l-emerald-500',
+    bg: 'bg-emerald-50/60 dark:bg-emerald-950/20',
+    iconBg: 'bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+  },
+  update: {
+    label: 'Chỉnh sửa',
+    icon: <Pencil className="w-3.5 h-3.5" />,
+    badge: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-900/50',
+    border: 'border-l-amber-500',
+    bg: 'bg-amber-50/60 dark:bg-amber-950/20',
+    iconBg: 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+  },
+  other: {
+    label: 'Khác',
+    icon: <BadgeInfo className="w-3.5 h-3.5" />,
+    badge: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+    border: 'border-l-slate-400',
+    bg: 'bg-white/70 dark:bg-slate-950/40',
+    iconBg: 'bg-violet-500/10 text-violet-500',
   },
 };
 
@@ -236,17 +281,19 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
               >
                 {paginatedEntries.map((entry, index) => {
                   const meta = categoryMeta[entry.category];
+                  const actionType = detectActionType(entry.action);
+                  const actionMeta = actionTypeMeta[actionType];
                   return (
                     <motion.div
                       key={entry.id}
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.22, delay: index * 0.02 }}
-                      className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-950/40 p-4"
+                      className={`rounded-2xl border border-slate-200/70 dark:border-slate-800/70 ${actionMeta.bg} p-4 border-l-4 ${actionMeta.border}`}
                     >
                       <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
-                          <div className="w-11 h-11 rounded-2xl bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
+                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${actionMeta.iconBg}`}>
                             {meta.icon}
                           </div>
 
@@ -256,6 +303,10 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                               <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${meta.badge}`}>
                                 {meta.icon}
                                 <span>{meta.label}</span>
+                              </span>
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${actionMeta.badge}`}>
+                                {actionMeta.icon}
+                                <span>{actionMeta.label}</span>
                               </span>
                             </div>
 
@@ -274,7 +325,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                             </div>
 
                             {entry.detail && (
-                              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 break-words">
+                              <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 break-words bg-slate-100/80 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
                                 {entry.detail}
                               </p>
                             )}

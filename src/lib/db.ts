@@ -239,8 +239,9 @@ export const upsertCashbookEntry = async (entry: CashbookEntry) => {
 };
 
 export const deleteCashbookEntry = async (id: string) => {
-  const { error } = await supabase.from('cashbook').delete().eq('id', id);
+  const { data, error } = await supabase.from('cashbook').delete().eq('id', id).select('id');
   if (error) throw error;
+  if (!data || data.length === 0) throw new Error('Không thể xóa phiếu: không có quyền hoặc bản ghi không tồn tại');
 };
 
 // ─── Lock/Unlock account ───────────────────────────────────────────────────
