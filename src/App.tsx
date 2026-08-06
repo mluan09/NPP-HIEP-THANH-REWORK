@@ -329,6 +329,8 @@ function AppInner() {
                         setInventory={setInventory}
                         debts={debts}
                         setDebts={setDebts}
+                        cashbook={cashbook}
+                        setCashbook={setCashbook}
                         currentUser={currentUser}
                       />
                     }

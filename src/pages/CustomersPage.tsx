@@ -17,7 +17,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 import type { Customer, Sale, SaleItem, InventoryItem, Debt, Profile } from '../lib/db';
-import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt, deleteDebtsByCustomer, deleteSalesByCustomer, deleteSaleItemsBySaleIds, upsertSale, upsertInventory } from '../lib/db';
+import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt, deleteDebtsByCustomer, deleteSalesByCustomer, deleteSaleItemsBySaleIds, upsertSale, upsertInventory, upsertCashbookEntry } from '../lib/db';
+import type { CashbookEntry } from '../lib/db';
 import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -34,6 +35,8 @@ interface CustomersPageProps {
   setInventory: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
   debts: Debt[];
   setDebts: React.Dispatch<React.SetStateAction<Debt[]>>;
+  cashbook: CashbookEntry[];
+  setCashbook: React.Dispatch<React.SetStateAction<CashbookEntry[]>>;
   currentUser: Profile;
 }
 
@@ -48,6 +51,8 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
   setInventory,
   debts,
   setDebts,
+  cashbook: _cashbook,
+  setCashbook,
   currentUser
 }) => {
   const { modalState, showAlert, showConfirm } = useModal();
@@ -177,10 +182,35 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             }
           }
 
-          // 3. Xoá nợ liên quan
+          // 3. Tính số tiền khách đã trả = total_revenue - remaining_debt
+          const saleDebt = debts.find(d => d.sale_id === sale.id);
+          const remainingDebt = saleDebt ? saleDebt.remaining_debt : 0;
+          const paidAmount = sale.total_revenue - remainingDebt;
+
+          // 4. Xoá nợ liên quan
           await deleteDebt(sale.id);
 
-          // 4. Cập nhật state
+          // 5. Tạo bút toán chi hoàn tiền vào sổ quỹ (nếu khách đã trả > 0)
+          if (paidAmount > 0) {
+            const now = new Date();
+            const refundEntry: CashbookEntry = {
+              id: `cb-refund-${Date.now()}`,
+              code: `HT-${Date.now()}`,
+              transaction_date: now.toISOString().split('T')[0],
+              description: `Hoàn tiền thu hồi đơn hàng - ${selectedCustomer?.customer_name || 'Khách hàng'} - ${productSummary}`,
+              income: 0,
+              expense_purchase: 0,
+              expense_operation: 0,
+              expense_other: paidAmount,
+              total_expense: paidAmount,
+              notes: `Thu hồi đơn ngày ${sale.sale_date}. Hoàn lại ${paidAmount.toLocaleString('vi-VN')}đ cho khách.`,
+              created_at: now.toISOString(),
+            };
+            await upsertCashbookEntry(refundEntry);
+            setCashbook(prev => [...prev, refundEntry]);
+          }
+
+          // 6. Cập nhật state
           setSales(prev => prev.map(s => s.id === sale.id ? cancelledSale : s));
           setInventory(updatedInventory);
           setDebts(prev => prev.filter(d => d.sale_id !== sale.id));
@@ -189,9 +219,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             currentUser,
             'Thu hồi đơn hàng',
             'sale',
-            `Khách: ${selectedCustomer?.customer_name || ''} | SP: ${productSummary} | Ngày: ${sale.sale_date}`
+            `Khách: ${selectedCustomer?.customer_name || ''} | SP: ${productSummary} | Hoàn tiền: ${paidAmount.toLocaleString('vi-VN')}đ | Ngày: ${sale.sale_date}`
           );
-          showToast(`Đã thu hồi đơn hàng ngày ${sale.sale_date}. Kho đã được hoàn lại.`);
+          showToast(`Đã thu hồi đơn hàng ngày ${sale.sale_date}. Hoàn ${paidAmount.toLocaleString('vi-VN')}đ vào sổ quỹ.`);
         } catch (err) {
           console.error('Thu hồi thất bại:', err);
           showAlert('Lỗi', 'Không thể thu hồi đơn hàng. Vui lòng thử lại.', 'danger');

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClipboardList, ChevronLeft, ChevronRight, Shield, Clock3, UserCircle2, Package, CreditCard, BookOpen, ShoppingCart, Users, BadgeInfo, Trash2, PlusCircle, Pencil } from 'lucide-react';
+import { ClipboardList, ChevronLeft, ChevronRight, Shield, Clock3, UserCircle2, Package, CreditCard, BookOpen, ShoppingCart, Users, BadgeInfo, Trash2, PlusCircle, Pencil, RotateCcw } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { getActivityLog, LOG_MAX_PAGES, LOG_PAGE_SIZE, type ActivityLogEntry } from '../lib/activityLog';
 import { supabase } from '../lib/supabase';
@@ -42,10 +42,11 @@ const categoryMeta: Record<ActivityLogEntry['category'], { label: string; icon: 
   },
 };
 
-type ActionType = 'delete' | 'create' | 'update' | 'other';
+type ActionType = 'delete' | 'create' | 'update' | 'recall' | 'other';
 
 const detectActionType = (action: string): ActionType => {
   const lower = action.toLowerCase();
+  if (lower.includes('thu hồi')) return 'recall';
   if (lower.includes('xoá') || lower.includes('xóa') || lower.includes('huỷ') || lower.includes('hủy')) return 'delete';
   if (lower.includes('thêm') || lower.includes('tạo') || lower.includes('lập')) return 'create';
   if (lower.includes('sửa') || lower.includes('điều chỉnh') || lower.includes('cập nhật') || lower.includes('thay đổi') || lower.includes('chỉnh sửa')) return 'update';
@@ -76,6 +77,14 @@ const actionTypeMeta: Record<ActionType, { label: string; icon: React.ReactNode;
     border: 'border-l-amber-500',
     bg: 'bg-amber-50/60 dark:bg-amber-950/20',
     iconBg: 'bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+  },
+  recall: {
+    label: 'Thu hồi',
+    icon: <RotateCcw className="w-3.5 h-3.5" />,
+    badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300 ring-1 ring-yellow-200 dark:ring-yellow-900/50',
+    border: 'border-l-yellow-500',
+    bg: 'bg-yellow-50/60 dark:bg-yellow-950/20',
+    iconBg: 'bg-yellow-500/15 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400',
   },
   other: {
     label: 'Khác',
