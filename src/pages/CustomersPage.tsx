@@ -13,10 +13,11 @@ import {
   ShoppingBag,
   CreditCard,
   CheckCircle2,
-  Clock
+  Clock,
+  RotateCcw
 } from 'lucide-react';
 import type { Customer, Sale, SaleItem, InventoryItem, Debt, Profile } from '../lib/db';
-import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt, deleteDebtsByCustomer, deleteSalesByCustomer, deleteSaleItemsBySaleIds } from '../lib/db';
+import { upsertCustomer, deleteCustomer, deleteSale, deleteSaleItem, deleteDebt, deleteDebtsByCustomer, deleteSalesByCustomer, deleteSaleItemsBySaleIds, upsertSale, upsertInventory } from '../lib/db';
 import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -30,6 +31,7 @@ interface CustomersPageProps {
   saleItems: SaleItem[];
   setSaleItems: React.Dispatch<React.SetStateAction<SaleItem[]>>;
   inventory: InventoryItem[];
+  setInventory: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
   debts: Debt[];
   setDebts: React.Dispatch<React.SetStateAction<Debt[]>>;
   currentUser: Profile;
@@ -43,6 +45,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
   saleItems,
   setSaleItems,
   inventory,
+  setInventory,
   debts,
   setDebts,
   currentUser
@@ -140,6 +143,61 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
         }
       },
       { type: 'danger', confirmText: 'Xóa khách hàng', cancelText: 'Hủy' }
+    );
+  };
+
+  // Thu hồi đơn hàng: CANCELLED, hoàn kho, xoá nợ
+  const handleRecallSale = (sale: Sale) => {
+    if (sale.status === 'CANCELLED') {
+      showAlert('Đã thu hồi', 'Đơn hàng này đã được thu hồi trước đó.', 'warning');
+      return;
+    }
+    const productSummary = getProductsForSale(sale.id);
+    const items = saleItems.filter(si => si.sale_id === sale.id);
+    showConfirm(
+      'Xác nhận thu hồi đơn hàng',
+      `Thu hồi đơn hàng ngày ${sale.sale_date}?\n\nSản phẩm: ${productSummary}\nTổng giá trị: ${sale.total_revenue.toLocaleString('vi-VN')}đ\n\nSố lượng sẽ được hoàn lại kho. Công nợ liên quan sẽ bị xoá.`,
+      async () => {
+        try {
+          // 1. Cập nhật sale → CANCELLED
+          const cancelledSale: Sale = { ...sale, status: 'CANCELLED', total_revenue: 0, total_cost: 0, profit: 0 };
+          await upsertSale(cancelledSale);
+
+          // 2. Hoàn kho: giảm export_qty cho từng sản phẩm
+          const updatedInventory = [...inventory];
+          for (const item of items) {
+            const idx = updatedInventory.findIndex(p => p.id === item.product_id);
+            if (idx !== -1) {
+              const updated = {
+                ...updatedInventory[idx],
+                export_qty: Math.max(0, updatedInventory[idx].export_qty - item.quantity),
+              };
+              await upsertInventory(updated);
+              updatedInventory[idx] = updated;
+            }
+          }
+
+          // 3. Xoá nợ liên quan
+          await deleteDebt(sale.id);
+
+          // 4. Cập nhật state
+          setSales(prev => prev.map(s => s.id === sale.id ? cancelledSale : s));
+          setInventory(updatedInventory);
+          setDebts(prev => prev.filter(d => d.sale_id !== sale.id));
+
+          logActivity(
+            currentUser,
+            'Thu hồi đơn hàng',
+            'sale',
+            `Khách: ${selectedCustomer?.customer_name || ''} | SP: ${productSummary} | Ngày: ${sale.sale_date}`
+          );
+          showToast(`Đã thu hồi đơn hàng ngày ${sale.sale_date}. Kho đã được hoàn lại.`);
+        } catch (err) {
+          console.error('Thu hồi thất bại:', err);
+          showAlert('Lỗi', 'Không thể thu hồi đơn hàng. Vui lòng thử lại.', 'danger');
+        }
+      },
+      { type: 'danger', confirmText: 'Thu hồi đơn hàng', cancelText: 'Huỷ' }
     );
   };
 
@@ -609,14 +667,17 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                       <th className="p-2.5 font-bold text-right">Số nợ</th>
                       <th className="p-2.5 font-bold text-right">Tổng thanh toán</th>
                       {canEdit && (
-                        <th className="p-2.5 font-bold text-center">Hành động</th>
+                        <th className="p-2.5 font-bold text-center">Thu hồi</th>
+                      )}
+                      {canEdit && (
+                        <th className="p-2.5 font-bold text-center">Xoá log</th>
                       )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {details.salesList.length === 0 ? (
                       <tr>
-                        <td colSpan={canEdit ? 6 : 5} className="p-6 text-center text-slate-400">
+                        <td colSpan={canEdit ? 7 : 5} className="p-6 text-center text-slate-400">
                           Chưa phát sinh giao dịch nào
                         </td>
                       </tr>
@@ -651,6 +712,23 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                             <td className="p-2.5 text-right font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                               {sale.total_revenue.toLocaleString('vi-VN')}đ
                             </td>
+                            {canEdit && (
+                              <td className="p-2.5 text-center">
+                                {sale.status !== 'CANCELLED' ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRecallSale(sale)}
+                                    className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/20 dark:text-amber-400 dark:hover:bg-amber-950/40 cursor-pointer transition-colors text-[10px] font-bold"
+                                    title="Thu hồi đơn hàng (hoàn kho, xoá nợ)"
+                                  >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Thu hồi</span>
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px] text-slate-400 italic">Đã thu hồi</span>
+                                )}
+                              </td>
+                            )}
                             {canEdit && (
                               <td className="p-2.5 text-center">
                                 <button

@@ -23,7 +23,7 @@ const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage').then((modul
 function PageLoader() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3 text-slate-500 dark:text-slate-400">
+      <div className="flex flex-col items-center gap-3 text-slate-500dark:text-slate-400">
         <div className="w-9 h-9 rounded-full border-2 border-amber-500/30 border-t-amber-500 animate-spin" />
         <span className="text-sm font-medium">Đang tải trang...</span>
       </div>
@@ -43,7 +43,7 @@ function AppInner() {
             <span className="text-2xl">⚠️</span>
           </div>
           <h1 className="text-lg font-bold text-red-400 mb-2">Lỗi Cấu Hình</h1>
-          <p className="text-sm text-red-300/80 mb-4">{supabaseConfigError}</p>
+          <p className="text-sm text-red-300/80mb-4">{supabaseConfigError}</p>
           <p className="text-xs text-slate-400">Liên hệ quản trị viên để khắc phục.</p>
         </div>
       </div>
@@ -189,7 +189,7 @@ function AppInner() {
     navigate('/login');
   }, [navigate, showToast]);
 
-  // ── Realtime: force-logout khi đăng nhập đồng thời ──
+  //── Realtime: force-logout khi đăng nhập đồng thời ──
   // Dùng cả Broadcast (nhanh, không cần realtime table) và postgres_changes (fallback)
   useEffect(() => {
     if (!currentUser) return;
@@ -326,6 +326,7 @@ function AppInner() {
                         saleItems={saleItems}
                         setSaleItems={setSaleItems}
                         inventory={inventory}
+                        setInventory={setInventory}
                         debts={debts}
                         setDebts={setDebts}
                         currentUser={currentUser}
