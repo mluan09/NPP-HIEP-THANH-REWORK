@@ -196,6 +196,28 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       return;
     }
 
+    const invalidPriceItems = cart.filter(item => item.sellingPrice < 1000);
+    if (invalidPriceItems.length > 0) {
+      const productNames = invalidPriceItems
+        .map(item => `• ${item.product.product_name}: ${item.sellingPrice.toLocaleString('vi-VN')}đ`)
+        .join('\n');
+      showAlert(
+        'Mệnh giá không hợp lệ',
+        `Giá bán phải từ 1.000đ trở lên. Có thể bạn đã nhập thiếu phần nghìn:\n\n${productNames}\n\nVí dụ: nhập 162.000 thay vì 162.`,
+        'warning'
+      );
+      return;
+    }
+
+    if (paidAmount > 0 && paidAmount < 1000) {
+      showAlert(
+        'Mệnh giá không hợp lệ',
+        `Tiền khách trả đang là ${paidAmount.toLocaleString('vi-VN')}đ. Vui lòng nhập từ 1.000đ trở lên; ví dụ nhập 162.000 thay vì 162.`,
+        'warning'
+      );
+      return;
+    }
+
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) return;
 

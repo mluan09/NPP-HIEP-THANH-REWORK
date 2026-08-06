@@ -135,6 +135,22 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       return;
     }
 
+    const invalidPrices: string[] = [];
+    if (costPrice > 0 && costPrice < 1000) {
+      invalidPrices.push(`Giá vốn: ${costPrice.toLocaleString('vi-VN')}đ`);
+    }
+    if (sellingPrice > 0 && sellingPrice < 1000) {
+      invalidPrices.push(`Giá bán: ${sellingPrice.toLocaleString('vi-VN')}đ`);
+    }
+    if (invalidPrices.length > 0) {
+      showAlert(
+        'Mệnh giá không hợp lệ',
+        `${invalidPrices.join('\n')}\n\nVui lòng nhập từ 1.000đ trở lên. Có thể bạn đã nhập thiếu phần nghìn; ví dụ nhập 162.000 thay vì 162.`,
+        'warning'
+      );
+      return;
+    }
+
     if (editingItem) {
       const updated: InventoryItem = {
         ...editingItem,

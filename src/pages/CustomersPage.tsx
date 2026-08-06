@@ -70,6 +70,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [addressError, setAddressError] = useState(false);
   const [notes, setNotes] = useState('');
 
   const canEdit = currentUser.role === 'owner' || currentUser.role === 'manager';
@@ -104,6 +105,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     setCustomerName('');
     setPhone('');
     setAddress('');
+    setAddressError(false);
     setNotes('');
     setIsDialogOpen(true);
   };
@@ -114,6 +116,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     setCustomerName(c.customer_name);
     setPhone(c.phone);
     setAddress(c.address);
+    setAddressError(false);
     setNotes(c.notes);
     setIsDialogOpen(true);
   };
@@ -260,6 +263,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       showAlert('Thiếu thông tin', 'Vui lòng điền tên khách hàng.', 'warning');
       return;
     }
+    if (!address.trim()) {
+      setAddressError(true);
+      return;
+    }
+    setAddressError(false);
 
     try {
       if (editingCustomer) {
@@ -551,13 +559,26 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Địa chỉ giao hàng</label>
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Địa chỉ giao hàng</label>
+                    {addressError && (
+                      <span className="text-[11px] font-semibold text-red-500">Vui lòng nhập địa chỉ</span>
+                    )}
+                  </div>
                   <textarea
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (e.target.value.trim()) setAddressError(false);
+                    }}
                     placeholder="Số nhà, tên đường, quận/huyện..."
                     rows={2}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                    aria-invalid={addressError}
+                    className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
+                      addressError
+                        ? 'border-red-500 focus:ring-2 focus:ring-red-500/30'
+                        : 'border-slate-250 dark:border-slate-800'
+                    }`}
                   />
                 </div>
 
@@ -687,9 +708,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">
                 Lịch sử giao dịch đơn hàng
               </h4>
-              <div className="flex-1 overflow-y-auto border border-slate-200/50 dark:border-slate-800/50 rounded-xl">
-                <table className="w-full text-xs text-left border-collapse">
-                  <thead className="bg-slate-50 dark:bg-slate-800/50 sticky top-0 border-b border-slate-200/50 dark:border-slate-800/50">
+              <div className="flex-1 overflow-y-auto border border-slate-200/50 dark:border-slate-800/50 rounded-xl bg-white dark:bg-slate-900">
+                <table className="w-full text-xs text-left border-collapse bg-white dark:bg-slate-900">
+                  <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
                     <tr>
                       <th className="p-2.5 font-bold">Sản phẩm mua</th>
                       <th className="p-2.5 font-bold">Ngày bán</th>
@@ -717,7 +738,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                         const saleDebt = getDebtForSale(sale.id, sale.customer_id);
 
                         return (
-                          <tr key={sale.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                          <tr key={sale.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800">
                             <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-300 max-w-[220px] align-top">
                               <div className="whitespace-normal break-words leading-relaxed">
                                 {getProductsForSale(sale.id)}
