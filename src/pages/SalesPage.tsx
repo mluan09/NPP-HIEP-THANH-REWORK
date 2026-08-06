@@ -196,27 +196,10 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       return;
     }
 
-    const invalidPriceItems = cart.filter(item => item.sellingPrice < 1000);
-    if (invalidPriceItems.length > 0) {
-      const productNames = invalidPriceItems
-        .map(item => `• ${item.product.product_name}: ${item.sellingPrice.toLocaleString('vi-VN')}đ`)
-        .join('\n');
-      showAlert(
-        'Mệnh giá không hợp lệ',
-        `Giá bán phải từ 1.000đ trở lên. Có thể bạn đã nhập thiếu phần nghìn:\n\n${productNames}\n\nVí dụ: nhập 162.000 thay vì 162.`,
-        'warning'
-      );
-      return;
-    }
+    const hasInvalidPrice = cart.some(item => item.sellingPrice > 0 && item.sellingPrice < 1000);
+    if (hasInvalidPrice) return;
 
-    if (paidAmount > 0 && paidAmount < 1000) {
-      showAlert(
-        'Mệnh giá không hợp lệ',
-        `Tiền khách trả đang là ${paidAmount.toLocaleString('vi-VN')}đ. Vui lòng nhập từ 1.000đ trở lên; ví dụ nhập 162.000 thay vì 162.`,
-        'warning'
-      );
-      return;
-    }
+    if (paidAmount > 0 && paidAmount < 1000) return;
 
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) return;
@@ -488,8 +471,15 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                           inputMode="numeric"
                           value={formatCurrencyInput(item.sellingPrice)}
                           onChange={(e) => updateCartPrice(item.product.id, parseCurrencyInput(e.target.value))}
-                          className="w-24 bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-lg px-2 py-1 text-xs text-right font-semibold focus:outline-none dark:text-slate-250"
+                          className={`w-24 bg-slate-50 dark:bg-slate-950 border rounded-lg px-2 py-1 text-xs text-right font-semibold focus:outline-none dark:text-slate-250 ${
+                            item.sellingPrice > 0 && item.sellingPrice < 1000
+                              ? 'border-red-500'
+                              : 'border-slate-250 dark:border-slate-800'
+                          }`}
                         />
+                        {item.sellingPrice > 0 && item.sellingPrice < 1000 && (
+                          <span className="text-[10px] text-red-500 font-semibold block mt-0.5 text-right">Nhập ≥ 1.000đ</span>
+                        )}
                       </td>
                       <td className="p-4 text-right font-bold text-slate-850 dark:text-slate-100">
                         {(item.quantity * item.sellingPrice).toLocaleString('vi-VN')}đ
@@ -672,8 +662,15 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                 inputMode="numeric"
                 value={formatCurrencyInput(paidAmount)}
                 onChange={(e) => setPaidAmount(parseCurrencyInput(e.target.value))}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none ${
+                  paidAmount > 0 && paidAmount < 1000
+                    ? 'border-red-500'
+                    : 'border-slate-250 dark:border-slate-850'
+                }`}
               />
+              {paidAmount > 0 && paidAmount < 1000 && (
+                <span className="text-[10px] text-red-500 font-semibold mt-0.5">Nhập ≥ 1.000đ</span>
+              )}
               <div className="flex gap-1.5 mt-1.5">
                 <button
                   type="button"

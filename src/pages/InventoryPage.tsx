@@ -135,21 +135,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       return;
     }
 
-    const invalidPrices: string[] = [];
-    if (costPrice > 0 && costPrice < 1000) {
-      invalidPrices.push(`Giá vốn: ${costPrice.toLocaleString('vi-VN')}đ`);
-    }
-    if (sellingPrice > 0 && sellingPrice < 1000) {
-      invalidPrices.push(`Giá bán: ${sellingPrice.toLocaleString('vi-VN')}đ`);
-    }
-    if (invalidPrices.length > 0) {
-      showAlert(
-        'Mệnh giá không hợp lệ',
-        `${invalidPrices.join('\n')}\n\nVui lòng nhập từ 1.000đ trở lên. Có thể bạn đã nhập thiếu phần nghìn; ví dụ nhập 162.000 thay vì 162.`,
-        'warning'
-      );
-      return;
-    }
+    if ((costPrice > 0 && costPrice < 1000) || (sellingPrice > 0 && sellingPrice < 1000)) return;
 
     if (editingItem) {
       const updated: InventoryItem = {
@@ -612,9 +598,14 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                       inputMode="numeric"
                       value={formatCurrencyInput(costPrice)}
                       onChange={(e) => setCostPrice(parseCurrencyInput(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
+                        costPrice > 0 && costPrice < 1000 ? 'border-red-500' : 'border-slate-250 dark:border-slate-800'
+                      }`}
                       required
                     />
+                    {costPrice > 0 && costPrice < 1000 && (
+                      <span className="text-[10px] text-red-500 font-semibold">Nhập ≥ 1.000đ</span>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Giá bán (đ)</label>
@@ -623,9 +614,14 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                       inputMode="numeric"
                       value={formatCurrencyInput(sellingPrice)}
                       onChange={(e) => setSellingPrice(parseCurrencyInput(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
+                        sellingPrice > 0 && sellingPrice < 1000 ? 'border-red-500' : 'border-slate-250 dark:border-slate-800'
+                      }`}
                       required
                     />
+                    {sellingPrice > 0 && sellingPrice < 1000 && (
+                      <span className="text-[10px] text-red-500 font-semibold">Nhập ≥ 1.000đ</span>
+                    )}
                   </div>
                 </div>
 
