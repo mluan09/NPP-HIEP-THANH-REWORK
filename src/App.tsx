@@ -76,7 +76,14 @@ function AppInner() {
           .select('*')
           .eq('id', session.user.id)
           .single();
-        if (profileData) setCurrentUser(profileData as Profile);
+        if (profileData) {
+          const profile = profileData as Profile;
+          if (profile.is_locked) {
+            await supabase.auth.signOut();
+          } else {
+            setCurrentUser(profile);
+          }
+        }
       }
       setAuthLoading(false);
     });
@@ -90,7 +97,14 @@ function AppInner() {
           .select('*')
           .eq('id', session.user.id)
           .single();
-        if (profileData) setCurrentUser(profileData as Profile);
+        if (profileData) {
+          const profile = profileData as Profile;
+          if (profile.is_locked) {
+            await supabase.auth.signOut();
+          } else {
+            setCurrentUser(profile);
+          }
+        }
       }
     });
 
@@ -205,8 +219,20 @@ function AppInner() {
       });
     };
 
+    const handleLockedLogout = () => {
+      if (!sessionTokenRef.current) return;
+      sessionTokenRef.current = null;
+      localStorage.removeItem('npp_session_token');
+      supabase.auth.signOut().then(() => {
+        setCurrentUser(null);
+        showToast('⚠️ Tài khoản đã bị khoá bởi quản trị viên. Bạn đã bị đăng xuất.', 'warning');
+        navigate('/login');
+      });
+    };
+
     const channel = supabase
       .channel(`session-monitor-${currentUser.id}`)
+      .on('broadcast', { event: 'account_locked' }, handleLockedLogout)
       // Broadcast: cơ chế chính — phát hiện ngay khi thiết bị kia gửi tín hiệu
       .on('broadcast', { event: 'force_logout' }, handleForcedLogout)
       // postgres_changes: fallback — khi thiết bị kia xoá session trong DB

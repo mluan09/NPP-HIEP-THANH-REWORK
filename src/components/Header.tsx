@@ -11,7 +11,7 @@ const getTabTitle = (tab: string) => {
     case 'inventory': return 'Quản Lý Kho Hàng';
     case 'customers': return 'Danh Sách Khách Hàng';
     case 'debts': return 'Quản Lý & Thu Hồi Công Nợ';
-    case 'cashbook': return 'Sổ Quỹ Thu Chi';
+    case 'cashbook': return 'Nhật Ký Thu Chi';
     case 'accounts': return 'Quản Lý Tài Khoản';
     case 'activity-log': return 'Nhật Ký Hoạt Động';
     case 'feedback': return 'Góp Ý & Báo Lỗi';

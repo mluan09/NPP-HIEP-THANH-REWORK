@@ -45,6 +45,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   const [sku, setSku] = useState('');
   const [productName, setProductName] = useState('');
   const [unit, setUnit] = useState('Thùng');
+  const [unitMenuOpen, setUnitMenuOpen] = useState(false);
   const [costPrice, setCostPrice] = useState(0);
   const [sellingPrice, setSellingPrice] = useState(0);
   const [initialStock, setInitialStock] = useState(0);
@@ -558,24 +559,68 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Đơn vị tính</label>
-                  <select
-                    value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 cursor-pointer"
-                    required
-                  >
-                    <option value="Thùng">Thùng</option>
-                    <option value="Khay">Khay</option>
-                    <option value="Két">Két</option>
-                    <option value="Chai">Chai</option>
-                    <option value="Lon">Lon</option>
-                    <option value="Thùng (12 chai)">Thùng (12 chai)</option>
-                    <option value="Thùng (24 chai)">Thùng (24 chai)</option>
-                    <option value="Thùng (24 lon)">Thùng (24 lon)</option>
-                    <option value="Thùng (24 hộp)">Thùng (24 hộp)</option>
-                    <option value="Hộp">Hộp</option>
-                    <option value="Lốc">Lốc</option>
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setUnitMenuOpen((open) => !open)}
+                      className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 cursor-pointer"
+                      aria-haspopup="listbox"
+                      aria-expanded={unitMenuOpen}
+                    >
+                      <span>{unit}</span>
+                      <motion.span
+                        animate={{ rotate: unitMenuOpen ? 180 : 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="text-slate-400"
+                      >
+                        ▾
+                      </motion.span>
+                    </button>
+                    <AnimatePresence>
+                      {unitMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                          transition={{ duration: 0.16 }}
+                          className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-800"
+                          role="listbox"
+                        >
+                          {[
+                            'Thùng',
+                            'Khay',
+                            'Két',
+                            'Chai',
+                            'Lon',
+                            'Thùng (12 chai)',
+                            'Thùng (24 chai)',
+                            'Thùng (24 lon)',
+                            'Thùng (24 hộp)',
+                            'Hộp',
+                            'Lốc',
+                          ].map((option) => (
+                            <button
+                              key={option}
+                              type="button"
+                              role="option"
+                              aria-selected={unit === option}
+                              onClick={() => {
+                                setUnit(option);
+                                setUnitMenuOpen(false);
+                              }}
+                              className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                                unit === option
+                                  ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
+                              }`}
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 <div className="space-y-1">

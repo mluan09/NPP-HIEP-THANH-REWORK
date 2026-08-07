@@ -251,6 +251,36 @@ export const lockProfile = async (userId: string, reason = 'Đăng nhập đồn
     .update({ is_locked: true, concurrent_attempts: 0 })
     .eq('id', userId);
   if (error) throw error;
+
+  // Broadcast trước khi xoá session để thiết bị đang mở nhận đúng lý do.
+  try {
+    const channel = supabase.channel(`session-monitor-${userId}`);
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
+
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channel
+            .send({
+              type: 'broadcast',
+              event: 'account_locked',
+              payload: { reason: 'account_locked' },
+            })
+            .finally(finish);
+        }
+      });
+      window.setTimeout(finish, 2000);
+    });
+    await supabase.removeChannel(channel);
+  } catch {
+    // Xoá session bên dưới vẫn giữ làm fallback.
+  }
+
   // Xoá tất cả sessions của user bị khoá
   await supabase.from('user_sessions').delete().eq('user_id', userId);
   console.info(`Profile ${userId} locked: ${reason}`);
