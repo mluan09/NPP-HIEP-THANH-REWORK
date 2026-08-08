@@ -11,12 +11,13 @@ import {
   ShieldAlert,
   X,
   Edit3,
-  Trash2
+  Trash2,
+  ShoppingCart
 } from 'lucide-react';
 import { generateCashbookCode, upsertCashbookEntry, deleteCashbookEntry } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import { logActivity } from '../lib/activityLog';
-import type { CashbookEntry, Profile } from '../lib/db';
+import type { CashbookEntry, Customer, InventoryItem, Profile, Sale, SaleItem } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
@@ -24,19 +25,29 @@ import { useToast } from '../components/Toast';
 interface CashbookPageProps {
   cashbook: CashbookEntry[];
   setCashbook: React.Dispatch<React.SetStateAction<CashbookEntry[]>>;
+  sales: Sale[];
+  saleItems: SaleItem[];
+  customers: Customer[];
+  inventory: InventoryItem[];
+  profiles: Profile[];
   currentUser: Profile;
 }
 
 export const CashbookPage: React.FC<CashbookPageProps> = ({
   cashbook,
   setCashbook,
+  sales,
+  saleItems,
+  customers,
+  inventory,
+  profiles,
   currentUser
 }) => {
   const { modalState, showAlert, showConfirm } = useModal();
   const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense' | 'sales'>('all');
 
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -74,6 +85,32 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   const expensePurchase = cashbook.reduce((sum, e) => sum + e.expense_purchase, 0);
   const expenseOperation = cashbook.reduce((sum, e) => sum + e.expense_operation, 0);
   const expenseOther = cashbook.reduce((sum, e) => sum + e.expense_other, 0);
+
+  const salesRows = sales
+    .filter(sale => sale.status !== 'CANCELLED')
+    .flatMap(sale => {
+      const customer = customers.find(c => c.id === sale.customer_id);
+      const seller = profiles.find(p => p.id === sale.seller_id);
+      return saleItems
+        .filter(item => item.sale_id === sale.id)
+        .map(item => {
+          const product = inventory.find(i => i.id === item.product_id);
+          return {
+            id: item.id,
+            sellerName: seller?.full_name || '---',
+            saleDate: sale.sale_date,
+            customerName: customer?.customer_name || '---',
+            customerAddress: customer?.address || '---',
+            productName: product?.product_name || '---',
+            quantity: item.quantity,
+            sellingPrice: item.selling_price,
+            subtotalRevenue: item.subtotal_revenue,
+            subtotalCost: item.subtotal_cost,
+            netProfit: item.subtotal_revenue - item.subtotal_cost,
+          };
+        });
+    })
+    .sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
 
   // Filter transactions
   const filteredEntries = cashbook.filter(entry => {
@@ -273,6 +310,15 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
           >
             Phiếu Chi
           </button>
+          <button
+            onClick={() => setFilterType('sales')}
+            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
+              ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400 scale-[1.02]'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+              }`}
+          >
+            Bán Hàng
+          </button>
         </div>
 
         {/* Buttons */}
@@ -294,8 +340,84 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         </div>
       </div>
 
-      {/* Ledger Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden">
+      <AnimatePresence mode="wait">
+        {filterType === 'sales' ? (
+          <motion.div
+            key="sales-detail"
+            initial={{ opacity: 0, y: 14, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: 'easeOut' }}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden"
+          >
+            <div className="p-4 border-b border-slate-150 dark:border-slate-800 flex items-center gap-2">
+              <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                <ShoppingCart className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Chi tiết bán hàng hằng ngày</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Theo từng sản phẩm trong đơn hàng</p>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/55">
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">STT</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">CTV bán hàng</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Ngày bán hàng</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Khách hàng</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Địa chỉ khách hàng</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên sản phẩm</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Giá bán</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Thành tiền</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Thành tiền giá vốn</th>
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Lợi nhuận ròng</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-150 dark:divide-slate-800/60">
+                  {salesRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="p-8 text-center text-slate-400 text-sm">
+                        Chưa có dữ liệu bán hàng
+                      </td>
+                    </tr>
+                  ) : (
+                    salesRows.map((row, idx) => (
+                      <tr key={row.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10 transition-colors">
+                        <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-300">{idx + 1}</td>
+                        <td className="p-4 text-sm font-semibold text-slate-700 dark:text-slate-300">{row.sellerName}</td>
+                        <td className="p-4 text-sm text-slate-500 dark:text-slate-400">
+                          {new Intl.DateTimeFormat('vi-VN').format(new Date(row.saleDate))}
+                        </td>
+                        <td className="p-4 text-sm font-semibold text-slate-800 dark:text-slate-200">{row.customerName}</td>
+                        <td className="p-4 text-sm text-slate-500 dark:text-slate-400 min-w-52">{row.customerAddress}</td>
+                        <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100 min-w-48">
+                          {row.productName}
+                          <div className="text-[10px] text-slate-400 font-semibold">SL: {row.quantity.toLocaleString('vi-VN')}</div>
+                        </td>
+                        <td className="p-4 text-sm font-bold text-emerald-600 dark:text-emerald-400 text-right">{row.sellingPrice.toLocaleString('vi-VN')}đ</td>
+                        <td className="p-4 text-sm font-bold text-emerald-600 dark:text-emerald-400 text-right">{row.subtotalRevenue.toLocaleString('vi-VN')}đ</td>
+                        <td className="p-4 text-sm font-bold text-rose-600 dark:text-rose-400 text-right">{row.subtotalCost.toLocaleString('vi-VN')}đ</td>
+                        <td className={`p-4 text-sm font-extrabold text-right ${row.netProfit >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {row.netProfit.toLocaleString('vi-VN')}đ
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="cashbook-ledger"
+            initial={{ opacity: 0, y: 14, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: 'easeOut' }}
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden"
+          >
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -378,7 +500,9 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             </tbody>
           </table>
         </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Write Receipt / Payment Voucher Modal Dialog */}
       <AnimatePresence>

@@ -385,6 +385,11 @@ function AppInner() {
                       <CashbookPage
                         cashbook={cashbook}
                         setCashbook={setCashbook}
+                        sales={sales}
+                        saleItems={saleItems}
+                        customers={customers}
+                        inventory={inventory}
+                        profiles={profiles}
                         currentUser={currentUser}
                       />
                     }
