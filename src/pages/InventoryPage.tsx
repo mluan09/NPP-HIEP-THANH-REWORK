@@ -228,12 +228,29 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         defval: ''
       });
 
+      const headerKeywords = ['stt', 'tên hàng', 'tên hàng hoá', 'tên hàng hóa', 'đvt', 'đơn vị', 'đơn giá', 'tồn đầu', 'nhập trong', 'xuất trong', 'tồn cuối', 'sl', 'lần 1', 'lần 2', 'lần 3', 'thành tiền'];
+      const isHeaderRow = (row: any[]) => {
+        const cellText = String(row[1] ?? '').trim().toLocaleLowerCase('vi-VN');
+        return !cellText || headerKeywords.some(kw => cellText.includes(kw));
+      };
+
+      let validIdx = 0;
       const parsed = rows
-        .slice(2)
-        .filter(row => row[1])
-        .map((row, idx) => {
+        .slice(1)
+        .filter(row => {
+          if (!row[1]) return false;
+          if (isHeaderRow(row)) return false;
+          const name = String(row[1]).trim();
+          if (name.length < 2) return false;
+          return true;
+        })
+        .map((row) => {
           const existing = inventory.find(item => item.product_name.trim().toLowerCase() === String(row[1]).trim().toLowerCase());
           const sellingPrice = parseExcelNumber(row[3]);
+          const importTotal = parseExcelNumber(row[6]) + parseExcelNumber(row[7]) + parseExcelNumber(row[8]);
+          const exportTotal = parseExcelNumber(row[11]);
+          const initialStock = parseExcelNumber(row[4]);
+          const idx = validIdx++;
           return {
             id: existing?.id || `p-import-${Date.now()}-${idx}`,
             sku: existing?.sku || `SP-${String(inventory.length + idx + 1).padStart(4, '0')}`,
@@ -241,9 +258,9 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             unit: String(row[2] || 'Thùng').trim(),
             cost_price: sellingPrice,
             selling_price: sellingPrice,
-            initial_stock: parseExcelNumber(row[4]),
-            import_qty: parseExcelNumber(row[6]) + parseExcelNumber(row[7]) + parseExcelNumber(row[8]),
-            export_qty: parseExcelNumber(row[11]),
+            initial_stock: initialStock,
+            import_qty: importTotal,
+            export_qty: exportTotal,
             created_at: existing?.created_at || new Date().toISOString()
           };
         });
@@ -744,9 +761,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                           <th className="p-2 font-bold">SKU</th>
                           <th className="p-2 font-bold">Tên sản phẩm</th>
                           <th className="p-2 font-bold">ĐVT</th>
-                          {canSeeCost && <th className="p-2 font-bold text-right">Giá vốn</th>}
                           <th className="p-2 font-bold text-right">Giá bán</th>
                           <th className="p-2 font-bold text-center">Tồn đầu</th>
+                          <th className="p-2 font-bold text-center">Nhập</th>
+                          <th className="p-2 font-bold text-center">Xuất</th>
+                          <th className="p-2 font-bold text-center">Tồn cuối</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -755,9 +774,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                             <td className="p-2 font-semibold">{item.sku}</td>
                             <td className="p-2 font-semibold">{item.product_name}</td>
                             <td className="p-2">{item.unit}</td>
-                            {canSeeCost && <td className="p-2 text-right">{item.cost_price.toLocaleString()}đ</td>}
                             <td className="p-2 text-right">{item.selling_price.toLocaleString()}đ</td>
                             <td className="p-2 text-center">{item.initial_stock}</td>
+                            <td className="p-2 text-center text-emerald-600">+{item.import_qty}</td>
+                            <td className="p-2 text-center text-rose-600">-{item.export_qty}</td>
+                            <td className="p-2 text-center font-bold">{item.initial_stock + item.import_qty - item.export_qty}</td>
                           </tr>
                         ))}
                       </tbody>
