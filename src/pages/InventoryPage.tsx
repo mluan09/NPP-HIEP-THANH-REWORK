@@ -228,34 +228,78 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         defval: ''
       });
 
+      const normalizeText = (value: unknown) => String(value ?? '').trim().toLocaleLowerCase('vi-VN');
+      const includesAny = (value: unknown, keywords: string[]) => {
+        const text = normalizeText(value);
+        return keywords.some((keyword) => text.includes(keyword));
+      };
+
       const headerKeywords = ['stt', 'tên hàng', 'tên hàng hoá', 'tên hàng hóa', 'đvt', 'đơn vị', 'đơn giá', 'tồn đầu', 'nhập trong', 'xuất trong', 'tồn cuối', 'sl', 'lần 1', 'lần 2', 'lần 3', 'thành tiền'];
       const isHeaderRow = (row: any[]) => {
-        const cellText = String(row[1] ?? '').trim().toLocaleLowerCase('vi-VN');
-        return !cellText || headerKeywords.some(kw => cellText.includes(kw));
+        const rowText = row.map(normalizeText).join(' ');
+        const productCellText = normalizeText(row[1]);
+        return !productCellText || headerKeywords.some(kw => rowText.includes(kw));
+      };
+
+      const headerRows = rows.slice(0, 8);
+      const findColumn = (keywords: string[], fallback: number) => {
+        for (const row of headerRows) {
+          const index = row.findIndex((cell) => includesAny(cell, keywords));
+          if (index >= 0) return index;
+        }
+        return fallback;
+      };
+
+      const productNameCol = findColumn(['tên hàng hoá', 'tên hàng hóa', 'tên sản phẩm', 'tên hàng'], 1);
+      const unitCol = findColumn(['đvt', 'đơn vị'], 2);
+      const priceCol = findColumn(['đơn giá', 'giá bán'], 3);
+
+      const getGroupText = (col: number) => headerRows
+        .map((row) => row.slice(Math.max(0, col - 2), col + 1).map(normalizeText).join(' '))
+        .join(' ');
+
+      const slColumns = headerRows.reduce<number[]>((cols, row) => {
+        row.forEach((cell, col) => {
+          const text = normalizeText(cell);
+          if ((text === 'sl' || text.includes('số lượng')) && !cols.includes(col)) {
+            cols.push(col);
+          }
+        });
+        return cols;
+      }, []);
+
+      const initialStockCols = slColumns.filter((col) => includesAny(getGroupText(col), ['tồn đầu']));
+      const importQtyCols = slColumns.filter((col) => includesAny(getGroupText(col), ['nhập trong', 'nhập']));
+      const exportQtyCols = slColumns.filter((col) => includesAny(getGroupText(col), ['xuất trong', 'xuất']));
+
+      const sumColumns = (row: any[], cols: number[], fallbackCols: number[]) => {
+        const targetCols = cols.length > 0 ? cols : fallbackCols;
+        return targetCols.reduce((sum, col) => sum + parseExcelNumber(row[col]), 0);
       };
 
       let validIdx = 0;
       const parsed = rows
         .slice(1)
         .filter(row => {
-          if (!row[1]) return false;
+          if (!row[productNameCol]) return false;
           if (isHeaderRow(row)) return false;
-          const name = String(row[1]).trim();
+          const name = String(row[productNameCol]).trim();
           if (name.length < 2) return false;
           return true;
         })
         .map((row) => {
-          const existing = inventory.find(item => item.product_name.trim().toLowerCase() === String(row[1]).trim().toLowerCase());
-          const sellingPrice = parseExcelNumber(row[3]);
-          const importTotal = parseExcelNumber(row[6]) + parseExcelNumber(row[7]) + parseExcelNumber(row[8]);
-          const exportTotal = parseExcelNumber(row[11]);
-          const initialStock = parseExcelNumber(row[4]);
+          const productName = String(row[productNameCol]).trim();
+          const existing = inventory.find(item => item.product_name.trim().toLowerCase() === productName.toLowerCase());
+          const sellingPrice = parseExcelNumber(row[priceCol]);
+          const initialStock = sumColumns(row, initialStockCols, [4]);
+          const importTotal = sumColumns(row, importQtyCols, [6, 7, 8]);
+          const exportTotal = sumColumns(row, exportQtyCols, [10]);
           const idx = validIdx++;
           return {
             id: existing?.id || `p-import-${Date.now()}-${idx}`,
             sku: existing?.sku || `SP-${String(inventory.length + idx + 1).padStart(4, '0')}`,
-            product_name: String(row[1]).trim(),
-            unit: String(row[2] || 'Thùng').trim(),
+            product_name: productName,
+            unit: String(row[unitCol] || existing?.unit || 'Thùng').trim(),
             cost_price: sellingPrice,
             selling_price: sellingPrice,
             initial_stock: initialStock,
@@ -279,17 +323,32 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   const handleConfirmImport = () => {
     if (importPreview.length === 0) return;
     
-    // Merge into inventory (check duplicates)
     setInventory(prev => {
-      const existingSkus = new Set(prev.map(p => p.sku));
-      const newItems = importPreview.filter(p => !existingSkus.has(p.sku));
-      
-      if (newItems.length < importPreview.length) {
-        showAlert('Thông báo Import', `Đã bỏ qua ${importPreview.length - newItems.length} sản phẩm bị trùng SKU trong hệ thống.`, 'info');
-      }
-      newItems.forEach(item => upsertInventory(item).catch(console.error));
-      showToast(`Import thành công ${newItems.length} sản phẩm`);
-      return [...newItems, ...prev];
+      const previewByName = new Map(importPreview.map(item => [item.product_name.trim().toLowerCase(), item]));
+      const updatedExisting = prev.map(item => {
+        const imported = previewByName.get(item.product_name.trim().toLowerCase());
+        if (!imported) return item;
+        previewByName.delete(item.product_name.trim().toLowerCase());
+        return {
+          ...item,
+          unit: imported.unit,
+          cost_price: imported.cost_price,
+          selling_price: imported.selling_price,
+          initial_stock: imported.initial_stock,
+          import_qty: imported.import_qty,
+          export_qty: imported.export_qty
+        };
+      });
+      const newItems = Array.from(previewByName.values());
+      const nextInventory = [...newItems, ...updatedExisting];
+
+      nextInventory
+        .filter(item => importPreview.some(imported => imported.product_name.trim().toLowerCase() === item.product_name.trim().toLowerCase()))
+        .forEach(item => upsertInventory(item).catch(console.error));
+
+      const overwrittenCount = importPreview.length - newItems.length;
+      showToast(`Import thành công ${importPreview.length} sản phẩm (${overwrittenCount} ghi đè, ${newItems.length} thêm mới)`);
+      return nextInventory;
     });
 
     logActivity(currentUser, 'Import kho hàng', 'inventory', `${importPreview.length} sản phẩm`);
