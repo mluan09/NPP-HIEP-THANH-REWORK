@@ -12,7 +12,8 @@ import {
   X,
   Edit3,
   Trash2,
-  ShoppingCart
+  ShoppingCart,
+  Calendar
 } from 'lucide-react';
 import { generateCashbookCode, upsertCashbookEntry, deleteCashbookEntry } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
@@ -47,7 +48,11 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense' | 'sales'>('all');
+  const [filterType, setFilterType] = useState<'income' | 'expense' | 'sales'>('income');
+
+  // Date filter state
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,8 +91,18 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   const expenseOperation = cashbook.reduce((sum, e) => sum + e.expense_operation, 0);
   const expenseOther = cashbook.reduce((sum, e) => sum + e.expense_other, 0);
 
+  // Helper: check if a date string falls within the selected date range
+  const isInDateRange = (dateStr: string) => {
+    if (!dateFrom && !dateTo) return true;
+    const d = dateStr.slice(0, 10); // 'YYYY-MM-DD'
+    if (dateFrom && d < dateFrom) return false;
+    if (dateTo && d > dateTo) return false;
+    return true;
+  };
+
   const salesRows = sales
     .filter(sale => sale.status !== 'CANCELLED')
+    .filter(sale => isInDateRange(sale.sale_date))
     .flatMap(sale => {
       const customer = customers.find(c => c.id === sale.customer_id);
       const seller = profiles.find(p => p.id === sale.seller_id);
@@ -112,11 +127,20 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
     })
     .sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
 
-  // Filter transactions
+  // Sales totals for summary cards
+  const totalSalesRevenue = salesRows.reduce((sum, r) => sum + r.subtotalRevenue, 0);
+  const totalSalesCost = salesRows.reduce((sum, r) => sum + r.subtotalCost, 0);
+  const totalSalesProfit = salesRows.reduce((sum, r) => sum + r.netProfit, 0);
+
+  // Filter transactions (with date range)
   const filteredEntries = cashbook.filter(entry => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = entry.description.toLowerCase().includes(term) ||
       (entry.notes || '').toLowerCase().includes(term);
+
+    // Date range filter
+    const entryDate = (entry.transaction_date || entry.created_at || '').slice(0, 10);
+    if (!isInDateRange(entryDate)) return false;
 
     if (filterType === 'income') {
       return matchesSearch && entry.income > 0;
@@ -225,6 +249,11 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
     setIsDialogOpen(false);
   };
 
+  const clearDateFilter = () => {
+    setDateFrom('');
+    setDateTo('');
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -269,74 +298,100 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-        <div className="relative w-full md:w-72">
-          <input
-            type="text"
-            placeholder="Tìm theo lý do, ghi chú..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
-          />
-          <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-4">
+        {/* Row 1: Search + Filters + Buttons */}
+        <div className="flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative w-full md:w-72">
+            <input
+              type="text"
+              placeholder="Tìm theo lý do, ghi chú..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+            />
+            <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+          </div>
+
+          {/* Filters - no "Tất cả quỹ" */}
+          <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl w-full md:w-auto">
+            <button
+              onClick={() => { setFilterType('income'); clearDateFilter(); }}
+              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'income'
+                ? 'bg-white dark:bg-slate-800 shadow-sm text-emerald-600 dark:text-emerald-450 scale-[1.02]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                }`}
+            >
+              Phiếu Thu
+            </button>
+            <button
+              onClick={() => { setFilterType('expense'); clearDateFilter(); }}
+              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'expense'
+                ? 'bg-white dark:bg-slate-800 shadow-sm text-rose-650 dark:text-rose-400 scale-[1.02]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                }`}
+            >
+              Phiếu Chi
+            </button>
+            <button
+              onClick={() => { setFilterType('sales'); clearDateFilter(); }}
+              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
+                ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400 scale-[1.02]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                }`}
+            >
+              Bán Hàng
+            </button>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2 w-full md:w-auto md:ml-auto">
+            <button
+              onClick={() => openAddDialog('income')}
+              className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Lập Phiếu Thu</span>
+            </button>
+            <button
+              onClick={() => openAddDialog('expense')}
+              className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Lập Phiếu Chi</span>
+            </button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl w-full md:w-auto">
-          <button
-            onClick={() => setFilterType('all')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'all'
-              ? 'bg-white dark:bg-slate-800 shadow-sm text-white font-bold scale-[1.02]'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
-              }`}
-          >
-            Tất cả quỹ
-          </button>
-          <button
-            onClick={() => setFilterType('income')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'income'
-              ? 'bg-white dark:bg-slate-800 shadow-sm text-emerald-600 dark:text-emerald-450 scale-[1.02]'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
-              }`}
-          >
-            Phiếu Thu
-          </button>
-          <button
-            onClick={() => setFilterType('expense')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'expense'
-              ? 'bg-white dark:bg-slate-800 shadow-sm text-rose-650 dark:text-rose-400 scale-[1.02]'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
-              }`}
-          >
-            Phiếu Chi
-          </button>
-          <button
-            onClick={() => setFilterType('sales')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
-              ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400 scale-[1.02]'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
-              }`}
-          >
-            Bán Hàng
-          </button>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex gap-2 w-full md:w-auto md:ml-auto">
-          <button
-            onClick={() => openAddDialog('income')}
-            className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Lập Phiếu Thu</span>
-          </button>
-          <button
-            onClick={() => openAddDialog('expense')}
-            className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Lập Phiếu Chi</span>
-          </button>
+        {/* Row 2: Date Range Picker */}
+        <div className="flex flex-col md:flex-row gap-3 items-center border-t border-slate-100 dark:border-slate-800 pt-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Calendar className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider">Lọc theo ngày:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100 cursor-pointer"
+            />
+            <span className="text-xs text-slate-400 font-semibold">đến</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100 cursor-pointer"
+            />
+          </div>
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={clearDateFilter}
+              className="text-xs text-rose-500 hover:text-rose-600 font-semibold cursor-pointer flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Xóa bộ lọc ngày
+            </button>
+          )}
         </div>
       </div>
 
@@ -350,13 +405,46 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             transition={{ duration: 0.24, ease: 'easeOut' }}
             className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden"
           >
-            <div className="p-4 border-b border-slate-150 dark:border-slate-800 flex items-center gap-2">
-              <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
-                <ShoppingCart className="w-4 h-4" />
+            {/* Sales Header + Summary Totals */}
+            <div className="p-4 border-b border-slate-150 dark:border-slate-800">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                  <ShoppingCart className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Chi tiết bán hàng hằng ngày</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Theo từng sản phẩm trong đơn hàng{(dateFrom || dateTo) ? ` • ${dateFrom || '...'} → ${dateTo || '...'}` : ''}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Chi tiết bán hàng hằng ngày</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Theo từng sản phẩm trong đơn hàng</p>
+              {/* Summary totals */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-xl p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Tổng thành tiền</span>
+                  </div>
+                  <span className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
+                    {totalSalesRevenue.toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+                <div className="bg-rose-500/5 border border-rose-500/15 rounded-xl p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4 text-rose-500" />
+                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Tổng giá vốn</span>
+                  </div>
+                  <span className="text-lg font-extrabold text-rose-600 dark:text-rose-400">
+                    {totalSalesCost.toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+                <div className={`${totalSalesProfit >= 0 ? 'bg-amber-500/5 border-amber-500/15' : 'bg-rose-500/5 border-rose-500/15'} border rounded-xl p-3 flex items-center justify-between`}>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className={`w-4 h-4 ${totalSalesProfit >= 0 ? 'text-amber-500' : 'text-rose-500'}`} />
+                    <span className={`text-xs font-bold uppercase tracking-wider ${totalSalesProfit >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>Lợi nhuận ròng</span>
+                  </div>
+                  <span className={`text-lg font-extrabold ${totalSalesProfit >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                    {totalSalesProfit >= 0 ? '+' : ''}{totalSalesProfit.toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -379,7 +467,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
                   {salesRows.length === 0 ? (
                     <tr>
                       <td colSpan={10} className="p-8 text-center text-slate-400 text-sm">
-                        Chưa có dữ liệu bán hàng
+                        Chưa có dữ liệu bán hàng{(dateFrom || dateTo) ? ' trong khoảng thời gian đã chọn' : ''}
                       </td>
                     </tr>
                   ) : (
@@ -435,7 +523,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
               {filteredEntries.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-400 text-sm">
-                    Không tìm thấy giao dịch dòng tiền nào
+                    Không tìm thấy giao dịch dòng tiền nào{(dateFrom || dateTo) ? ' trong khoảng thời gian đã chọn' : ''}
                   </td>
                 </tr>
               ) : (
