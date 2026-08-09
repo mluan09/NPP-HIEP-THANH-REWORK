@@ -23,6 +23,10 @@ export default defineConfig({
             return 'vendor-icons';
           }
 
+          if (id.includes('xlsx') || id.includes('codepage') || id.includes('cfb') || id.includes('ssf')) {
+            return 'vendor-xlsx';
+          }
+
           return 'vendor';
         },
       },

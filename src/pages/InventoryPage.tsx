@@ -12,7 +12,6 @@ import {
   X,
   RefreshCw
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import type { InventoryItem, Profile } from '../lib/db';
 import { upsertInventory, deleteInventoryItem } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
@@ -205,10 +204,29 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     setImportPreview([]);
 
     try {
+      const XLSX = await import('xlsx');
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '' });
+      const reportTitle = 'báo cáo xuất nhập tồn';
+      const reportSheetName = workbook.SheetNames.find((sheetName) => {
+        const sheetRows = XLSX.utils.sheet_to_json<any[]>(workbook.Sheets[sheetName], {
+          header: 1,
+          defval: ''
+        });
+        return sheetRows.some((row) =>
+          row.some((cell) => String(cell).trim().toLocaleLowerCase('vi-VN') === reportTitle)
+        );
+      });
+
+      if (!reportSheetName) {
+        setImportError('Không tìm thấy phần "Báo Cáo Xuất Nhập Tồn" trong file Excel.');
+        return;
+      }
+
+      const rows = XLSX.utils.sheet_to_json<any[]>(workbook.Sheets[reportSheetName], {
+        header: 1,
+        defval: ''
+      });
 
       const parsed = rows
         .slice(2)
