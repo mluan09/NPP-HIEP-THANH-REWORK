@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Package, 
-  Search, 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Download, 
-  Upload, 
-  AlertTriangle, 
-  FileSpreadsheet, 
+import {
+  Package,
+  Search,
+  Plus,
+  Edit3,
+  Trash2,
+  Upload,
+  AlertTriangle,
+  FileSpreadsheet,
   X,
   RefreshCw
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { InventoryItem, Profile } from '../lib/db';
 import { upsertInventory, deleteInventoryItem } from '../lib/db';
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
@@ -54,11 +54,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
 
   // Import Simulator State
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [importText, setImportText] = useState('');
   const [importPreview, setImportPreview] = useState<any[]>([]);
   const [importError, setImportError] = useState('');
 
   const canEdit = currentUser.role === 'owner' || currentUser.role === 'manager';
+  const canImport = currentUser.role === 'owner';
   const canSeeCost = currentUser.role === 'owner' || currentUser.role === 'manager';
 
   // Get current stock
@@ -185,98 +185,59 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     }
   };
 
-  // CSV Export
-  const handleExportCSV = () => {
-    // Construct CSV content with UTF-8 support
-    let csvContent = "\uFEFF"; // Byte Order Mark for Excel UTF-8 compatibility
-    
-    // Header
-    if (canSeeCost) {
-      csvContent += "SKU,Tên sản phẩm,Đơn vị,Giá vốn,Giá bán,Tồn đầu,Nhập kho,Xuất kho,Tồn cuối\n";
-    } else {
-      csvContent += "SKU,Tên sản phẩm,Đơn vị,Giá bán,Tồn đầu,Nhập kho,Xuất kho,Tồn cuối\n";
-    }
-
-    inventory.forEach(item => {
-      const stock = getCurrentStock(item);
-      const row = canSeeCost 
-        ? `"${item.sku}","${item.product_name}","${item.unit}",${item.cost_price},${item.selling_price},${item.initial_stock},${item.import_qty},${item.export_qty},${stock}`
-        : `"${item.sku}","${item.product_name}","${item.unit}",${item.selling_price},${item.initial_stock},${item.import_qty},${item.export_qty},${stock}`;
-      csvContent += row + "\n";
-    });
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Bao_cao_kho_hang_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const parseExcelNumber = (value: unknown) => {
+    if (typeof value === 'number') return value;
+    if (value === null || value === undefined) return 0;
+    const normalized = String(value).replace(/[^\d.-]/g, '');
+    return normalized ? Number(normalized) : 0;
   };
 
-  // Import Simulator parsing
-  const handleParseImport = () => {
+  const handleImportClick = () => {
+    if (!canImport) {
+      showAlert('Chức năng đang thử nghiệm', 'Chức năng đang được thử nghiệm và sẽ hoạt động sớm.', 'info');
+      return;
+    }
+    setIsImportOpen(true);
+  };
+
+  const handleParseImportFile = async (file: File) => {
     setImportError('');
     setImportPreview([]);
 
     try {
-      // Split lines and parse CSV
-      const lines = importText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      if (lines.length < 2) {
-        setImportError('Dữ liệu trống hoặc thiếu tiêu đề cột');
-        return;
-      }
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '' });
 
-      // Simple parsing of CSV/Tab delimited format
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
-      
-      const expectedHeaders = ['sku', 'product_name', 'unit', 'cost_price', 'selling_price', 'initial_stock'];
-      const headerIndexes: Record<string, number> = {};
-
-      expectedHeaders.forEach(expected => {
-        const idx = headers.findIndex(h => h.toLowerCase() === expected || h.toLowerCase().includes(expected.replace('_', ' ')));
-        headerIndexes[expected] = idx;
-      });
-
-      if (headerIndexes['sku'] === -1 || headerIndexes['product_name'] === -1 || headerIndexes['selling_price'] === -1) {
-        setImportError('Cột tiêu đề phải chứa ít nhất: "sku", "product_name", "selling_price"');
-        return;
-      }
-
-      const rows: any[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-        if (values.length < headers.length) continue;
-
-        const rowSku = values[headerIndexes['sku']];
-        const rowName = values[headerIndexes['product_name']];
-        const rowUnit = headerIndexes['unit'] !== -1 ? values[headerIndexes['unit']] : 'Thùng';
-        const rowCost = headerIndexes['cost_price'] !== -1 ? Number(values[headerIndexes['cost_price']]) : 0;
-        const rowSell = Number(values[headerIndexes['selling_price']]);
-        const rowStock = headerIndexes['initial_stock'] !== -1 ? Number(values[headerIndexes['initial_stock']]) : 0;
-
-        if (!rowSku || !rowName || isNaN(rowSell)) {
-          throw new Error(`Dòng ${i + 1} chứa dữ liệu không hợp lệ.`);
-        }
-
-        rows.push({
-          id: `p-import-${i}-${Date.now()}`,
-          sku: rowSku,
-          product_name: rowName,
-          unit: rowUnit,
-          cost_price: isNaN(rowCost) ? 0 : rowCost,
-          selling_price: rowSell,
-          initial_stock: isNaN(rowStock) ? 0 : rowStock,
-          import_qty: 0,
-          export_qty: 0,
-          created_at: new Date().toISOString()
+      const parsed = rows
+        .slice(2)
+        .filter(row => row[1])
+        .map((row, idx) => {
+          const existing = inventory.find(item => item.product_name.trim().toLowerCase() === String(row[1]).trim().toLowerCase());
+          const sellingPrice = parseExcelNumber(row[3]);
+          return {
+            id: existing?.id || `p-import-${Date.now()}-${idx}`,
+            sku: existing?.sku || `SP-${String(inventory.length + idx + 1).padStart(4, '0')}`,
+            product_name: String(row[1]).trim(),
+            unit: String(row[2] || 'Thùng').trim(),
+            cost_price: sellingPrice,
+            selling_price: sellingPrice,
+            initial_stock: parseExcelNumber(row[4]),
+            import_qty: parseExcelNumber(row[6]) + parseExcelNumber(row[7]) + parseExcelNumber(row[8]),
+            export_qty: parseExcelNumber(row[11]),
+            created_at: existing?.created_at || new Date().toISOString()
+          };
         });
+
+      if (parsed.length === 0) {
+        setImportError('Không tìm thấy dòng sản phẩm hợp lệ trong file Excel.');
+        return;
       }
 
-      setImportPreview(rows);
+      setImportPreview(parsed);
     } catch (err: any) {
-      setImportError(err.message || 'Lỗi định dạng tệp CSV. Vui lòng kiểm tra lại.');
+      setImportError(err.message || 'Không đọc được file Excel. Vui lòng kiểm tra lại định dạng.');
     }
   };
 
@@ -296,8 +257,8 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       return [...newItems, ...prev];
     });
 
+    logActivity(currentUser, 'Import kho hàng', 'inventory', `${importPreview.length} sản phẩm`);
     setIsImportOpen(false);
-    setImportText('');
     setImportPreview([]);
   };
 
@@ -414,23 +375,13 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               <span>Thêm sản phẩm</span>
             </button>
           )}
-          {canEdit && (
-            <button
-              onClick={() => setIsImportOpen(true)}
-              className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              title="Nhập từ Excel/CSV"
-            >
-              <Upload className="w-4 h-4" />
-              <span>Import</span>
-            </button>
-          )}
           <button
-            onClick={handleExportCSV}
+            onClick={handleImportClick}
             className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-            title="Xuất Excel/CSV"
+            title="Nhập từ Excel"
           >
-            <Download className="w-4 h-4" />
-            <span>Export CSV</span>
+            <Upload className="w-4 h-4" />
+            <span>Import</span>
           </button>
         </div>
       </div>
@@ -722,7 +673,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Import CSV / Simulation Modal */}
+      {/* Import Excel Modal */}
       {isImportOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-2xl shadow-2xl flex flex-col gap-5">
@@ -743,34 +694,21 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
 
             <div className="space-y-4">
               <div className="text-xs text-slate-500 space-y-1">
-                <p>Hãy sao chép các hàng dữ liệu Excel của bạn dưới dạng CSV (ngăn cách bởi dấu phẩy) và dán vào ô bên dưới.</p>
+                <p>Upload file Excel có bảng như mẫu: STT, Tên hàng hoá, ĐVT, Đơn giá, Tồn đầu/SL, Nhập trong tháng/Lần 1-3, Xuất trong tháng/SL.</p>
                 <p className="font-semibold text-slate-700 dark:text-slate-300">
-                  Định dạng hàng tiêu chuẩn: <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-amber-600">sku, product_name, unit, cost_price, selling_price, initial_stock</code>
+                  Hệ thống tự map dữ liệu vào: Tên sản phẩm, Đơn vị, Giá bán, Tồn đầu, Nhập, Xuất.
                 </p>
               </div>
 
-              <textarea
-                value={importText}
-                onChange={(e) => setImportText(e.target.value)}
-                placeholder={`sku, product_name, unit, cost_price, selling_price, initial_stock\nSAIGON-01, Bia Sài Gòn Lager, Thùng, 250000, 275000, 100\n333-01, Bia 333 Export, Thùng, 260000, 290000, 80`}
-                rows={6}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm focus:outline-none dark:text-slate-100 font-mono"
+              <input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleParseImportFile(file);
+                }}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm focus:outline-none dark:text-slate-100"
               />
-
-              <div className="flex gap-2">
-                <button
-                  onClick={handleParseImport}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs cursor-pointer shadow-md shadow-emerald-600/10"
-                >
-                  Xem trước dữ liệu
-                </button>
-                <button
-                  onClick={() => setImportText(`sku, product_name, unit, cost_price, selling_price, initial_stock\nSAIGON-01, Bia Sài Gòn Lager, Thùng, 250000, 275000, 100\n333-01, Bia 333 Export, Thùng, 260000, 290000, 80`)}
-                  className="px-3.5 py-2 border border-slate-250 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl text-xs hover:bg-slate-50 cursor-pointer"
-                >
-                  Tải dữ liệu mẫu
-                </button>
-              </div>
 
               {importError && (
                 <div className="p-3 bg-red-100 text-red-800 rounded-xl text-xs font-semibold">
@@ -817,7 +755,6 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                 onClick={() => {
                   setIsImportOpen(false);
                   setImportPreview([]);
-                  setImportText('');
                 }}
                 className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50"
               >
