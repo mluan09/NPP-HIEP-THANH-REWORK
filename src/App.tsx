@@ -290,13 +290,13 @@ function AppInner() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 pl-68 min-h-screen flex flex-col">
+      <div className="flex-1 min-h-screen flex flex-col landscape:pl-16 lg:pl-68 portrait:pb-14">
         <Header
           activeTab={activeTab}
           currentUser={currentUser}
         />
 
-        <main className="p-8 flex-1 overflow-y-auto">
+        <main className="p-4 lg:p-8 flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

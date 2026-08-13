@@ -33,18 +33,18 @@ const roleBadge = (role: string) => {
 
 export const Header: React.FC<HeaderProps> = ({ activeTab, currentUser }) => {
   return (
-    <header className="h-16 border-b border-slate-200/50 dark:border-slate-800/50 glass-panel sticky top-0 right-0 z-20 px-8 flex items-center justify-between">
+    <header className="h-12 lg:h-16 border-b border-slate-200/50 dark:border-slate-800/50 glass-panel sticky top-0 right-0 z-20 px-4 lg:px-8 flex items-center justify-between">
       {/* Title */}
       <div>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+        <h1 className="text-base lg:text-xl font-bold text-slate-800 dark:text-slate-100 truncate max-w-[160px] sm:max-w-none">
           {getTabTitle(activeTab)}
         </h1>
       </div>
 
       {/* User Info */}
       {currentUser && (
-        <div className="flex items-center gap-3">
-          <div className="text-right">
+        <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+          <div className="hidden sm:block text-right">
             <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
               {currentUser.full_name}
             </p>
@@ -52,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, currentUser }) => {
               {roleLabel(currentUser.role)}
             </span>
           </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-inner flex-shrink-0">
             {currentUser.full_name.charAt(0)}
           </div>
         </div>
