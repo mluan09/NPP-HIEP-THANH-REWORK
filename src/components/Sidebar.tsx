@@ -70,8 +70,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* ─── Desktop / Landscape Mini Sidebar ─── */}
-      {/* hidden on portrait mobile, icon-only mini on landscape mobile, full on desktop */}
-      <aside className="hidden landscape:flex lg:flex flex-col h-screen fixed left-0 top-0 z-30 w-16 lg:w-68 glass-panel border-r border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
+      {/* hidden on portrait mobile, icon-only mini on landscape mobile (<lg), full sidebar on desktop (lg+) */}
+      <aside className="hidden landscape:max-lg:flex lg:flex flex-col h-screen fixed left-0 top-0 z-30 w-16 lg:w-68 glass-panel border-r border-slate-200/50 dark:border-slate-800/50 transition-all duration-300">
 
         {/* Brand / Logo — only on desktop */}
         <div className="hidden lg:flex p-5 border-b border-slate-200/40 dark:border-slate-800/40 flex-col items-center gap-3">

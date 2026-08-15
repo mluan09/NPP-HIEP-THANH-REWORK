@@ -290,7 +290,7 @@ function AppInner() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 min-h-screen flex flex-col landscape:pl-16 lg:pl-68 portrait:pb-14">
+      <div className="flex-1 min-h-screen flex flex-col landscape:max-lg:pl-16 lg:pl-68 portrait:max-lg:pb-14">
         <Header
           activeTab={activeTab}
           currentUser={currentUser}
