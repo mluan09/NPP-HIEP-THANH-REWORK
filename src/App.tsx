@@ -8,6 +8,8 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ToastProvider, useToast } from './components/Toast';
 import { RotateLockOverlay } from './components/RotateLockOverlay';
+import { ConfirmModal } from './components/ConfirmModal';
+import { useModal } from './hooks/useModal';
 
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
@@ -35,21 +37,6 @@ function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (supabaseConfigError) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <div className="max-w-md bg-red-950/20 border border-red-900/50 rounded-2xl p-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">⚠️</span>
-          </div>
-          <h1 className="text-lg font-bold text-red-400 mb-2">Lỗi Cấu Hình</h1>
-          <p className="text-sm text-red-300/80mb-4">{supabaseConfigError}</p>
-          <p className="text-xs text-slate-400">Liên hệ quản trị viên để khắc phục.</p>
-        </div>
-      </div>
-    );
-  }
-
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -62,8 +49,10 @@ function AppInner() {
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [touchMenuOpen, setTouchMenuOpen] = useState(false);
   const sessionTokenRef = useRef<string | null>(localStorage.getItem('npp_session_token'));
   const { showToast } = useToast();
+  const { modalState, showConfirm } = useModal();
 
   const activeTab = location.pathname.replace('/', '') || 'sales';
 
@@ -183,6 +172,10 @@ function AppInner() {
     navigate(`/${tab}`);
   };
 
+  useEffect(() => {
+    setTouchMenuOpen(false);
+  }, [location.pathname]);
+
   const handleLoginSuccess = (profile: Profile, sessionToken: string) => {
     sessionTokenRef.current = sessionToken;
     localStorage.setItem('npp_session_token', sessionToken);
@@ -202,6 +195,17 @@ function AppInner() {
     if (reason) showToast(reason);
     navigate('/login');
   }, [navigate, showToast]);
+
+  const handleLogoutRequest = useCallback(() => {
+    if (!currentUser) return;
+    setTouchMenuOpen(false);
+    showConfirm(
+      'Xác nhận đăng xuất',
+      `Bạn có chắc chắn muốn đăng xuất khỏi tài khoản [${currentUser.full_name}] không?`,
+      handleLogout,
+      { type: 'warning', confirmText: 'Đăng xuất', cancelText: 'Ở lại' }
+    );
+  }, [currentUser, handleLogout, showConfirm]);
 
   //── Realtime: force-logout khi đăng nhập đồng thời ──
   // Dùng cả Broadcast (nhanh, không cần realtime table) và postgres_changes (fallback)
@@ -246,6 +250,21 @@ function AppInner() {
     return () => { supabase.removeChannel(channel); };
   }, [currentUser, navigate, showToast]);
 
+  if (supabaseConfigError) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="max-w-md bg-red-950/20 border border-red-900/50 rounded-2xl p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h1 className="text-lg font-bold text-red-400 mb-2">Lỗi Cấu Hình</h1>
+          <p className="text-sm text-red-300/80 mb-4">{supabaseConfigError}</p>
+          <p className="text-xs text-slate-400">Liên hệ quản trị viên để khắc phục.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
@@ -287,13 +306,18 @@ function AppInner() {
       <Sidebar
         setActiveTab={handleTabChange}
         currentUser={currentUser}
-        onLogout={handleLogout}
+        onLogout={handleLogoutRequest}
       />
 
-      <div className="flex-1 min-h-screen flex flex-col landscape:max-lg:pl-16 lg:pl-68 portrait:max-lg:pb-14">
+      <div className="flex-1 min-h-screen flex flex-col lg:pl-68">
         <Header
           activeTab={activeTab}
           currentUser={currentUser}
+          touchMenuOpen={touchMenuOpen}
+          onTouchMenuToggle={() => setTouchMenuOpen((open) => !open)}
+          onTouchMenuClose={() => setTouchMenuOpen(false)}
+          onNavigate={handleTabChange}
+          onLogout={handleLogoutRequest}
         />
 
         <main className="p-4 lg:p-8 flex-1 overflow-y-auto overflow-x-hidden">
@@ -421,6 +445,8 @@ function AppInner() {
           </AnimatePresence>
         </main>
       </div>
+      <ConfirmModal {...modalState} />
+      <RotateLockOverlay isAuthenticated={Boolean(currentUser)} />
     </div>
   );
 }
@@ -429,7 +455,6 @@ function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
-        <RotateLockOverlay />
         <AppInner />
       </BrowserRouter>
     </ToastProvider>

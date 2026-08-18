@@ -155,9 +155,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-orange-600/5 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative w-full max-w-md bg-slate-900/70 backdrop-blur-2xl border border-slate-800/60 p-8 rounded-3xl shadow-2xl space-y-6">
+      <div className="relative w-full max-w-sm sm:max-w-md bg-slate-900/70 backdrop-blur-2xl border border-slate-800/60 p-5 sm:p-8 rounded-3xl shadow-2xl space-y-5 sm:space-y-6">
         <div className="flex flex-col items-center gap-4 pb-2">
-          <div className="w-28 h-28 rounded-2xl overflow-hidden border border-amber-500/20 shadow-lg shadow-amber-500/10 bg-slate-800/50 flex items-center justify-center">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-amber-500/20 shadow-lg shadow-amber-500/10 bg-slate-800/50 flex items-center justify-center">
             <img
               src="/logo-new.png"
               alt="NPP Hiệp Thành Logo"
@@ -197,7 +197,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="space-y-1.5">
             <label
               htmlFor="employee-id-input"
-              className="block text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+              className="block text-sm sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
             >
               Mã nhân viên
             </label>
@@ -216,7 +216,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder="Nhập mã nhân viên được ADMIN cấp"
                 aria-invalid={Boolean(fieldErrors.employeeId)}
                 aria-describedby={fieldErrors.employeeId ? 'employee-id-error' : undefined}
-                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 uppercase tracking-wider ${fieldErrors.employeeId
+                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-4 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 uppercase tracking-wider ${fieldErrors.employeeId
                   ? 'border-rose-500/80 focus:ring-rose-500/40 animate-[pulse_1.2s_ease-in-out_1]'
                   : 'border-slate-700/50 focus:ring-amber-500/50'
                   }`}
@@ -245,7 +245,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="space-y-1.5">
             <label
               htmlFor="password-input"
-              className="block text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+              className="block text-sm sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
             >
               Mật khẩu
             </label>
@@ -265,7 +265,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder="Nhập mật khẩu"
                 aria-invalid={Boolean(fieldErrors.password)}
                 aria-describedby={fieldErrors.password ? 'password-error' : undefined}
-                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-12 py-3 text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 ${fieldErrors.password
+                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-12 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 ${fieldErrors.password
                   ? 'border-rose-500/80 focus:ring-rose-500/40 animate-[pulse_1.2s_ease-in-out_1]'
                   : 'border-slate-700/50 focus:ring-amber-500/50'
                   }`}
@@ -317,7 +317,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3.5 sm:py-3 px-4 rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2 text-base sm:text-sm"
           >
             {isLoading ? (
               <span className="inline-block animate-spin border-2 border-white border-t-transparent rounded-full h-4 w-4" />
