@@ -239,7 +239,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
     <div className="space-y-6">
       {/* Metrics Banner */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500">
             <CreditCard className="w-6 h-6" />
           </div>
@@ -251,7 +251,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-rose-500/10 rounded-xl text-rose-600">
             <AlertCircle className="w-6 h-6" />
           </div>
@@ -263,7 +263,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
@@ -419,13 +419,13 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       {/* Collect Debt Payment Modal Dialog */}
       <AnimatePresence>
         {selectedDebt && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedDebt(null)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="fixed inset-0 bg-slate-950/90"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -450,7 +450,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
               </div>
 
               <form onSubmit={handlePayDebt} className="space-y-4">
-                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800">
+                <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
                   <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(selectedDebt.customer_id)}</p>
                   <p><span className="font-bold text-slate-700 dark:text-slate-350">Mã chứng từ nợ:</span> {selectedDebt.sale_id ? `Đơn hàng ĐH-${selectedDebt.sale_id.toUpperCase()}` : 'Khoản nợ tự do'}</p>
                   <p><span className="font-bold text-slate-700 dark:text-slate-350">Tổng số nợ gốc:</span> {selectedDebt.total_amount.toLocaleString()}đ</p>
@@ -533,13 +533,13 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       {/* Edit Debt Modal */}
       <AnimatePresence>
         {editingDebt && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setEditingDebt(null)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="fixed inset-0 bg-slate-950/90"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -562,7 +562,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
               </div>
 
               <form onSubmit={handleSaveEditDebt} className="space-y-4">
-                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800">
+                <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
                   <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(editingDebt.customer_id)}</p>
                   <p><span className="font-bold text-slate-700 dark:text-slate-350">Ngày giao dịch:</span> {getTransactionDate(editingDebt)}</p>
                 </div>

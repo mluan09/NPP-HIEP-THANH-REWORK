@@ -148,7 +148,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
   const roleBadge = (role: string) => {
     if (role === 'owner') return 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300';
     if (role === 'manager') return 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
-    return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    return 'bg-slate-800 text-slate-300';
   };
 
   const roleIconColor = (role: string) => {
@@ -295,7 +295,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 p-6"
+        className="glass-panel rounded-3xl p-6"
       >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-start gap-4">
@@ -303,7 +303,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
               <Shield className="w-6 h-6" />
             </motion.div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Quản Lý Tài Khoản</h2>
+              <h2 className="text-xl font-bold text-slate-100">Quản Lý Tài Khoản</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Chỉ tài khoản Owner có quyền tạo, chỉnh sửa và xóa tài khoản đăng nhập.</p>
             </div>
           </div>
@@ -324,14 +324,14 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.1, ease: 'easeOut' }}
-        className="glass-panel rounded-3xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden"
+        className="glass-panel overflow-hidden rounded-3xl"
       >
         <div className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}>
               <Users className="w-5 h-5 text-amber-500" />
             </motion.div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Danh sách tài khoản</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300">Danh sách tài khoản</h3>
           </div>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{profiles.length} tài khoản</span>
         </div>
@@ -345,7 +345,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20, height: 0 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/70 dark:hover:bg-slate-900/40 transition-colors"
+                className="p-4 flex items-center justify-between gap-4 hover:bg-slate-900/70 transition-colors"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <motion.div
@@ -359,7 +359,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                   </motion.div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{profile.full_name}</h4>
+                      <h4 className="truncate text-sm font-bold text-slate-100">{profile.full_name}</h4>
                       {profile.id === currentUser.id && <span className="text-[10px] font-bold text-amber-500">(bạn)</span>}
                       {profile.is_locked && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
@@ -420,8 +420,8 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       <AnimatePresence>
         {creating && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !loading && setCreating(null)} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-10">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !loading && setCreating(null)} className="fixed inset-0 bg-slate-950/90" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10">
               {/* Top Bar */}
               <div className="p-5 border-b border-emerald-500/20 bg-emerald-500/10 flex items-center gap-3.5">
                 <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-slate-900/80 shadow-inner">
@@ -477,8 +477,8 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       <AnimatePresence>
         {editing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !savingEdit && setEditing(null)} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-10">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !savingEdit && setEditing(null)} className="fixed inset-0 bg-slate-950/90" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10">
               {/* Top Bar */}
               <div className="p-5 border-b border-amber-500/20 bg-amber-500/10 flex items-center gap-3.5">
                 <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-slate-900/80 shadow-inner">

@@ -96,7 +96,7 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={showCancel && onCancel ? onCancel : onConfirm}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+          className="fixed inset-0 bg-slate-950/90"
         />
 
         {/* Modal Window */}
@@ -105,7 +105,7 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          className="relative w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl z-10"
+          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
         >
           {/* Top Bar Accent */}
           <div className={`p-4 border-b flex items-center gap-3.5 ${getHeaderBg()}`}>

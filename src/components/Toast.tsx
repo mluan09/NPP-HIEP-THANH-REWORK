@@ -76,7 +76,7 @@ const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
       onFocus={handleFocus}
       onBlur={handleBlur}
       tabIndex={0}
-      className={`flex items-center gap-3 bg-slate-900/95 text-slate-100 border shadow-xl px-4 py-3 rounded-2xl backdrop-blur-md focus:outline-none focus:ring-2 max-w-sm w-full cursor-default ${
+      className={`flex items-center gap-3 bg-slate-900 text-slate-100 border shadow-xl px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 max-w-sm w-full cursor-default ${
         toast.type === 'warning'
           ? 'border-red-500/60 shadow-red-950/40 focus:ring-red-500/50'
           : 'border-emerald-500/40 shadow-emerald-950/30 focus:ring-emerald-500/50'

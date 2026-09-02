@@ -56,7 +56,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
   if (!isVisible) return null;
 
   return (
-    <>
+    <div className="relative z-40 shrink-0">
       <button
         ref={triggerRef}
         type="button"
@@ -64,7 +64,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
         aria-expanded={isOpen}
         aria-controls="touch-menu"
         onClick={onToggle}
-        className="fixed top-2 left-3 z-40 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/70 bg-slate-900/90 text-slate-200 shadow-lg backdrop-blur-md transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/60 cursor-pointer"
+        className="touch-target flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-100 shadow-sm transition-colors hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/60 cursor-pointer"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -75,11 +75,11 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
             ref={menuRef}
             id="touch-menu"
             role="menu"
-            initial={{ opacity: 0, y: -10, scale: 0.96 }}
+            initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.96 }}
+            exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-            className="fixed top-14 left-3 z-50 w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-700/70 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl"
+            className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-xl shadow-black/30"
           >
             <nav className="space-y-1">
               {allowedItems.map((item, index) => {
@@ -122,6 +122,6 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };

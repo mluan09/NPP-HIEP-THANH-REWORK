@@ -53,20 +53,20 @@ export const FeedbackPage: React.FC = () => {
               Gửi góp ý cải thiện web hoặc báo lỗi bạn gặp phải qua Gmail hoặc SĐT Zalo của developer.
             </p>
           </div>
-          <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15">
             <MessageCircle className="w-8 h-8" />
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <section className="xl:col-span-2 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm p-6">
+        <section className="xl:col-span-2 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400">
               <Send className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Nội dung gửi developer</h3>
+              <h3 className="text-lg font-bold text-slate-100">Nội dung gửi developer</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">Nhập thông tin bên dưới rồi bấm gửi để mở Gmail trên trình duyệt với nội dung đã điền sẵn.</p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export const FeedbackPage: React.FC = () => {
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
                 feedbackType === 'gop-y'
                   ? 'border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300'
-                  : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  : 'border-slate-800 text-slate-300 hover:bg-slate-800'
               }`}
             >
               <MessageCircle className="w-5 h-5" />
@@ -90,7 +90,7 @@ export const FeedbackPage: React.FC = () => {
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
                 feedbackType === 'bao-loi'
                   ? 'border-red-500 bg-red-500/10 text-red-700 dark:text-red-300'
-                  : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                  : 'border-slate-800 text-slate-300 hover:bg-slate-800'
               }`}
             >
               <Bug className="w-5 h-5" />

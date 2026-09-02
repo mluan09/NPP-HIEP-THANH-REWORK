@@ -169,7 +169,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
           className={`group flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-all duration-300 ease-out ${
             open || hasValue
               ? 'border-amber-400/70 bg-amber-50 text-amber-700 shadow-sm shadow-amber-500/10 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300'
-              : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-amber-300 hover:text-amber-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-amber-500/40'
+              : 'border-slate-800 bg-slate-950 text-slate-300 hover:border-amber-500/40 hover:text-amber-300'
           }`}
         >
           <CalendarDays className="h-4 w-4 shrink-0" />
@@ -215,7 +215,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 420, damping: 32, mass: 0.7 }}
             style={{ transformOrigin: 'top left' }}
-            className="absolute left-0 top-full z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-xl shadow-slate-900/10 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/95 dark:shadow-black/40"
+            className="absolute left-0 top-full z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-3 shadow-xl shadow-black/40"
           >
             {/* Preset nhanh */}
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -226,7 +226,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                   onClick={preset.run}
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  className="rounded-lg bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 cursor-pointer transition-colors duration-200 hover:bg-amber-100 hover:text-amber-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-amber-500/15 dark:hover:text-amber-300"
+                  className="rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1 text-[11px] font-semibold text-slate-300 cursor-pointer transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-300"
                 >
                   {preset.label}
                 </motion.button>
@@ -252,7 +252,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: direction >= 0 ? -18 : 18 }}
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 text-xs font-bold text-slate-800 dark:text-slate-100"
+                    className="absolute inset-0 text-xs font-bold text-slate-100"
                   >
                     {MONTHS[view.month]} {view.year}
                   </motion.div>
@@ -310,7 +310,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                       } ${
                         inRange && !isSingle && key === range.end ? 'rounded-r-lg' : ''
                       } ${!inRange ? 'rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800' : ''} ${
-                        outside ? 'text-slate-300 dark:text-slate-600' : 'text-slate-700 dark:text-slate-200'
+                        outside ? 'text-slate-600' : 'text-slate-200'
                       }`}
                     >
                       {isEdge && (

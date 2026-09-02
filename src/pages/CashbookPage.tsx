@@ -71,7 +71,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
 
   if (!isAllowed) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-12 rounded-3xl text-center max-w-md mx-auto space-y-4 shadow-sm my-12">
+      <div className="bg-slate-900 border border-slate-800 p-12 rounded-3xl text-center max-w-md mx-auto space-y-4 shadow-sm my-12">
         <div className="w-16 h-16 bg-rose-500/10 text-rose-600 rounded-full flex items-center justify-center mx-auto border border-rose-500/20">
           <ShieldAlert className="w-8 h-8" />
         </div>
@@ -308,7 +308,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
               placeholder="Tìm theo lý do, ghi chú..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
             />
             <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
           </div>
@@ -318,8 +318,8 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             <button
               onClick={() => { setFilterType('income'); clearDateFilter(); }}
               className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'income'
-                ? 'bg-white dark:bg-slate-800 shadow-sm text-emerald-600 dark:text-emerald-450 scale-[1.02]'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                ? 'bg-slate-900 shadow-sm text-emerald-400 scale-[1.02]'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
             >
               Phiếu Thu
@@ -327,8 +327,8 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             <button
               onClick={() => { setFilterType('expense'); clearDateFilter(); }}
               className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'expense'
-                ? 'bg-white dark:bg-slate-800 shadow-sm text-rose-650 dark:text-rose-400 scale-[1.02]'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                ? 'bg-slate-900 shadow-sm text-rose-400 scale-[1.02]'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
             >
               Phiếu Chi
@@ -337,7 +337,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
               onClick={() => { setFilterType('sales'); clearDateFilter(); }}
               className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
                 ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400 scale-[1.02]'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/40'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
             >
               Bán Hàng
@@ -581,13 +581,13 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       {/* Write Receipt / Payment Voucher Modal Dialog */}
       <AnimatePresence>
         {isDialogOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDialogOpen(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="fixed inset-0 bg-slate-950/90"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}

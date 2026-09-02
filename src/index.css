@@ -2,13 +2,19 @@
 
 @import "tailwindcss";
 
+/* Dark mode is class-controlled and never follows the operating system theme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color-scheme: dark;
+  background-color: #0b0f19;
 }
 
-/* Luôn nền tối — không phụ thuộc prefers-color-scheme của hệ thống (điện thoại/tablet để nền trắng vẫn hiển thị đen) */
-html {
+/* Luôn nền tối — không phụ thuộc prefers-color-scheme của hệ thống */
+html,
+body,
+#root {
   background-color: #0b0f19;
   color-scheme: dark;
 }
@@ -16,13 +22,6 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0b0f19;
-  color: #f8fafc;
-}
-
-/* Dark mode overrides if needed */
-.dark body {
-  background-color: #0b0f19;
   color: #f8fafc;
 }
 
@@ -33,39 +32,31 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #0b0f19;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #334155;
   border-radius: 9999px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
 
-/* Glassmorphism card */
+/* Solid surface compatibility class for existing cards and panels. */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: #0f172a;
+  border: 1px solid #1e293b;
 }
 
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Keep all native controls aligned with forced dark mode. */
+select,
+option,
+input,
+textarea,
+button {
+  color-scheme: dark;
 }
 
 /* Smooth transitions */
@@ -76,7 +67,7 @@ body {
 /* ===== #2: Tăng tương phản phân lớp nền tối ===== */
 .dark .layer-base { background-color: #0b0f19; }
 .dark .layer-card { background-color: #0f172a; }
-.dark .layer-card-alt { background-color: rgba(15, 23, 42, 0.6); }
+.dark .layer-card-alt { background-color: #172033; }
 .dark .layer-input { background-color: #020617; }
 
 /* ===== #3: Chuẩn hóa nút ===== */
@@ -84,7 +75,7 @@ body {
   @apply bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg shadow-amber-500/20 transition-all duration-200 cursor-pointer;
 }
 .btn-secondary {
-  @apply border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 font-bold transition-colors cursor-pointer;
+  @apply border border-slate-700 text-slate-300 hover:bg-slate-800 font-bold transition-colors cursor-pointer;
 }
 .btn-danger {
   @apply bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-sm transition-colors cursor-pointer;
@@ -100,9 +91,6 @@ body {
   z-index: 10;
 }
 .table-sticky-header thead th {
-  background-color: #f8fafc;
-}
-.dark .table-sticky-header thead th {
   background-color: #0f172a;
 }
 
@@ -117,7 +105,7 @@ body {
   @apply text-rose-600 dark:text-rose-400 font-bold tabular-nums text-right;
 }
 .money-neutral {
-  @apply text-slate-800 dark:text-slate-100 font-bold tabular-nums text-right;
+  @apply text-slate-100 font-bold tabular-nums text-right;
 }
 
 /* ===== #14: Modal footer sticky ===== */
@@ -204,5 +192,15 @@ body {
   }
   .responsive-table tbody td.td-actions::before {
     display: none;
+  }
+}
+
+/* Force background on any viewport state, including OS light mode. */
+@media (prefers-color-scheme: light), (prefers-color-scheme: dark) {
+  html,
+  body,
+  #root {
+    background-color: #0b0f19;
+    color-scheme: dark;
   }
 }

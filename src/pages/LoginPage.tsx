@@ -155,7 +155,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-orange-600/5 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative w-full max-w-sm sm:max-w-md bg-slate-900/70 backdrop-blur-2xl border border-slate-800/60 p-5 sm:p-8 rounded-3xl shadow-2xl space-y-5 sm:space-y-6">
+      <div className="relative w-full max-w-sm space-y-5 rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:max-w-md sm:space-y-6 sm:p-8">
         <div className="flex flex-col items-center gap-4 pb-2">
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-amber-500/20 shadow-lg shadow-amber-500/10 bg-slate-800/50 flex items-center justify-center">
             <img
@@ -231,7 +231,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: -10, scale: 0.96 }}
                     transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-                    className="mt-2 md:absolute md:left-full md:top-1/2 md:mt-0 md:ml-3 md:-translate-y-1/2 z-10 flex items-center gap-2 whitespace-nowrap rounded-xl border border-rose-400/25 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-300 shadow-lg shadow-rose-950/25 backdrop-blur-md"
+                    className="mt-2 flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-950 px-3 py-2 text-xs font-semibold text-rose-300 shadow-lg shadow-rose-950/25 md:absolute md:left-full md:top-1/2 md:mt-0 md:ml-3 md:-translate-y-1/2 z-10"
                   >
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {fieldErrors.employeeId}
@@ -294,7 +294,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: -10, scale: 0.96 }}
                     transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-                    className="mt-2 md:absolute md:left-full md:top-1/2 md:mt-0 md:ml-3 md:-translate-y-1/2 z-10 flex items-center gap-2 whitespace-nowrap rounded-xl border border-rose-400/25 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-300 shadow-lg shadow-rose-950/25 backdrop-blur-md"
+                    className="mt-2 flex items-center gap-2 rounded-xl border border-rose-400/30 bg-rose-950 px-3 py-2 text-xs font-semibold text-rose-300 shadow-lg shadow-rose-950/25 md:absolute md:left-full md:top-1/2 md:mt-0 md:ml-3 md:-translate-y-1/2 z-10"
                   >
                     <AlertCircle className="h-4 w-4 shrink-0" />
                     {fieldErrors.password}

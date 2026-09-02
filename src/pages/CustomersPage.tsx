@@ -366,7 +366,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     <div className="space-y-6">
       {/* Top metrics summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-blue-500/10 rounded-xl text-blue-600">
             <Users className="w-6 h-6" />
           </div>
@@ -376,7 +376,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl text-amber-600">
             <CreditCard className="w-6 h-6" />
           </div>
@@ -388,7 +388,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
+        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600">
             <ShoppingBag className="w-6 h-6" />
           </div>
@@ -410,7 +410,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             placeholder="Tìm theo Tên, Số điện thoại..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
           />
           <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
         </div>
@@ -428,11 +428,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       </div>
 
       {/* Main Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden">
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/55">
+              <tr className="border-b border-slate-800 bg-slate-950">
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">#</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên khách hàng</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Số điện thoại</th>
@@ -459,7 +459,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     <tr
                       key={c.id}
                       onClick={() => setSelectedCustomer(c)}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 cursor-pointer transition-colors"
+                      className="cursor-pointer transition-colors hover:bg-slate-800/50"
                       title="Nhấp để xem chi tiết lịch sử giao dịch"
                     >
                       <td className="p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">{index + 1}</td>
@@ -507,20 +507,20 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       {/* Add / Edit Dialog */}
       <AnimatePresence>
         {isDialogOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDialogOpen(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="fixed inset-0 bg-slate-950/90"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl flex flex-col gap-5 z-10"
+              className="relative flex w-full max-w-md flex-col gap-5 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl z-10"
             >
               <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
@@ -542,7 +542,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="Nhập tên đại lý, quán nhậu hoặc tạp hóa..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
                     required
                   />
                 </div>
@@ -554,7 +554,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Ví dụ: 0908123456"
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
                   />
                 </div>
 
@@ -589,7 +589,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Yêu cầu giao hàng, phương thức thanh toán..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
                   />
                 </div>
 
@@ -622,7 +622,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/75 z-40 flex items-center justify-center p-4"
             onClick={() => setSelectedCustomer(null)}
           >
             <motion.div

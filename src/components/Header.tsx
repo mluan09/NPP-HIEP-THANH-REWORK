@@ -33,9 +33,9 @@ const roleLabel = (role: string) => {
 };
 
 const roleBadge = (role: string) => {
-  if (role === 'owner') return 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300';
-  if (role === 'manager') return 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
-  return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+  if (role === 'owner') return 'bg-amber-950 text-amber-300';
+  if (role === 'manager') return 'bg-blue-950 text-blue-300';
+  return 'bg-slate-800 text-slate-300';
 };
 
 export const Header: React.FC<HeaderProps> = ({
@@ -50,38 +50,40 @@ export const Header: React.FC<HeaderProps> = ({
   const { isTouchLandscape } = useDeviceMode();
 
   return (
-    <header className="h-12 lg:h-16 border-b border-slate-200/50 dark:border-slate-800/50 glass-panel sticky top-0 right-0 z-20 px-4 lg:px-8 flex items-center justify-between">
-      {currentUser && (
-        <TouchMenu
-          currentUser={currentUser}
-          isOpen={touchMenuOpen}
-          isVisible={isTouchLandscape}
-          onToggle={onTouchMenuToggle}
-          onClose={onTouchMenuClose}
-          onNavigate={onNavigate}
-          onLogout={onLogout}
-        />
-      )}
+    <header className="sticky top-0 z-20 flex h-12 min-w-0 shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-4 shadow-sm shadow-black/20 lg:h-16 lg:px-8">
+      {/* Left section: menu and page title */}
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        {currentUser && (
+          <TouchMenu
+            currentUser={currentUser}
+            isOpen={touchMenuOpen}
+            isVisible={isTouchLandscape}
+            onToggle={onTouchMenuToggle}
+            onClose={onTouchMenuClose}
+            onNavigate={onNavigate}
+            onLogout={onLogout}
+          />
+        )}
 
-      {/* Title */}
-      <div className={isTouchLandscape ? 'pl-14' : undefined}>
-        <h1 className="text-base lg:text-xl font-bold text-slate-800 dark:text-slate-100 truncate max-w-[160px] sm:max-w-none">
-          {getTabTitle(activeTab)}
-        </h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-base font-bold text-slate-100 lg:text-xl">
+            {getTabTitle(activeTab)}
+          </h1>
+        </div>
       </div>
 
-      {/* User Info */}
+      {/* Right section: role and user avatar */}
       {currentUser && (
-        <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
-          <div className="hidden sm:block text-right">
-            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+        <div className="ml-3 flex max-w-[55%] shrink-0 items-center gap-2 lg:gap-3">
+          <div className="hidden min-w-0 max-w-[12rem] text-right sm:block lg:max-w-[18rem]">
+            <p className="truncate text-sm font-bold leading-tight text-slate-100">
               {currentUser.full_name}
             </p>
-            <span className={`inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-bold ${roleBadge(currentUser.role)}`}>
+            <span className={`mt-0.5 inline-block max-w-full truncate rounded px-2 py-0.5 text-[10px] font-bold ${roleBadge(currentUser.role)}`}>
               {roleLabel(currentUser.role)}
             </span>
           </div>
-          <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-inner flex-shrink-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-sm font-bold text-white shadow-inner lg:h-9 lg:w-9">
             {currentUser.full_name.charAt(0)}
           </div>
         </div>
