@@ -21,6 +21,7 @@ import { logActivity } from '../lib/activityLog';
 import type { CashbookEntry, Customer, InventoryItem, Profile, Sale, SaleItem } from '../lib/db';
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { DateRangePicker } from '../components/DateRangePicker';
 import { useToast } from '../components/Toast';
 
 interface CashbookPageProps {
@@ -368,30 +369,15 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             <Calendar className="w-4 h-4" />
             <span className="text-xs font-bold uppercase tracking-wider">Lọc theo ngày:</span>
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100 cursor-pointer"
-            />
-            <span className="text-xs text-slate-400 font-semibold">đến</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100 cursor-pointer"
-            />
-          </div>
-          {(dateFrom || dateTo) && (
-            <button
-              onClick={clearDateFilter}
-              className="text-xs text-rose-500 hover:text-rose-600 font-semibold cursor-pointer flex items-center gap-1"
-            >
-              <X className="w-3 h-3" />
-              Xóa bộ lọc ngày
-            </button>
-          )}
+          <DateRangePicker
+            from={dateFrom}
+            to={dateTo}
+            onChange={(from, to) => {
+              setDateFrom(from);
+              setDateTo(to);
+            }}
+            onClear={clearDateFilter}
+          />
         </div>
       </div>
 
