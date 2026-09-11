@@ -88,7 +88,7 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -105,11 +105,11 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
+          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh]"
         >
           {/* Top Bar Accent */}
-          <div className={`p-4 border-b flex items-center gap-3.5 ${getHeaderBg()}`}>
-            <div className="p-2 rounded-xl bg-slate-900/80 shadow-inner">
+          <div className={`p-3.5 sm:p-4 border-b flex items-center gap-3.5 shrink-0 ${getHeaderBg()}`}>
+            <div className="p-2 rounded-xl bg-slate-900/80 shadow-inner shrink-0">
               {getIcon()}
             </div>
             <div className="flex-1 min-w-0">
@@ -119,8 +119,10 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
             </div>
             {showCancel && onCancel && (
               <button
+                type="button"
+                aria-label="Đóng"
                 onClick={onCancel}
-                className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors"
+                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -128,14 +130,14 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           </div>
 
           {/* Body */}
-          <div className="p-6">
+          <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain">
             <div className="text-sm text-slate-300 whitespace-pre-line leading-relaxed">
               {message}
             </div>
           </div>
 
           {/* Footer Buttons */}
-          <div className="p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3">
+          <div className="p-3.5 sm:p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3 shrink-0 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))]">
             {showCancel && onCancel && (
               <button
                 type="button"

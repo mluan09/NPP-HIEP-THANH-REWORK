@@ -419,7 +419,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       {/* Collect Debt Payment Modal Dialog */}
       <AnimatePresence>
         {selectedDebt && (
-          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -432,83 +432,87 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl flex flex-col gap-5 z-10"
+              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-250 dark:border-slate-800 w-full max-w-md shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
                 <div className="flex items-center gap-2">
                   <Wallet className="w-5 h-5 text-amber-500" />
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                     Ghi Nhận Thu Nợ Khách Hàng
                   </h3>
                 </div>
                 <button
+                  type="button"
+                  aria-label="Đóng"
                   onClick={() => setSelectedDebt(null)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
                 >
-                  <X className="w-5 h-5 dark:text-slate-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handlePayDebt} className="space-y-4">
-                <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(selectedDebt.customer_id)}</p>
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Mã chứng từ nợ:</span> {selectedDebt.sale_id ? `Đơn hàng ĐH-${selectedDebt.sale_id.toUpperCase()}` : 'Khoản nợ tự do'}</p>
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Tổng số nợ gốc:</span> {selectedDebt.total_amount.toLocaleString()}đ</p>
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Nợ còn lại hiện tại:</span> {selectedDebt.remaining_debt.toLocaleString()}đ</p>
-                </div>
+              <form onSubmit={handlePayDebt} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
+                  <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(selectedDebt.customer_id)}</p>
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Mã chứng từ nợ:</span> {selectedDebt.sale_id ? `Đơn hàng ĐH-${selectedDebt.sale_id.toUpperCase()}` : 'Khoản nợ tự do'}</p>
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Tổng số nợ gốc:</span> {selectedDebt.total_amount.toLocaleString()}đ</p>
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Nợ còn lại hiện tại:</span> {selectedDebt.remaining_debt.toLocaleString()}đ</p>
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Số tiền khách thanh toán (đ)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrencyInput(payAmount)}
-                    onChange={(e) => setPayAmount(parseCurrencyInput(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
-                    required
-                  />
-                  <div className="flex gap-1.5 mt-1.5">
-                    <button
-                      type="button"
-                      onClick={() => setPayAmount(selectedDebt.remaining_debt)}
-                      className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-600 dark:text-slate-400 rounded cursor-pointer"
-                    >
-                      Thu đủ nợ còn lại
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPayAmount(Math.floor(selectedDebt.remaining_debt / 2))}
-                      className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-600 dark:text-slate-400 rounded cursor-pointer"
-                    >
-                      Thu một nửa (50%)
-                    </button>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Số tiền khách thanh toán (đ)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrencyInput(payAmount)}
+                      onChange={(e) => setPayAmount(parseCurrencyInput(e.target.value))}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
+                      required
+                    />
+                    <div className="flex gap-1.5 mt-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPayAmount(selectedDebt.remaining_debt)}
+                        className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-600 dark:text-slate-400 rounded cursor-pointer"
+                      >
+                        Thu đủ nợ còn lại
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayAmount(Math.floor(selectedDebt.remaining_debt / 2))}
+                        className="px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-600 dark:text-slate-400 rounded cursor-pointer"
+                      >
+                        Thu một nửa (50%)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 bg-amber-500/5 p-3.5 rounded-xl border border-dashed border-amber-500/20 text-xs">
+                    <div>
+                      <span className="text-slate-400 block">Số nợ cũ:</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{selectedDebt.remaining_debt.toLocaleString()}đ</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-slate-400 block">Số nợ sau thu:</span>
+                      <span className="font-extrabold text-amber-600 dark:text-amber-450 flex items-center justify-end gap-1">
+                        <span>{(selectedDebt.remaining_debt - payAmount).toLocaleString()}đ</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Ghi chú phiếu thu</label>
+                    <input
+                      type="text"
+                      value={paymentNotes}
+                      onChange={(e) => setPaymentNotes(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none dark:text-slate-100"
+                    />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 bg-amber-500/5 p-3.5 rounded-xl border border-dashed border-amber-500/20 text-xs">
-                  <div>
-                    <span className="text-slate-400 block">Số nợ cũ:</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{selectedDebt.remaining_debt.toLocaleString()}đ</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-slate-400 block">Số nợ sau thu:</span>
-                    <span className="font-extrabold text-amber-600 dark:text-amber-450 flex items-center justify-end gap-1">
-                      <span>{(selectedDebt.remaining_debt - payAmount).toLocaleString()}đ</span>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Ghi chú phiếu thu</label>
-                  <input
-                    type="text"
-                    value={paymentNotes}
-                    onChange={(e) => setPaymentNotes(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none dark:text-slate-100"
-                  />
-                </div>
-
-                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setSelectedDebt(null)}
@@ -533,7 +537,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
       {/* Edit Debt Modal */}
       <AnimatePresence>
         {editingDebt && (
-          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -546,65 +550,69 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl flex flex-col gap-5 z-10"
+              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-250 dark:border-slate-800 w-full max-w-md shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
                 <div className="flex items-center gap-2">
                   <Edit3 className="w-5 h-5 text-amber-500" />
-                  <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Điều chỉnh công nợ</h3>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">Điều chỉnh công nợ</h3>
                 </div>
                 <button
+                  type="button"
+                  aria-label="Đóng"
                   onClick={() => setEditingDebt(null)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
                 >
-                  <X className="w-5 h-5 dark:text-slate-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveEditDebt} className="space-y-4">
-                <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(editingDebt.customer_id)}</p>
-                  <p><span className="font-bold text-slate-700 dark:text-slate-350">Ngày giao dịch:</span> {getTransactionDate(editingDebt)}</p>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Tổng công nợ (đ)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrencyInput(editTotalAmount)}
-                    onChange={(e) => setEditTotalAmount(parseCurrencyInput(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Đã thanh toán (đ)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrencyInput(editPaidAmount)}
-                    onChange={(e) => setEditPaidAmount(parseCurrencyInput(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 bg-amber-500/5 p-3.5 rounded-xl border border-dashed border-amber-500/20 text-xs">
-                  <div>
-                    <span className="text-slate-400 block">Dư nợ mới:</span>
-                    <span className="font-bold text-slate-700 dark:text-slate-300">{Math.max(0, editTotalAmount - editPaidAmount).toLocaleString()}đ</span>
+              <form onSubmit={handleSaveEditDebt} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
+                  <div className="bg-slate-950 p-4 rounded-2xl space-y-2.5 text-xs text-slate-400 border border-slate-800">
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Khách hàng:</span> {getCustomerName(editingDebt.customer_id)}</p>
+                    <p><span className="font-bold text-slate-700 dark:text-slate-350">Ngày giao dịch:</span> {getTransactionDate(editingDebt)}</p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-slate-400 block">Trạng thái:</span>
-                    <span className="font-extrabold text-amber-600 dark:text-amber-450">
-                      {editTotalAmount - editPaidAmount <= 0 ? 'Đã thu xong' : 'Chờ thu nợ'}
-                    </span>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Tổng công nợ (đ)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrencyInput(editTotalAmount)}
+                      onChange={(e) => setEditTotalAmount(parseCurrencyInput(e.target.value))}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Đã thanh toán (đ)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrencyInput(editPaidAmount)}
+                      onChange={(e) => setEditPaidAmount(parseCurrencyInput(e.target.value))}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-100 focus:outline-none"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 bg-amber-500/5 p-3.5 rounded-xl border border-dashed border-amber-500/20 text-xs">
+                    <div>
+                      <span className="text-slate-400 block">Dư nợ mới:</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{Math.max(0, editTotalAmount - editPaidAmount).toLocaleString()}đ</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-slate-400 block">Trạng thái:</span>
+                      <span className="font-extrabold text-amber-600 dark:text-amber-450">
+                        {editTotalAmount - editPaidAmount <= 0 ? 'Đã thu xong' : 'Chờ thu nợ'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setEditingDebt(null)}

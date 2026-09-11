@@ -23,6 +23,7 @@ import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { DateRangePicker } from '../components/DateRangePicker';
 import { useToast } from '../components/Toast';
+import { ResponsiveSearchSheet } from '../components/ResponsiveSearchSheet';
 
 interface CashbookPageProps {
   cashbook: CashbookEntry[];
@@ -49,6 +50,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchSheetOpen, setIsSearchSheetOpen] = useState(false);
   const [filterType, setFilterType] = useState<'income' | 'expense' | 'sales'>('income');
 
   // Date filter state
@@ -256,53 +258,54 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1 min-w-0">
           <div className="flex items-center gap-2 text-emerald-600">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider">Tổng thu</span>
+            <TrendingUp className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider truncate">Tổng thu</span>
           </div>
-          <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">+{totalIncome.toLocaleString()}đ</span>
+          <span className="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 block truncate">+{totalIncome.toLocaleString()}đ</span>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1 min-w-0">
           <div className="flex items-center gap-2 text-rose-600">
-            <TrendingDown className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider">Tổng chi</span>
+            <TrendingDown className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider truncate">Tổng chi</span>
           </div>
-          <span className="text-2xl font-extrabold text-rose-600 dark:text-rose-400">-{totalExpense.toLocaleString()}đ</span>
+          <span className="text-xl sm:text-2xl font-extrabold text-rose-600 dark:text-rose-400 block truncate">-{totalExpense.toLocaleString()}đ</span>
           <div className="text-[10px] text-slate-400 space-y-0.5 pt-1 border-t border-slate-100 dark:border-slate-800">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Mua hàng NCC:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">{expensePurchase.toLocaleString()}đ</span>
+            <div className="flex justify-between gap-1">
+              <span className="text-slate-500 truncate">Mua hàng NCC:</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 shrink-0">{expensePurchase.toLocaleString()}đ</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Vận hành (Lương):</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">{expenseOperation.toLocaleString()}đ</span>
+            <div className="flex justify-between gap-1">
+              <span className="text-slate-500 truncate">Vận hành (Lương):</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 shrink-0">{expenseOperation.toLocaleString()}đ</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Chi phí khác:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">{expenseOther.toLocaleString()}đ</span>
+            <div className="flex justify-between gap-1">
+              <span className="text-slate-500 truncate">Chi phí khác:</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 shrink-0">{expenseOther.toLocaleString()}đ</span>
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-1 min-w-0">
           <div className="flex items-center gap-2 text-amber-600">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-xs font-bold uppercase tracking-wider">Số dư quỹ hiện tại</span>
+            <DollarSign className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider truncate">Số dư quỹ hiện tại</span>
           </div>
-          <span className={`text-2xl font-extrabold ${balance >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <span className={`text-xl sm:text-2xl font-extrabold block truncate ${balance >= 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {balance >= 0 ? '+' : ''}{balance.toLocaleString()}đ
           </span>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-4">
+      <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col gap-4">
         {/* Row 1: Search + Filters + Buttons */}
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative w-full md:w-72">
+        <div className="flex flex-wrap lg:flex-nowrap gap-3 lg:gap-4 items-center justify-between">
+          {/* Desktop Search (>= lg) */}
+          <div className="hidden lg:block relative w-72">
             <input
               type="text"
               placeholder="Tìm theo lý do, ghi chú..."
@@ -313,11 +316,40 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
           </div>
 
+          {/* Touch/Tablet Search Icon (< lg) */}
+          <div className="lg:hidden flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsSearchSheetOpen(true)}
+              aria-label="Tìm kiếm giao dịch"
+              className="min-w-[44px] min-h-[44px] px-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            >
+              <Search className="w-5 h-5 text-amber-500" />
+              {searchTerm ? (
+                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 max-w-[120px] truncate">
+                  {searchTerm}
+                </span>
+              ) : (
+                <span className="text-xs text-slate-400">Tìm kiếm...</span>
+              )}
+            </button>
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                aria-label="Xóa bộ lọc tìm kiếm"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-xl cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
           {/* Filters - no "Tất cả quỹ" */}
-          <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl w-full md:w-auto">
+          <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
             <button
               onClick={() => { setFilterType('income'); clearDateFilter(); }}
-              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'income'
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'income'
                 ? 'bg-slate-900 shadow-sm text-emerald-400 scale-[1.02]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
@@ -326,7 +358,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             </button>
             <button
               onClick={() => { setFilterType('expense'); clearDateFilter(); }}
-              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'expense'
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'expense'
                 ? 'bg-slate-900 shadow-sm text-rose-400 scale-[1.02]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
@@ -335,7 +367,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
             </button>
             <button
               onClick={() => { setFilterType('sales'); clearDateFilter(); }}
-              className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-300 ease-out transform-gpu hover:-translate-y-0.5 ${filterType === 'sales'
                 ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400 scale-[1.02]'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                 }`}
@@ -345,17 +377,17 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-2 w-full md:w-auto md:ml-auto">
+          <div className="flex items-center gap-2 lg:ml-auto">
             <button
               onClick={() => openAddDialog('income')}
-              className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Lập Phiếu Thu</span>
             </button>
             <button
               onClick={() => openAddDialog('expense')}
-              className="flex-1 md:flex-none bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer"
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1 cursor-pointer min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Lập Phiếu Chi</span>
@@ -364,7 +396,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
         </div>
 
         {/* Row 2: Date Range Picker */}
-        <div className="flex flex-col md:flex-row gap-3 items-center border-t border-slate-100 dark:border-slate-800 pt-3">
+        <div className="flex flex-wrap gap-3 items-center border-t border-slate-100 dark:border-slate-800 pt-3">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <Calendar className="w-4 h-4" />
             <span className="text-xs font-bold uppercase tracking-wider">Lọc theo ngày:</span>
@@ -380,6 +412,16 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
           />
         </div>
       </div>
+
+      {/* Search Sheet for touch landscape / tablet */}
+      <ResponsiveSearchSheet
+        isOpen={isSearchSheetOpen}
+        onClose={() => setIsSearchSheetOpen(false)}
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Tìm theo lý do, ghi chú..."
+        title="Tìm kiếm trong sổ quỹ"
+      />
 
       <AnimatePresence mode="wait">
         {filterType === 'sales' ? (
@@ -581,7 +623,7 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
       {/* Write Receipt / Payment Voucher Modal Dialog */}
       <AnimatePresence>
         {isDialogOpen && (
-          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -594,75 +636,79 @@ export const CashbookPage: React.FC<CashbookPageProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-md shadow-2xl flex flex-col gap-5 z-10"
+              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-250 dark:border-slate-800 w-full max-w-md shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                   {editingEntry
                     ? `Chỉnh Sửa Phiếu`
                     : txType === 'income' ? 'Lập Phiếu Thu Quỹ' : 'Lập Phiếu Chi Quỹ'
                   }
                 </h3>
                 <button
+                  type="button"
+                  aria-label="Đóng"
                   onClick={() => setIsDialogOpen(false)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
                 >
-                  <X className="w-5 h-5 dark:text-slate-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Lý do giao dịch</label>
-                  <input
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder={txType === 'income' ? 'Thu nợ khách hàng, thanh toán mua vỏ két...' : 'Chi lương nhân viên, thanh toán điện nước...'}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Số tiền (đ)</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formatCurrencyInput(amount)}
-                    onChange={(e) => setAmount(parseCurrencyInput(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2 text-sm font-bold focus:outline-none dark:text-slate-100"
-                    required
-                  />
-                </div>
-
-                {txType === 'expense' && (
+              <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Danh mục chi phí</label>
-                    <select
-                      value={expenseCategory}
-                      onChange={(e) => setExpenseCategory(e.target.value as any)}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-200 cursor-pointer"
-                    >
-                      <option value="purchase">Mua hàng nhà cung cấp (Beer/Beverage)</option>
-                      <option value="operation">Chi phí vận hành (Lương, mặt bằng, điện nước)</option>
-                      <option value="other">Các chi phí khác</option>
-                    </select>
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Lý do giao dịch</label>
+                    <input
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder={txType === 'income' ? 'Thu nợ khách hàng, thanh toán mua vỏ két...' : 'Chi lương nhân viên, thanh toán điện nước...'}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      required
+                    />
                   </div>
-                )}
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Chi tiết / Ghi chú</label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Phương thức thanh toán, số tài khoản..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none dark:text-slate-100"
-                  />
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Số tiền (đ)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatCurrencyInput(amount)}
+                      onChange={(e) => setAmount(parseCurrencyInput(e.target.value))}
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-xl px-3.5 py-2 text-sm font-bold focus:outline-none dark:text-slate-100"
+                      required
+                    />
+                  </div>
+
+                  {txType === 'expense' && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Danh mục chi phí</label>
+                      <select
+                        value={expenseCategory}
+                        onChange={(e) => setExpenseCategory(e.target.value as any)}
+                        className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-200 cursor-pointer"
+                      >
+                        <option value="purchase">Mua hàng nhà cung cấp (Beer/Beverage)</option>
+                        <option value="operation">Chi phí vận hành (Lương, mặt bằng, điện nước)</option>
+                        <option value="other">Các chi phí khác</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Chi tiết / Ghi chú</label>
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Phương thức thanh toán, số tài khoản..."
+                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none dark:text-slate-100"
+                    />
+                  </div>
                 </div>
 
-                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setIsDialogOpen(false)}

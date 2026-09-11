@@ -19,6 +19,7 @@ import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { useToast } from '../components/Toast';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { ResponsiveSearchSheet } from '../components/ResponsiveSearchSheet';
 
 interface InventoryPageProps {
   inventory: InventoryItem[];
@@ -34,6 +35,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   const { modalState, showAlert, showConfirm } = useModal();
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchSheetOpen, setIsSearchSheetOpen] = useState(false);
   const [filterTab, setFilterTab] = useState<'all' | 'low' | 'out'>('all');
   
   // Dialog state
@@ -357,38 +359,38 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden">
       {/* Top Banner and Quick stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 rounded-xl text-amber-600">
-            <Package className="w-6 h-6" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 bg-amber-500/10 rounded-xl text-amber-600 shrink-0">
+            <Package className="w-5 h-5 sm:w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs text-slate-400 font-semibold block">Tổng sản phẩm</span>
-            <span className="text-xl font-bold dark:text-slate-100">{inventory.length}</span>
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Tổng sản phẩm</span>
+            <span className="text-lg sm:text-xl font-bold dark:text-slate-100">{inventory.length}</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-rose-500/10 rounded-xl text-rose-600">
-            <AlertTriangle className="w-6 h-6" />
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 bg-rose-500/10 rounded-xl text-rose-600 shrink-0">
+            <AlertTriangle className="w-5 h-5 sm:w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs text-slate-400 font-semibold block">Hết hàng</span>
-            <span className="text-xl font-bold text-rose-600 dark:text-rose-400">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Hết hàng</span>
+            <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400">
               {inventory.filter(i => getCurrentStock(i) <= 0).length}
             </span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 rounded-xl text-amber-500">
-            <AlertTriangle className="w-6 h-6" />
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 bg-amber-500/10 rounded-xl text-amber-500 shrink-0">
+            <AlertTriangle className="w-5 h-5 sm:w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs text-slate-400 font-semibold block">Sắp hết hàng</span>
-            <span className="text-xl font-bold text-amber-600 dark:text-amber-400">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Sắp hết hàng</span>
+            <span className="text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-400">
               {inventory.filter(i => {
                 const stock = getCurrentStock(i);
                 return stock > 0 && stock <= 25;
@@ -397,13 +399,13 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600">
-            <RefreshCw className="w-6 h-6" />
+        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="p-2.5 sm:p-3 bg-emerald-500/10 rounded-xl text-emerald-600 shrink-0">
+            <RefreshCw className="w-5 h-5 sm:w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs text-slate-400 font-semibold block">Tổng tồn kho toàn bộ</span>
-            <span className="text-xl font-bold dark:text-slate-100">
+          <div className="min-w-0 flex-1">
+            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Tổng tồn kho</span>
+            <span className="text-lg sm:text-xl font-bold dark:text-slate-100">
               {inventory.reduce((sum, item) => sum + getCurrentStock(item), 0)}
             </span>
           </div>
@@ -411,9 +413,9 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        {/* Search */}
-        <div className="relative w-full md:w-80">
+      <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-wrap lg:flex-nowrap gap-3 lg:gap-4 items-center justify-between">
+        {/* Desktop Search (>= lg) */}
+        <div className="hidden lg:block relative w-80">
           <input
             type="text"
             placeholder="Tìm sản phẩm, SKU..."
@@ -424,11 +426,40 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
         </div>
 
+        {/* Touch/Tablet Search Icon (< lg) */}
+        <div className="lg:hidden flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsSearchSheetOpen(true)}
+            aria-label="Tìm kiếm sản phẩm"
+            className="min-w-[44px] min-h-[44px] px-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          >
+            <Search className="w-5 h-5 text-amber-500" />
+            {searchTerm ? (
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 max-w-[120px] truncate">
+                {searchTerm}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-400">Tìm kiếm...</span>
+            )}
+          </button>
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              aria-label="Xóa bộ lọc tìm kiếm"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-xl cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
         {/* Filters Tabs */}
-        <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl w-full md:w-auto">
+        <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
           <button
             onClick={() => setFilterTab('all')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'all'
                 ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-100'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
@@ -438,7 +469,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           </button>
           <button
             onClick={() => setFilterTab('low')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'low'
                 ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
@@ -448,7 +479,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           </button>
           <button
             onClick={() => setFilterTab('out')}
-            className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'out'
                 ? 'bg-white dark:bg-slate-800 shadow-sm text-rose-600 dark:text-rose-400'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
@@ -459,19 +490,20 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2">
           {canEdit && (
             <button
               onClick={openAddDialog}
-              className="flex-1 md:flex-none bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-amber-500/10"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-amber-500/10 min-h-[44px]"
             >
               <Plus className="w-4 h-4" />
               <span>Thêm sản phẩm</span>
             </button>
           )}
+          {/* Import Excel Button: hidden on touch/tablet < lg, visible on lg+ */}
           <button
             onClick={handleImportClick}
-            className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            className="hidden lg:flex bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 py-2.5 px-3.5 rounded-xl text-xs items-center justify-center gap-1.5 cursor-pointer transition-colors min-h-[44px]"
             title="Nhập từ Excel"
           >
             <Upload className="w-4 h-4" />
@@ -479,6 +511,16 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Search Sheet for touch landscape / tablet */}
+      <ResponsiveSearchSheet
+        isOpen={isSearchSheetOpen}
+        onClose={() => setIsSearchSheetOpen(false)}
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Tìm sản phẩm, SKU..."
+        title="Tìm kiếm sản phẩm trong kho"
+      />
 
       {/* Main Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden">
@@ -574,7 +616,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       {/* Add / Edit Dialog */}
       <AnimatePresence>
         {isDialogOpen && (
-          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -587,21 +629,24 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-lg shadow-2xl flex flex-col gap-5 z-10"
+              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 w-full max-w-lg shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                   {editingItem ? 'Cập Nhật Sản Phẩm' : 'Thêm Sản Phẩm Mới'}
                 </h3>
                 <button 
+                  type="button"
+                  aria-label="Đóng"
                   onClick={() => setIsDialogOpen(false)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
                 >
-                  <X className="w-5 h-5 dark:text-slate-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSave} className="space-y-4">
+              <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Đơn vị tính</label>
                   <div className="relative">
@@ -745,8 +790,9 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                     />
                   </div>
                 </div>
+                </div>
 
-                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setIsDialogOpen(false)}
@@ -769,24 +815,26 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
 
       {/* Import Excel Modal */}
       {isImportOpen && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-250 dark:border-slate-800 p-6 w-full max-w-2xl shadow-2xl flex flex-col gap-5">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-250 dark:border-slate-800 w-full max-w-2xl shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                   Nhập Kho Hàng Từ Spreadsheet
                 </h3>
               </div>
               <button 
+                type="button"
+                aria-label="Đóng"
                 onClick={() => setIsImportOpen(false)}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
               >
-                <X className="w-5 h-5 dark:text-slate-400" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
               <div className="text-xs text-slate-500 space-y-1">
                 <p>Upload file Excel có bảng như mẫu: STT, Tên hàng hoá, ĐVT, Đơn giá, Tồn đầu/SL, Nhập trong tháng/Lần 1-3, Xuất trong tháng/SL.</p>
                 <p className="font-semibold text-slate-700 dark:text-slate-300">
@@ -847,7 +895,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               )}
             </div>
 
-            <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
               <button
                 type="button"
                 onClick={() => {

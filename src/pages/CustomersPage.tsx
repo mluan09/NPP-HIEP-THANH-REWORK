@@ -507,7 +507,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       {/* Add / Edit Dialog */}
       <AnimatePresence>
         {isDialogOpen && (
-          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -520,84 +520,88 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative flex w-full max-w-md flex-col gap-5 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl z-10"
+              className="relative flex w-full max-w-md flex-col rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
+                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                   {editingCustomer ? 'Cập Nhật Khách Hàng' : 'Thêm Khách Hàng Mới'}
                 </h3>
                 <button
+                  type="button"
+                  aria-label="Đóng"
                   onClick={() => setIsDialogOpen(false)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
                 >
-                  <X className="w-5 h-5 dark:text-slate-400" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Tên khách hàng</label>
-                  <input
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Nhập tên đại lý, quán nhậu hoặc tạp hóa..."
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Số điện thoại</label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Ví dụ: 0908123456"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Địa chỉ giao hàng</label>
-                    {addressError && (
-                      <span className="text-[11px] font-semibold text-red-500">Vui lòng nhập địa chỉ</span>
-                    )}
+              <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Tên khách hàng</label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Nhập tên đại lý, quán nhậu hoặc tạp hóa..."
+                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                      required
+                    />
                   </div>
-                  <textarea
-                    value={address}
-                    onChange={(e) => {
-                      setAddress(e.target.value);
-                      if (e.target.value.trim()) setAddressError(false);
-                    }}
-                    placeholder="Số nhà, tên đường, quận/huyện..."
-                    rows={2}
-                    aria-invalid={addressError}
-                    className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
-                      addressError
-                        ? 'border-red-500 focus:ring-2 focus:ring-red-500/30'
-                        : 'border-slate-250 dark:border-slate-800'
-                    }`}
-                  />
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Số điện thoại</label>
+                    <input
+                      type="text"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Ví dụ: 0908123456"
+                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Địa chỉ giao hàng</label>
+                      {addressError && (
+                        <span className="text-[11px] font-semibold text-red-500">Vui lòng nhập địa chỉ</span>
+                      )}
+                    </div>
+                    <textarea
+                      value={address}
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+                        if (e.target.value.trim()) setAddressError(false);
+                      }}
+                      placeholder="Số nhà, tên đường, quận/huyện..."
+                      rows={2}
+                      aria-invalid={addressError}
+                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
+                        addressError
+                          ? 'border-red-500 focus:ring-2 focus:ring-red-500/30'
+                          : 'border-slate-250 dark:border-slate-800'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Ghi chú bổ sung</label>
+                    <input
+                      type="text"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Yêu cầu giao hàng, phương thức thanh toán..."
+                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Ghi chú bổ sung</label>
-                  <input
-                    type="text"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Yêu cầu giao hàng, phương thức thanh toán..."
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
-                  />
-                </div>
-
-                <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setIsDialogOpen(false)}
-                    className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50"
+                    className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
                     Hủy bỏ
                   </button>
@@ -622,7 +626,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed inset-0 bg-black/75 z-40 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/75 z-40 flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
             onClick={() => setSelectedCustomer(null)}
           >
             <motion.div
@@ -630,30 +634,34 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 24, scale: 0.96 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 w-full max-w-3xl shadow-2xl flex flex-col gap-5 max-h-[90vh]"
+              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-            <div className="flex justify-between items-center pb-3 border-b border-slate-150 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm">
-                  {selectedCustomer.customer_name.charAt(0)}
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-150 dark:border-slate-800 shrink-0 bg-inherit">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm">
+                    {selectedCustomer.customer_name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                      Sổ giao dịch: {selectedCustomer.customer_name}
+                    </h3>
+                    <span className="text-xs text-slate-400 font-semibold block">
+                      #{customers.findIndex(c => c.id === selectedCustomer.id) + 1}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                    Sổ giao dịch: {selectedCustomer.customer_name}
-                  </h3>
-                  <span className="text-xs text-slate-400 font-semibold block">
-                    #{customers.findIndex(c => c.id === selectedCustomer.id) + 1}
-                  </span>
-                </div>
+                <button
+                  type="button"
+                  aria-label="Đóng"
+                  onClick={() => setSelectedCustomer(null)}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedCustomer(null)}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
-              >
-                <X className="w-5 h-5 dark:text-slate-400" />
-              </button>
-            </div>
+
+              <div className="p-5 sm:px-6 overflow-y-auto space-y-5 flex-1 overscroll-contain">
 
             {/* Profile body */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -799,14 +807,16 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                   </tbody>
                 </table>
               </div>
+              </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-150 dark:border-slate-800 pt-3">
+            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
               <button
+                type="button"
                 onClick={() => setSelectedCustomer(null)}
-                className="px-5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-350 rounded-xl text-xs font-bold cursor-pointer"
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold cursor-pointer transition-colors"
               >
-                Đóng sổ quỹ
+                Đóng sổ giao dịch
               </button>
             </div>
             </motion.div>
