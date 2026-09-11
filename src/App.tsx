@@ -10,6 +10,7 @@ import { ToastProvider, useToast } from './components/Toast';
 import { RotateLockOverlay } from './components/RotateLockOverlay';
 import { ConfirmModal } from './components/ConfirmModal';
 import { useModal } from './hooks/useModal';
+import { useDeviceMode } from './hooks/useDeviceMode';
 
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
@@ -53,8 +54,16 @@ function AppInner() {
   const sessionTokenRef = useRef<string | null>(localStorage.getItem('npp_session_token'));
   const { showToast } = useToast();
   const { modalState, showConfirm } = useModal();
+  const { isTouchPortrait } = useDeviceMode();
 
+  const isRotateLocked = Boolean(currentUser) && isTouchPortrait;
   const activeTab = location.pathname.replace('/', '') || 'sales';
+
+  useEffect(() => {
+    if (isRotateLocked) {
+      setTouchMenuOpen(false);
+    }
+  }, [isRotateLocked]);
 
   // Restore Supabase session on mount
   useEffect(() => {
@@ -309,7 +318,12 @@ function AppInner() {
         onLogout={handleLogoutRequest}
       />
 
-      <div className="flex-1 min-h-screen flex flex-col lg:pl-68">
+      <div
+        className={`flex-1 min-h-screen flex flex-col lg:pl-68 ${
+          isRotateLocked ? 'pointer-events-none select-none' : ''
+        }`}
+        aria-hidden={isRotateLocked || undefined}
+      >
         <Header
           activeTab={activeTab}
           currentUser={currentUser}
@@ -320,7 +334,11 @@ function AppInner() {
           onLogout={handleLogoutRequest}
         />
 
-        <main className="p-4 lg:p-8 flex-1 overflow-y-auto overflow-x-hidden">
+        <main
+          className={`p-4 lg:p-8 flex-1 overflow-x-hidden ${
+            isRotateLocked ? 'overflow-hidden' : 'overflow-y-auto'
+          }`}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

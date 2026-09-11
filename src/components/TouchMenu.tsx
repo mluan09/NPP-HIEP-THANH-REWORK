@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut, Menu, X } from 'lucide-react';
@@ -15,6 +15,11 @@ interface TouchMenuProps {
   onLogout: () => void;
 }
 
+function getIsSmallScreen(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.innerHeight < 520 || window.innerWidth < 480;
+}
+
 export const TouchMenu: React.FC<TouchMenuProps> = ({
   currentUser,
   isOpen,
@@ -28,6 +33,19 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
   const firstItemRef = useRef<HTMLAnchorElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const allowedItems = ALL_MENU_ITEMS.filter((item) => item.allowed.includes(currentUser.role));
+  const [isSmallScreen, setIsSmallScreen] = useState(getIsSmallScreen);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(getIsSmallScreen());
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -79,9 +97,9 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-            className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-xl shadow-black/30"
+            className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-3.75rem)] overflow-y-auto overscroll-contain rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-xl shadow-black/30 touch-pan-y"
           >
-            <nav className="space-y-1">
+            <nav className={isSmallScreen ? 'space-y-0.5' : 'space-y-1'}>
               {allowedItems.map((item, index) => {
                 const Icon = item.icon;
                 return (
@@ -95,18 +113,22 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
                       onClose();
                     }}
                     className={({ isActive }) =>
-                      `flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
-                        isActive ? 'bg-amber-500/20 text-amber-300' : 'text-slate-200 hover:bg-slate-800'
+                      `flex items-center rounded-xl transition-colors cursor-pointer ${
+                        isSmallScreen
+                          ? 'min-h-[36px] gap-2.5 px-2.5 py-1.5 text-xs'
+                          : 'min-h-11 gap-3 px-3 py-2.5 text-sm font-semibold'
+                      } ${
+                        isActive ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-200 hover:bg-slate-800'
                       }`
                     }
                   >
-                    <Icon className="h-5 w-5 shrink-0" />
-                    <span>{item.label}</span>
+                    <Icon className={`${isSmallScreen ? 'h-4 w-4' : 'h-5 w-5'} shrink-0`} />
+                    <span className="truncate">{item.label}</span>
                   </NavLink>
                 );
               })}
             </nav>
-            <div className="my-2 border-t border-slate-800" />
+            <div className={`border-t border-slate-800 ${isSmallScreen ? 'my-1.5' : 'my-2'}`} />
             <button
               type="button"
               role="menuitem"
@@ -114,9 +136,13 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
                 onClose();
                 onLogout();
               }}
-              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-300 transition-colors hover:bg-rose-500/10 cursor-pointer"
+              className={`flex w-full items-center rounded-xl font-semibold text-rose-300 transition-colors hover:bg-rose-500/10 cursor-pointer ${
+                isSmallScreen
+                  ? 'min-h-[36px] gap-2.5 px-2.5 py-1.5 text-xs'
+                  : 'min-h-11 gap-3 px-3 py-2.5 text-sm'
+              }`}
             >
-              <LogOut className="h-5 w-5 shrink-0" />
+              <LogOut className={`${isSmallScreen ? 'h-4 w-4' : 'h-5 w-5'} shrink-0`} />
               <span>Đăng xuất</span>
             </button>
           </motion.div>
