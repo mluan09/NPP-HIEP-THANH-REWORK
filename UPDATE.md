@@ -1,105 +1,44 @@
-# UPDATE.md
+# Cập nhật mới: Popup tìm kiếm trên Mobile
 
 ## Mục tiêu
 
-Cập nhật chức năng của trang đăng nhập nhằm cải thiện trải nghiệm người
-dùng, đảm bảo tuân thủ Semantic HTML, Accessibility và chuẩn bị dữ liệu
-để thử nghiệm đăng nhập.
+Cải thiện trải nghiệm tìm kiếm trên thiết bị mobile: khi người dùng nhập
+từ khóa trong popup tìm kiếm, các sản phẩm phù hợp phải tự động xuất hiện
+để người dùng có thể chọn nhanh.
 
-## 1. Cập nhật Form đăng nhập
+## Yêu cầu chức năng
 
--   Sử dụng thẻ `<form>` gốc của HTML.
--   Bên trong form có:
-    -   Ô **Mã nhân viên** với `type="text"` và
-        `autocomplete="username"`.
-    -   Ô **Mật khẩu** với `type="password"` và
-        `autocomplete="current-password"`.
--   Mỗi ô đều có `label` rõ ràng.
+- Popup tìm kiếm chỉ áp dụng cho giao diện mobile.
+- Khi người dùng nhập hoặc thay đổi từ khóa, hệ thống tự động lọc và hiển
+  thị các sản phẩm phù hợp trong popup; không yêu cầu nhấn nút tìm kiếm.
+- Mỗi kết quả cần hiển thị thông tin đủ để nhận biết sản phẩm, gồm tối
+  thiểu tên sản phẩm và ảnh đại diện; hiển thị giá nếu dữ liệu có sẵn.
+- Người dùng có thể chạm vào một kết quả để chọn hoặc mở trang chi tiết
+  sản phẩm.
+- Hiển thị trạng thái phù hợp khi từ khóa trống và thông báo rõ ràng khi
+  không có sản phẩm khớp từ khóa.
 
-## 2. Nút đăng nhập
+## Danh sách kết quả
 
--   Dùng `<button type="submit">Sign in</button>`.
--   Nhấn **Enter** trong ô Mã nhân viên hoặc Mật khẩu phải submit form.
+- Ô nhập từ khóa luôn cố định ở phần trên của popup.
+- Khi có nhiều sản phẩm vượt quá không gian hiển thị, chỉ danh sách kết
+  quả được cuộn dọc.
+- Người dùng có thể kéo lên/xuống mượt mà bằng thao tác cảm ứng để xem và
+  chọn thêm sản phẩm.
+- Danh sách không được làm popup tràn khỏi màn hình hoặc che khuất thao
+  tác đóng popup.
 
-## 3. Hiện / Ẩn mật khẩu
+## Accessibility
 
--   Dùng `<button type="button">`.
--   Accessible name mặc định: **Show password**.
--   Chuyển `type="password"` ↔ `type="text"` khi bấm.
--   Cập nhật icon, `aria-label`, `aria-pressed`.
--   Không làm mất focus của ô mật khẩu.
+- Popup, ô tìm kiếm và danh sách kết quả phải có nhãn hoặc thuộc tính
+  ARIA phù hợp.
+- Có thể điều hướng đến và chọn kết quả bằng bàn phím khi sử dụng thiết
+  bị hỗ trợ bàn phím.
+- Kết quả đang được chọn hoặc focus phải có trạng thái trực quan rõ ràng.
+- Người dùng luôn có thể tiếp tục nhập từ khóa hoặc đóng popup.
 
-## 4. Thuộc tính autocomplete
+## Responsive
 
-Giữ nguyên: - `autocomplete="username"` -
-`autocomplete="current-password"`
-
-Không được thay đổi vì đây là thuộc tính quan trọng giúp các Password
-Manager nhận diện tài khoản.
-
-## 5. Dữ liệu đăng nhập thử nghiệm
-
-Tạo file dữ liệu mẫu, ví dụ:
-
-``` json
-[
-  {"employeeId":"NV001","password":"123456"},
-  {"employeeId":"NV002","password":"abcdef"},
-  {"employeeId":"ADMIN","password":"admin123"}
-]
-```
-
-Yêu cầu: - Chỉ dùng cho Development. - Không dùng xác thực thật. - Chưa
-cần API, Database hoặc mã hóa mật khẩu.
-
-## 6. Xử lý đăng nhập
-
--   Đọc dữ liệu từ file thử nghiệm.
--   So khớp Mã nhân viên và Mật khẩu.
--   Đúng → đăng nhập.
--   Sai → thông báo lỗi.
--   Nếu là SPA thì không reload trang.
-
-## 7. Accessibility
-
--   Semantic HTML.
--   Label liên kết đúng với Input.
--   Có thể thao tác hoàn toàn bằng bàn phím.
--   Hỗ trợ Screen Reader.
-
-## 8. Responsive
-
-Hoạt động tốt trên Desktop, Tablet và Mobile.
-
-## 9. Lưu ý
-
-Thiết kế theo hướng dễ mở rộng để sau này thay bằng Backend API,
-Database, JWT, Session/Cookie và phân quyền.
-
-## 10. Thông báo thành công bằng Toast (Snackbar)
-
-Sau khi người dùng thực hiện hành động thành công, hiển thị Toast
-(Snackbar).
-
-### Yêu cầu
-
--   Sử dụng `role="status"` kết hợp Live Region.
--   Hiển thị ở góc cố định, không che nội dung chính.
--   Tự động ẩn các thông báo không quan trọng sau khoảng 3--5 giây.
--   Nếu người dùng hover hoặc Toast có keyboard focus thì tạm dừng bộ
-    đếm tự động ẩn.
--   Khi hover/focus kết thúc thì tiếp tục đếm thời gian.
-
-### Accessibility
-
--   Không tự động cướp keyboard focus.
--   Hiệu ứng nhẹ nhàng.
--   Vị trí hiển thị nhất quán trên toàn website.
-
-### Chỉ dùng cho
-
--   Đăng nhập thành công.
--   Lưu/Cập nhật/Xóa dữ liệu thành công.
-
-Không dùng Toast cho lỗi nghiêm trọng hoặc yêu cầu xác nhận; hãy dùng
-Dialog hoặc Modal.
+- Hoạt động tốt trên các kích thước màn hình mobile phổ biến.
+- Vùng kết quả đáp ứng thao tác vuốt, không gây cuộn ngoài ý muốn cho
+  trang nền khi người dùng đang xem danh sách sản phẩm.

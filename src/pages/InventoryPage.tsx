@@ -513,13 +513,30 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       </div>
 
       {/* Search Sheet for touch landscape / tablet */}
-      <ResponsiveSearchSheet
-        isOpen={isSearchSheetOpen}
-        onClose={() => setIsSearchSheetOpen(false)}
-        value={searchTerm}
-        onChange={setSearchTerm}
-        placeholder="Tìm sản phẩm, SKU..."
-        title="Tìm kiếm sản phẩm trong kho"
+       <ResponsiveSearchSheet
+         isOpen={isSearchSheetOpen}
+         onClose={() => setIsSearchSheetOpen(false)}
+         value={searchTerm}
+         onChange={setSearchTerm}
+         placeholder="Tìm sản phẩm, SKU..."
+         title="Tìm kiếm sản phẩm trong kho"
+         productResults={inventory
+           .filter((item) => {
+             const term = searchTerm.trim().toLowerCase();
+             return term
+               ? item.product_name.toLowerCase().includes(term) || item.sku.toLowerCase().includes(term)
+               : false;
+           })
+           .map((item) => ({
+             id: item.id,
+             name: item.product_name,
+             sku: item.sku,
+             price: item.selling_price,
+           }))}
+         onSelectProduct={(product) => {
+           setSearchTerm(product.name);
+           setIsSearchSheetOpen(false);
+         }}
       />
 
       {/* Main Table */}

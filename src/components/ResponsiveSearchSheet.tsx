@@ -1,7 +1,14 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X } from 'lucide-react';
+import { Package, Search, X } from 'lucide-react';
 import { SearchInput } from './SearchInput';
+
+export interface ProductSearchResult {
+  id: string;
+  name: string;
+  sku: string;
+  price?: number;
+}
 
 interface ResponsiveSearchSheetProps {
   isOpen: boolean;
@@ -10,6 +17,8 @@ interface ResponsiveSearchSheetProps {
   onChange: (value: string) => void;
   placeholder?: string;
   title?: string;
+  productResults?: ProductSearchResult[];
+  onSelectProduct?: (product: ProductSearchResult) => void;
 }
 
 export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
@@ -19,23 +28,38 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
   onChange,
   placeholder = 'Tìm kiếm...',
   title = 'Tìm kiếm',
+  productResults,
+  onSelectProduct,
 }) => {
-  // Listen for Escape key to close sheet
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  const hasProductSearch = productResults !== undefined;
+  const normalizedValue = value.trim();
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-16 sm:pt-20">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-3 pt-16 sm:p-4 sm:pt-20">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -45,32 +69,32 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
             className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
           />
 
-          {/* Search Card / Popover */}
           <motion.div
             initial={{ opacity: 0, y: -16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -16, scale: 0.96 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-4 sm:p-5 flex flex-col gap-3"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="responsive-search-sheet-title"
+            className="relative z-10 flex max-h-[calc(100dvh-5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:max-h-[calc(100dvh-6rem)] sm:p-5"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold text-sm">
-                <Search className="w-4 h-4 text-amber-500" />
-                <span>{title}</span>
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+                <Search className="h-4 w-4 text-amber-500" />
+                <span id="responsive-search-sheet-title">{title}</span>
               </div>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Đóng tìm kiếm"
-                className="w-11 h-11 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Input with autoFocus & clear button */}
-            <div className="pt-1">
+            <div className="shrink-0 pt-3">
               <SearchInput
                 value={value}
                 onChange={onChange}
@@ -79,17 +103,63 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
               />
             </div>
 
-            {/* Quick action bar */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
-              <span>{value ? `Đang lọc: "${value}"` : 'Nhập từ khóa để lọc dữ liệu'}</span>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm shadow-amber-500/10 transition-colors"
+            {hasProductSearch ? (
+              <div
+                className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-slate-100 dark:border-slate-800"
+                role="listbox"
+                aria-label="Kết quả tìm kiếm sản phẩm"
               >
-                Xem kết quả
-              </button>
-            </div>
+                {!normalizedValue ? (
+                  <p className="p-6 text-center text-sm text-slate-400">
+                    Nhập tên sản phẩm hoặc SKU để xem kết quả.
+                  </p>
+                ) : productResults.length === 0 ? (
+                  <p className="p-6 text-center text-sm text-slate-400">
+                    Không có sản phẩm khớp với "{value}".
+                  </p>
+                ) : (
+                  productResults.map((product) => (
+                    <button
+                      key={product.id}
+                      type="button"
+                      role="option"
+                      aria-label={`Chọn ${product.name}`}
+                      onClick={() => onSelectProduct?.(product)}
+                      className="flex w-full items-center gap-3 border-b border-slate-100 p-3 text-left last:border-b-0 focus:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 dark:border-slate-800 dark:focus:bg-amber-500/10"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      >
+                        <Package className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                          {product.name}
+                        </span>
+                        <span className="block truncate text-xs text-slate-400">{product.sku}</span>
+                      </span>
+                      {typeof product.price === 'number' && (
+                        <span className="shrink-0 text-sm font-bold text-slate-800 dark:text-slate-200">
+                          {product.price.toLocaleString('vi-VN')}đ
+                        </span>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="mt-3 flex shrink-0 items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-400 dark:border-slate-800">
+                <span>{value ? `Đang lọc: "${value}"` : 'Nhập từ khóa để lọc dữ liệu'}</span>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-amber-500/10 transition-colors hover:bg-amber-600"
+                >
+                  Xem kết quả
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
       )}
