@@ -52,9 +52,9 @@ const roleOptions: RoleOption[] = [
     value: 'staff',
     label: 'Nhân Viên',
     icon: <User className="w-4 h-4" />,
-    color: 'text-slate-400',
+    color: 'text-muted',
     bg: 'bg-slate-500/15',
-    border: 'border-slate-500/40 ring-slate-500/30',
+    border: 'border-line ring-line',
   },
 ];
 
@@ -76,17 +76,17 @@ function RoleSelector({ value, onChange, disabled = false }: { value: 'owner' | 
             } ${
               selected
                 ? `${opt.bg} ${opt.border} ring-2`
-                : 'border-slate-800 bg-slate-950 hover:border-slate-700'
+                : 'border-line bg-bg hover:border-line-strong'
             }`}
           >
             <motion.span
               animate={selected ? { scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] } : { scale: 1 }}
               transition={{ duration: 0.4 }}
-              className={selected ? opt.color : 'text-slate-500'}
+              className={selected ? opt.color : 'text-muted'}
             >
               {opt.icon}
             </motion.span>
-            <span className={`text-[11px] font-bold ${selected ? 'text-slate-100' : 'text-slate-500'}`}>
+            <span className={`text-[11px] font-bold ${selected ? 'text-foreground' : 'text-muted'}`}>
               {opt.label}
             </span>
             <AnimatePresence>
@@ -148,7 +148,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
   const roleBadge = (role: string) => {
     if (role === 'owner') return 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300';
     if (role === 'manager') return 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300';
-    return 'bg-slate-800 text-slate-300';
+    return 'bg-surface-alt text-secondary';
   };
 
   const roleIconColor = (role: string) => {
@@ -303,8 +303,8 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
               <Shield className="w-6 h-6" />
             </motion.div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100">Quản Lý Tài Khoản</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Chỉ tài khoản Owner có quyền tạo, chỉnh sửa và xóa tài khoản đăng nhập.</p>
+              <h2 className="text-xl font-bold text-foreground">Quản Lý Tài Khoản</h2>
+              <p className="text-sm text-muted mt-1">Chỉ tài khoản Owner có quyền tạo, chỉnh sửa và xóa tài khoản đăng nhập.</p>
             </div>
           </div>
           <motion.button
@@ -326,16 +326,16 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
         transition={{ duration: 0.35, delay: 0.1, ease: 'easeOut' }}
         className="glass-panel overflow-hidden rounded-3xl"
       >
-        <div className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-line flex items-center justify-between">
           <div className="flex items-center gap-3">
             <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}>
               <Users className="w-5 h-5 text-amber-500" />
             </motion.div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300">Danh sách tài khoản</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-secondary">Danh sách tài khoản</h3>
           </div>
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{profiles.length} tài khoản</span>
+          <span className="text-xs font-bold text-muted">{profiles.length} tài khoản</span>
         </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+        <div className="divide-y divide-line">
           <AnimatePresence initial={false}>
             {sortedProfiles.map((profile) => (
               <motion.div
@@ -345,7 +345,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20, height: 0 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="p-4 flex items-center justify-between gap-4 hover:bg-slate-900/70 transition-colors"
+                className="p-4 flex items-center justify-between gap-4 hover:bg-surface transition-colors"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <motion.div
@@ -359,7 +359,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                   </motion.div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="truncate text-sm font-bold text-slate-100">{profile.full_name}</h4>
+                      <h4 className="truncate text-sm font-bold text-foreground">{profile.full_name}</h4>
                       {profile.id === currentUser.id && <span className="text-[10px] font-bold text-amber-500">(bạn)</span>}
                       {profile.is_locked && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
@@ -369,7 +369,7 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className={`text-[10px] font-bold px-2 py-1 rounded ${roleBadge(profile.role)} transition-colors`}>{roleLabel(profile.role)}</span>
-                      <span className="text-xs font-semibold text-slate-400">{profile.employee_id ?? 'Chưa có Mã NV'}</span>
+                      <span className="text-xs font-semibold text-muted">{profile.employee_id ?? 'Chưa có Mã NV'}</span>
                     </div>
                   </div>
                 </div>
@@ -420,46 +420,46 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       <AnimatePresence>
         {creating && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !loading && setCreating(null)} className="fixed inset-0 bg-slate-950/90" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !loading && setCreating(null)} className="fixed inset-0 bg-bg" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden z-10">
               {/* Top Bar */}
               <div className="p-5 border-b border-emerald-500/20 bg-emerald-500/10 flex items-center gap-3.5">
-                <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-slate-900/80 shadow-inner">
+                <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-surface shadow-inner">
                   <UserPlus className="w-6 h-6 text-emerald-500" />
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-slate-100">Thêm tài khoản mới</h3>
-                  <p className="text-xs text-slate-400">Tài khoản đăng nhập bằng Mã NV và mật khẩu</p>
+                  <h3 className="text-base font-bold text-foreground">Thêm tài khoản mới</h3>
+                  <p className="text-xs text-muted">Tài khoản đăng nhập bằng Mã NV và mật khẩu</p>
                 </div>
-                <button onClick={() => !loading && setCreating(null)} disabled={loading} className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors disabled:opacity-50 cursor-pointer"><X className="w-4 h-4" /></button>
+                <button onClick={() => !loading && setCreating(null)} disabled={loading} className="p-1.5 text-muted hover:text-secondary rounded-lg hover:bg-surface-alt transition-colors disabled:opacity-50 cursor-pointer"><X className="w-4 h-4" /></button>
               </div>
 
               {/* Body */}
               <form id="create-account-form" onSubmit={handleCreateUser} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Họ và tên</label>
-                  <input type="text" placeholder="Nhập họ và tên nhân viên" value={creating.full_name} onChange={(e) => setCreating({ ...creating, full_name: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-slate-100 transition-shadow" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Họ và tên</label>
+                  <input type="text" placeholder="Nhập họ và tên nhân viên" value={creating.full_name} onChange={(e) => setCreating({ ...creating, full_name: e.target.value })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-foreground transition-shadow" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mã nhân viên</label>
-                    <input type="text" placeholder="VD: NV005" value={creating.employee_id} onChange={(e) => setCreating({ ...creating, employee_id: e.target.value.toUpperCase() })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-slate-100 uppercase transition-shadow" />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Mã nhân viên</label>
+                    <input type="text" placeholder="VD: NV005" value={creating.employee_id} onChange={(e) => setCreating({ ...creating, employee_id: e.target.value.toUpperCase() })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-foreground uppercase transition-shadow" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mật khẩu</label>
-                    <input type="password" placeholder="Tối thiểu 6 ký tự" value={creating.password} onChange={(e) => setCreating({ ...creating, password: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-slate-100 transition-shadow" />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Mật khẩu</label>
+                    <input type="password" placeholder="Tối thiểu 6 ký tự" value={creating.password} onChange={(e) => setCreating({ ...creating, password: e.target.value })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 text-foreground transition-shadow" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Vai trò</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Vai trò</label>
                   <RoleSelector value={creating.role} onChange={(v) => setCreating({ ...creating, role: v })} />
                 </div>
-                <p className="text-xs text-slate-500">Email nội bộ được tạo tự động theo dạng MãNV@npp.local.</p>
+                <p className="text-xs text-muted">Email nội bộ được tạo tự động theo dạng MãNV@npp.local.</p>
               </form>
 
               {/* Footer */}
-              <div className="p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setCreating(null)} disabled={loading} className="px-4 py-2 rounded-xl border border-slate-700/60 text-slate-300 hover:bg-slate-800/70 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50">Hủy</button>
+              <div className="p-4 bg-bg border-t border-line flex items-center justify-end gap-3">
+                <button type="button" onClick={() => setCreating(null)} disabled={loading} className="px-4 py-2 rounded-xl border border-line-strong text-secondary hover:bg-surface-alt font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50">Hủy</button>
                 <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} type="submit" form="create-account-form" disabled={loading} className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-900/30 transition-colors cursor-pointer disabled:opacity-50">
                   {loading ? (
                     <><motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="inline-flex"><Save className="w-4 h-4" /></motion.span><span>Đang tạo...</span></>
@@ -477,49 +477,49 @@ export const AccountsPage: React.FC<AccountsPageProps> = ({
       <AnimatePresence>
         {editing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !savingEdit && setEditing(null)} className="fixed inset-0 bg-slate-950/90" />
-            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-10">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onClick={() => !savingEdit && setEditing(null)} className="fixed inset-0 bg-bg" />
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ type: 'spring', damping: 25, stiffness: 320 }} className="relative w-full max-w-lg bg-surface border border-line rounded-2xl shadow-2xl overflow-hidden z-10">
               {/* Top Bar */}
               <div className="p-5 border-b border-amber-500/20 bg-amber-500/10 flex items-center gap-3.5">
-                <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-slate-900/80 shadow-inner">
+                <motion.div initial={{ rotate: -20, scale: 0.7 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="p-2 rounded-xl bg-surface shadow-inner">
                   <Pencil className="w-6 h-6 text-amber-500" />
                 </motion.div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-slate-100 truncate">Chỉnh sửa tài khoản</h3>
-                  <p className="text-xs text-slate-400 truncate">{editing.profile.full_name} · {editing.profile.employee_id ?? 'Chưa có Mã NV'}</p>
+                  <h3 className="text-base font-bold text-foreground truncate">Chỉnh sửa tài khoản</h3>
+                  <p className="text-xs text-muted truncate">{editing.profile.full_name} · {editing.profile.employee_id ?? 'Chưa có Mã NV'}</p>
                 </div>
-                <button onClick={() => !savingEdit && setEditing(null)} disabled={savingEdit} className="p-1.5 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors disabled:opacity-50 cursor-pointer"><X className="w-4 h-4" /></button>
+                <button onClick={() => !savingEdit && setEditing(null)} disabled={savingEdit} className="p-1.5 text-muted hover:text-secondary rounded-lg hover:bg-surface-alt transition-colors disabled:opacity-50 cursor-pointer"><X className="w-4 h-4" /></button>
               </div>
 
               {/* Body */}
               <form id="edit-account-form" onSubmit={handleSaveEdit} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Họ và tên</label>
-                  <input type="text" placeholder="Họ và tên" value={editing.full_name} onChange={(e) => setEditing({ ...editing, full_name: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-100 transition-shadow" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Họ và tên</label>
+                  <input type="text" placeholder="Họ và tên" value={editing.full_name} onChange={(e) => setEditing({ ...editing, full_name: e.target.value })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-foreground transition-shadow" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mã nhân viên</label>
-                    <input type="text" placeholder="Mã nhân viên" value={editing.employee_id} onChange={(e) => setEditing({ ...editing, employee_id: e.target.value.toUpperCase() })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-100 uppercase transition-shadow" />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Mã nhân viên</label>
+                    <input type="text" placeholder="Mã nhân viên" value={editing.employee_id} onChange={(e) => setEditing({ ...editing, employee_id: e.target.value.toUpperCase() })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-foreground uppercase transition-shadow" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Mật khẩu mới</label>
-                    <input type="password" placeholder="Để trống nếu không đổi" value={editing.password} onChange={(e) => setEditing({ ...editing, password: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-100 transition-shadow" />
+                    <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Mật khẩu mới</label>
+                    <input type="password" placeholder="Để trống nếu không đổi" value={editing.password} onChange={(e) => setEditing({ ...editing, password: e.target.value })} className="w-full bg-bg border border-line rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-foreground transition-shadow" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Vai trò</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Vai trò</label>
                   <RoleSelector value={editing.role} onChange={(v) => setEditing({ ...editing, role: v })} disabled={editing.profile.id === currentUser.id} />
                 </div>
                 {editing.profile.id === currentUser.id && (
                   <p className="text-xs text-amber-500">Owner không thể tự điều chỉnh role của bản thân.</p>
                 )}
-                <p className="text-xs text-slate-500">Thay đổi sẽ được cập nhật lên Supabase ngay lập tức.</p>
+                <p className="text-xs text-muted">Thay đổi sẽ được cập nhật lên Supabase ngay lập tức.</p>
               </form>
 
               {/* Footer */}
-              <div className="p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setEditing(null)} disabled={savingEdit} className="px-4 py-2 rounded-xl border border-slate-700/60 text-slate-300 hover:bg-slate-800/70 font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50">Hủy</button>
+              <div className="p-4 bg-bg border-t border-line flex items-center justify-end gap-3">
+                <button type="button" onClick={() => setEditing(null)} disabled={savingEdit} className="px-4 py-2 rounded-xl border border-line-strong text-secondary hover:bg-surface-alt font-semibold text-xs transition-colors cursor-pointer disabled:opacity-50">Hủy</button>
                 <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} type="submit" form="edit-account-form" disabled={savingEdit} className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-lg shadow-amber-900/30 transition-colors cursor-pointer disabled:opacity-50">
                   {savingEdit ? (
                     <><motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }} className="inline-flex"><Save className="w-4 h-4" /></motion.span><span>Đang lưu...</span></>

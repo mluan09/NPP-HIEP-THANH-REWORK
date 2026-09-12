@@ -66,7 +66,7 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-bg/80 backdrop-blur-sm"
           />
 
           <motion.div
@@ -77,10 +77,10 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby="responsive-search-sheet-title"
-            className="relative z-10 flex max-h-[calc(100dvh-5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:max-h-[calc(100dvh-6rem)] sm:p-5"
+            className="relative z-10 flex max-h-[calc(100dvh-5rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 shadow-2xl sm:max-h-[calc(100dvh-6rem)] sm:p-5"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-800">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
+            <div className="flex shrink-0 items-center justify-between border-b border-line pb-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-foreground">
                 <Search className="h-4 w-4 text-amber-500" />
                 <span id="responsive-search-sheet-title">{title}</span>
               </div>
@@ -88,7 +88,7 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
                 type="button"
                 onClick={onClose}
                 aria-label="Đóng tìm kiếm"
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-muted transition-colors hover:bg-surface-alt hover:text-foreground"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -105,16 +105,16 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
 
             {hasProductSearch ? (
               <div
-                className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-slate-100 dark:border-slate-800"
+                className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl border border-line"
                 role="listbox"
                 aria-label="Kết quả tìm kiếm sản phẩm"
               >
                 {!normalizedValue ? (
-                  <p className="p-6 text-center text-sm text-slate-400">
+                  <p className="p-6 text-center text-sm text-muted">
                     Nhập tên sản phẩm hoặc SKU để xem kết quả.
                   </p>
                 ) : productResults.length === 0 ? (
-                  <p className="p-6 text-center text-sm text-slate-400">
+                  <p className="p-6 text-center text-sm text-muted">
                     Không có sản phẩm khớp với "{value}".
                   </p>
                 ) : (
@@ -125,22 +125,22 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
                       role="option"
                       aria-label={`Chọn ${product.name}`}
                       onClick={() => onSelectProduct?.(product)}
-                      className="flex w-full items-center gap-3 border-b border-slate-100 p-3 text-left last:border-b-0 focus:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 dark:border-slate-800 dark:focus:bg-amber-500/10"
+                      className="flex w-full items-center gap-3 border-b border-line p-3 text-left last:border-b-0 focus:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500"
                     >
                       <span
                         aria-hidden="true"
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500"
                       >
                         <Package className="h-5 w-5" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                        <span className="block truncate text-sm font-bold text-foreground">
                           {product.name}
                         </span>
-                        <span className="block truncate text-xs text-slate-400">{product.sku}</span>
+                        <span className="block truncate text-xs text-muted">{product.sku}</span>
                       </span>
                       {typeof product.price === 'number' && (
-                        <span className="shrink-0 text-sm font-bold text-slate-800 dark:text-slate-200">
+                        <span className="shrink-0 text-sm font-bold text-foreground">
                           {product.price.toLocaleString('vi-VN')}đ
                         </span>
                       )}
@@ -149,7 +149,7 @@ export const ResponsiveSearchSheet: React.FC<ResponsiveSearchSheetProps> = ({
                 )}
               </div>
             ) : (
-              <div className="mt-3 flex shrink-0 items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-400 dark:border-slate-800">
+              <div className="mt-3 flex shrink-0 items-center justify-between border-t border-line pt-3 text-xs text-muted">
                 <span>{value ? `Đang lọc: "${value}"` : 'Nhập từ khóa để lọc dữ liệu'}</span>
                 <button
                   type="button"

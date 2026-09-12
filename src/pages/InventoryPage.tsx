@@ -362,34 +362,34 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     <div className="space-y-6 w-full max-w-full overflow-x-hidden">
       {/* Top Banner and Quick stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-line shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="p-2.5 sm:p-3 bg-amber-500/10 rounded-xl text-amber-600 shrink-0">
             <Package className="w-5 h-5 sm:w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Tổng sản phẩm</span>
-            <span className="text-lg sm:text-xl font-bold dark:text-slate-100">{inventory.length}</span>
+            <span className="text-[11px] sm:text-xs text-muted font-semibold block truncate">Tổng sản phẩm</span>
+            <span className="text-lg sm:text-xl font-bold">{inventory.length}</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-line shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="p-2.5 sm:p-3 bg-rose-500/10 rounded-xl text-rose-600 shrink-0">
             <AlertTriangle className="w-5 h-5 sm:w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Hết hàng</span>
+            <span className="text-[11px] sm:text-xs text-muted font-semibold block truncate">Hết hàng</span>
             <span className="text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400">
               {inventory.filter(i => getCurrentStock(i) <= 0).length}
             </span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-line shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="p-2.5 sm:p-3 bg-amber-500/10 rounded-xl text-amber-500 shrink-0">
             <AlertTriangle className="w-5 h-5 sm:w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Sắp hết hàng</span>
+            <span className="text-[11px] sm:text-xs text-muted font-semibold block truncate">Sắp hết hàng</span>
             <span className="text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-400">
               {inventory.filter(i => {
                 const stock = getCurrentStock(i);
@@ -399,13 +399,13 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
+        <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-line shadow-sm flex items-center gap-3 sm:gap-4 min-w-0">
           <div className="p-2.5 sm:p-3 bg-emerald-500/10 rounded-xl text-emerald-600 shrink-0">
             <RefreshCw className="w-5 h-5 sm:w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[11px] sm:text-xs text-slate-400 font-semibold block truncate">Tổng tồn kho</span>
-            <span className="text-lg sm:text-xl font-bold dark:text-slate-100">
+            <span className="text-[11px] sm:text-xs text-muted font-semibold block truncate">Tổng tồn kho</span>
+            <span className="text-lg sm:text-xl font-bold">
               {inventory.reduce((sum, item) => sum + getCurrentStock(item), 0)}
             </span>
           </div>
@@ -413,7 +413,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-wrap lg:flex-nowrap gap-3 lg:gap-4 items-center justify-between">
+      <div className="bg-surface p-3.5 sm:p-4 rounded-2xl border border-line shadow-sm flex flex-wrap lg:flex-nowrap gap-3 lg:gap-4 items-center justify-between">
         {/* Desktop Search (>= lg) */}
         <div className="hidden lg:block relative w-80">
           <input
@@ -421,9 +421,9 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             placeholder="Tìm sản phẩm, SKU..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+            className="w-full bg-surface-alt border border-line rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
           />
-          <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-muted" />
         </div>
 
         {/* Touch/Tablet Search Icon (< lg) */}
@@ -432,7 +432,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             type="button"
             onClick={() => setIsSearchSheetOpen(true)}
             aria-label="Tìm kiếm sản phẩm"
-            className="min-w-[44px] min-h-[44px] px-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            className="min-w-[44px] min-h-[44px] px-3 rounded-xl bg-surface-alt border border-line text-muted hover:text-amber-500 dark:hover:text-amber-400 flex items-center justify-center gap-2 cursor-pointer transition-colors"
           >
             <Search className="w-5 h-5 text-amber-500" />
             {searchTerm ? (
@@ -440,7 +440,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                 {searchTerm}
               </span>
             ) : (
-              <span className="text-xs text-slate-400">Tìm kiếm...</span>
+              <span className="text-xs text-muted">Tìm kiếm...</span>
             )}
           </button>
           {searchTerm && (
@@ -448,7 +448,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               type="button"
               onClick={() => setSearchTerm('')}
               aria-label="Xóa bộ lọc tìm kiếm"
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-xl cursor-pointer"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-secondary rounded-xl cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -456,13 +456,13 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
         </div>
 
         {/* Filters Tabs */}
-        <div className="flex gap-1.5 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl">
+        <div className="flex gap-1.5 bg-surface-alt p-1 rounded-xl">
           <button
             onClick={() => setFilterTab('all')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'all'
-                ? 'bg-white dark:bg-slate-800 shadow-sm text-slate-800 dark:text-slate-100'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+                ? 'bg-surface shadow-sm text-foreground'
+                : 'text-muted hover:text-secondary'
             }`}
           >
             Tất cả
@@ -471,8 +471,8 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             onClick={() => setFilterTab('low')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'low'
-                ? 'bg-white dark:bg-slate-800 shadow-sm text-amber-600 dark:text-amber-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+                ? 'bg-surface shadow-sm text-amber-600 dark:text-amber-400'
+                : 'text-muted hover:text-secondary'
             }`}
           >
             Sắp hết
@@ -481,8 +481,8 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
             onClick={() => setFilterTab('out')}
             className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer ${
               filterTab === 'out'
-                ? 'bg-white dark:bg-slate-800 shadow-sm text-rose-600 dark:text-rose-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'
+                ? 'bg-surface shadow-sm text-rose-600 dark:text-rose-400'
+                : 'text-muted hover:text-secondary'
             }`}
           >
             Hết hàng
@@ -503,7 +503,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
           {/* Import Excel Button: hidden on touch/tablet < lg, visible on lg+ */}
           <button
             onClick={handleImportClick}
-            className="hidden lg:flex bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-200 py-2.5 px-3.5 rounded-xl text-xs items-center justify-center gap-1.5 cursor-pointer transition-colors min-h-[44px]"
+            className="hidden lg:flex bg-surface-alt hover:bg-surface-alt dark:hover:bg-surface-alt text-secondary py-2.5 px-3.5 rounded-xl text-xs items-center justify-center gap-1.5 cursor-pointer transition-colors min-h-[44px]"
             title="Nhập từ Excel"
           >
             <Upload className="w-4 h-4" />
@@ -540,31 +540,31 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       />
 
       {/* Main Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-line shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-150 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/55">
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-12 text-center">STT</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên sản phẩm</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Đơn vị</th>
+              <tr className="border-b border-line bg-surface-alt">
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider w-12 text-center">STT</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">Tên sản phẩm</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">Đơn vị</th>
                 {canSeeCost && (
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Giá vốn</th>
+                  <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Giá vốn</th>
                 )}
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Giá bán</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Tồn đầu</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Nhập</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Xuất</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Tồn cuối</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Giá bán</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Tồn đầu</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Nhập</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Xuất</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Tồn cuối</th>
                 {canEdit && (
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Hành động</th>
+                  <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Hành động</th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-150 dark:divide-slate-800/60">
+            <tbody className="divide-y divide-line">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={canEdit ? 10 : 8} className="p-8 text-center text-slate-400 text-sm">
+                  <td colSpan={canEdit ? 10 : 8} className="p-8 text-center text-muted text-sm">
                     Không tìm thấy sản phẩm nào
                   </td>
                 </tr>
@@ -575,19 +575,19 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                   const isLow = stock > 0 && stock <= 25;
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="p-4 text-sm font-semibold text-slate-500 dark:text-slate-400 text-center">{idx + 1}</td>
-                      <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100">{item.product_name}</td>
-                      <td className="p-4 text-sm text-slate-600 dark:text-slate-400">{item.unit}</td>
+                    <tr key={item.id} className="hover:bg-surface-alt dark:hover:bg-surface-alt transition-colors">
+                      <td className="p-4 text-sm font-semibold text-muted text-center">{idx + 1}</td>
+                      <td className="p-4 text-sm font-bold text-foreground">{item.product_name}</td>
+                      <td className="p-4 text-sm text-secondary">{item.unit}</td>
                       {canSeeCost && (
-                        <td className="p-4 text-sm font-medium text-slate-800 dark:text-slate-300 text-right">
+                        <td className="p-4 text-sm font-medium text-foreground text-right">
                           {item.cost_price.toLocaleString('vi-VN')}đ
                         </td>
                       )}
-                      <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-200 text-right">
+                      <td className="p-4 text-sm font-bold text-foreground text-right">
                         {item.selling_price.toLocaleString('vi-VN')}đ
                       </td>
-                      <td className="p-4 text-sm text-slate-500 dark:text-slate-400 text-center">{item.initial_stock}</td>
+                      <td className="p-4 text-sm text-muted text-center">{item.initial_stock}</td>
                       <td className="p-4 text-sm text-emerald-600 dark:text-emerald-400 text-center font-medium">+{item.import_qty}</td>
                       <td className="p-4 text-sm text-rose-600 dark:text-rose-400 text-center font-medium">-{item.export_qty}</td>
                       <td className="p-4 text-center">
@@ -606,14 +606,14 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                           <div className="flex justify-center gap-1.5">
                             <button
                               onClick={() => openEditDialog(item)}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg cursor-pointer transition-colors"
+                              className="p-1.5 bg-surface-alt text-secondary hover:text-amber-500 dark:hover:text-amber-400 rounded-lg cursor-pointer transition-colors"
                               title="Sửa sản phẩm"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteItem(item.id)}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
+                              className="p-1.5 bg-surface-alt text-secondary hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
                               title="Xóa"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -639,24 +639,24 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDialogOpen(false)}
-              className="fixed inset-0 bg-slate-950/90"
+              className="fixed inset-0 bg-bg"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 w-full max-w-lg shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
+              className="relative bg-surface rounded-2xl sm:rounded-3xl border border-line w-full max-w-lg shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
-                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line shrink-0 bg-inherit">
+                <h3 className="text-base sm:text-lg font-bold text-foreground">
                   {editingItem ? 'Cập Nhật Sản Phẩm' : 'Thêm Sản Phẩm Mới'}
                 </h3>
                 <button 
                   type="button"
                   aria-label="Đóng"
                   onClick={() => setIsDialogOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-surface-alt dark:hover:bg-surface-alt rounded-xl cursor-pointer text-muted hover:text-secondary transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -665,12 +665,12 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Đơn vị tính</label>
+                  <label className="text-xs font-bold text-muted">Đơn vị tính</label>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setUnitMenuOpen((open) => !open)}
-                      className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 cursor-pointer"
+                      className="w-full flex items-center justify-between bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-sm focus:outline-none cursor-pointer"
                       aria-haspopup="listbox"
                       aria-expanded={unitMenuOpen}
                     >
@@ -678,7 +678,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                       <motion.span
                         animate={{ rotate: unitMenuOpen ? 180 : 0 }}
                         transition={{ duration: 0.18 }}
-                        className="text-slate-400"
+                        className="text-muted"
                       >
                         ▾
                       </motion.span>
@@ -690,7 +690,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -6, scale: 0.98 }}
                           transition={{ duration: 0.16 }}
-                          className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-800"
+                          className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-line bg-surface p-1 shadow-xl-strong-alt"
                           role="listbox"
                         >
                           {[
@@ -718,7 +718,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                               className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                                 unit === option
                                   ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
-                                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
+                                  : 'text-secondary hover:bg-surface-alt dark:hover:bg-surface-alt'
                               }`}
                             >
                               {option}
@@ -731,27 +731,27 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Tên sản phẩm</label>
+                  <label className="text-xs font-bold text-muted">Tên sản phẩm</label>
                   <input
                     type="text"
                     value={productName}
                     onChange={(e) => setProductName(e.target.value)}
                     placeholder="Bia Tiger lon, Pepsi chai..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-sm focus:outline-none"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Giá vốn (đ)</label>
+                    <label className="text-xs font-bold text-muted">Giá vốn (đ)</label>
                     <input
                       type="text"
                       inputMode="numeric"
                       value={formatCurrencyInput(costPrice)}
                       onChange={(e) => setCostPrice(parseCurrencyInput(e.target.value))}
-                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
-                        costPrice > 0 && costPrice < 1000 ? 'border-red-500' : 'border-slate-250 dark:border-slate-800'
+                      className={`w-full bg-surface-alt border rounded-xl px-3.5 py-2 text-sm focus:outline-none ${
+                        costPrice > 0 && costPrice < 1000 ? 'border-red-500' : 'border-line'
                       }`}
                       required
                     />
@@ -760,14 +760,14 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                     )}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Giá bán (đ)</label>
+                    <label className="text-xs font-bold text-muted">Giá bán (đ)</label>
                     <input
                       type="text"
                       inputMode="numeric"
                       value={formatCurrencyInput(sellingPrice)}
                       onChange={(e) => setSellingPrice(parseCurrencyInput(e.target.value))}
-                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
-                        sellingPrice > 0 && sellingPrice < 1000 ? 'border-red-500' : 'border-slate-250 dark:border-slate-800'
+                      className={`w-full bg-surface-alt border rounded-xl px-3.5 py-2 text-sm focus:outline-none ${
+                        sellingPrice > 0 && sellingPrice < 1000 ? 'border-red-500' : 'border-line'
                       }`}
                       required
                     />
@@ -779,41 +779,41 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Tồn ban đầu</label>
+                    <label className="text-xs font-bold text-muted">Tồn ban đầu</label>
                     <input
                       type="number"
                       value={initialStock}
                       onChange={(e) => setInitialStock(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-sm focus:outline-none"
                       required
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Nhập thêm</label>
+                    <label className="text-xs font-bold text-muted">Nhập thêm</label>
                     <input
                       type="number"
                       value={importQty}
                       onChange={(e) => setImportQty(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-sm focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Đã xuất bán</label>
+                    <label className="text-xs font-bold text-muted">Đã xuất bán</label>
                     <input
                       type="number"
                       value={exportQty}
                       onChange={(e) => setExportQty(Number(e.target.value))}
-                      className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100"
+                      className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-sm focus:outline-none"
                     />
                   </div>
                 </div>
                 </div>
 
-                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-line bg-surface flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setIsDialogOpen(false)}
-                    className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-850"
+                    className="px-4 py-2 border border-line-strong text-secondary rounded-xl text-xs cursor-pointer hover:bg-surface-alt dark:hover:bg-surface-alt"
                   >
                     Hủy bỏ
                   </button>
@@ -833,11 +833,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
       {/* Import Excel Modal */}
       {isImportOpen && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-250 dark:border-slate-800 w-full max-w-2xl shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
+          <div className="relative bg-surface rounded-2xl sm:rounded-3xl border border-line w-full max-w-2xl shadow-2xl flex flex-col z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line shrink-0 bg-inherit">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
+                <h3 className="text-base sm:text-lg font-bold text-foreground">
                   Nhập Kho Hàng Từ Spreadsheet
                 </h3>
               </div>
@@ -845,16 +845,16 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                 type="button"
                 aria-label="Đóng"
                 onClick={() => setIsImportOpen(false)}
-                className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
+                className="w-10 h-10 flex items-center justify-center hover:bg-surface-alt dark:hover:bg-surface-alt rounded-xl cursor-pointer text-muted hover:text-secondary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
-              <div className="text-xs text-slate-500 space-y-1">
+              <div className="text-xs text-muted space-y-1">
                 <p>Upload file Excel có bảng như mẫu: STT, Tên hàng hoá, ĐVT, Đơn giá, Tồn đầu/SL, Nhập trong tháng/Lần 1-3, Xuất trong tháng/SL.</p>
-                <p className="font-semibold text-slate-700 dark:text-slate-300">
+                <p className="font-semibold text-secondary">
                   Hệ thống tự map dữ liệu vào: Tên sản phẩm, Đơn vị, Giá bán, Tồn đầu, Nhập, Xuất.
                 </p>
               </div>
@@ -866,7 +866,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                   const file = e.target.files?.[0];
                   if (file) handleParseImportFile(file);
                 }}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-3 text-sm focus:outline-none dark:text-slate-100"
+                className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-3 text-sm focus:outline-none"
               />
 
               {importError && (
@@ -877,11 +877,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
 
               {importPreview.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Xem trước ({importPreview.length} dòng):</span>
-                  <div className="max-h-40 overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+                  <span className="text-xs font-bold text-secondary">Xem trước ({importPreview.length} dòng):</span>
+                  <div className="max-h-40 overflow-y-auto border border-line rounded-xl">
                     <table className="w-full text-xs text-left border-collapse">
-                      <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
-                        <tr className="border-b border-slate-200 dark:border-slate-700">
+                      <thead className="bg-surface-alt sticky top-0">
+                        <tr className="border-b border-line-strong">
                           <th className="p-2 font-bold">SKU</th>
                           <th className="p-2 font-bold">Tên sản phẩm</th>
                           <th className="p-2 font-bold">ĐVT</th>
@@ -892,9 +892,9 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                           <th className="p-2 font-bold text-center">Tồn cuối</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tbody className="divide-y divide-line">
                         {importPreview.map((item, idx) => (
-                          <tr key={idx} className="bg-white dark:bg-slate-900">
+                          <tr key={idx} className="bg-surface">
                             <td className="p-2 font-semibold">{item.sku}</td>
                             <td className="p-2 font-semibold">{item.product_name}</td>
                             <td className="p-2">{item.unit}</td>
@@ -912,14 +912,14 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
               )}
             </div>
 
-            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-line bg-surface flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
               <button
                 type="button"
                 onClick={() => {
                   setIsImportOpen(false);
                   setImportPreview([]);
                 }}
-                className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50"
+                className="px-4 py-2 border border-line-strong text-secondary rounded-xl text-xs cursor-pointer hover:bg-surface-alt"
               >
                 Hủy bỏ
               </button>

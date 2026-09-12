@@ -60,14 +60,14 @@ export const FeedbackPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <section className="xl:col-span-2 rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-sm">
+        <section className="xl:col-span-2 rounded-3xl border border-line bg-surface p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-600 dark:text-amber-400">
               <Send className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-100">Nội dung gửi developer</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Nhập thông tin bên dưới rồi bấm gửi để mở Gmail trên trình duyệt với nội dung đã điền sẵn.</p>
+              <h3 className="text-lg font-bold text-foreground">Nội dung gửi developer</h3>
+              <p className="text-sm text-muted">Nhập thông tin bên dưới rồi bấm gửi để mở Gmail trên trình duyệt với nội dung đã điền sẵn.</p>
             </div>
           </div>
 
@@ -78,7 +78,7 @@ export const FeedbackPage: React.FC = () => {
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
                 feedbackType === 'gop-y'
                   ? 'border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300'
-                  : 'border-slate-800 text-slate-300 hover:bg-slate-800'
+                  : 'border-line text-secondary hover:bg-surface-alt'
               }`}
             >
               <MessageCircle className="w-5 h-5" />
@@ -90,7 +90,7 @@ export const FeedbackPage: React.FC = () => {
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors cursor-pointer ${
                 feedbackType === 'bao-loi'
                   ? 'border-red-500 bg-red-500/10 text-red-700 dark:text-red-300'
-                  : 'border-slate-800 text-slate-300 hover:bg-slate-800'
+                  : 'border-line text-secondary hover:bg-surface-alt'
               }`}
             >
               <Bug className="w-5 h-5" />
@@ -100,7 +100,7 @@ export const FeedbackPage: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 Tiêu đề
               </label>
               <input
@@ -108,12 +108,12 @@ export const FeedbackPage: React.FC = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ví dụ: Lỗi không lưu đơn hàng hoặc góp ý thêm báo cáo..."
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+                className="w-full bg-surface-alt border border-line rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-secondary mb-2">
                 Nội dung chi tiết
               </label>
               <textarea
@@ -121,7 +121,7 @@ export const FeedbackPage: React.FC = () => {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Mô tả góp ý hoặc lỗi bạn gặp. Nếu báo lỗi, hãy ghi thao tác đã làm và màn hình đang dùng."
                 rows={8}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100 resize-none"
+                className="w-full bg-surface-alt border border-line rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none"
               />
             </div>
 
@@ -138,14 +138,14 @@ export const FeedbackPage: React.FC = () => {
         </section>
 
         <aside className="space-y-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm p-5">
+          <div className="bg-surface rounded-3xl border border-line shadow-sm p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-600 dark:text-blue-400">
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-slate-400 font-semibold uppercase">Gmail developer</p>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 break-all">{contactConfig.gmail}</p>
+                <p className="text-xs text-muted font-semibold uppercase">Gmail developer</p>
+                <p className="text-sm font-bold text-foreground break-all">{contactConfig.gmail}</p>
               </div>
             </div>
             <a
@@ -159,14 +159,14 @@ export const FeedbackPage: React.FC = () => {
             </a>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm p-5">
+          <div className="bg-surface rounded-3xl border border-line shadow-sm p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600 dark:text-emerald-400">
                 <Smartphone className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-slate-400 font-semibold uppercase">SĐT Zalo</p>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{contactConfig.zaloPhone}</p>
+                <p className="text-xs text-muted font-semibold uppercase">SĐT Zalo</p>
+                <p className="text-sm font-bold text-foreground">{contactConfig.zaloPhone}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-2">
@@ -182,7 +182,7 @@ export const FeedbackPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyPhone}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800/50 text-sm font-semibold transition-colors cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-line text-secondary hover:bg-surface-alt dark:hover:bg-surface-alt text-sm font-semibold transition-colors cursor-pointer"
               >
                 <Copy className="w-4 h-4" />
                 Sao chép SĐT

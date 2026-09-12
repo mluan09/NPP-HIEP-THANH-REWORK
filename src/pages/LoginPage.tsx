@@ -151,13 +151,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bg via-bg to-bg p-4 relative overflow-hidden">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-orange-600/5 rounded-full blur-2xl pointer-events-none" />
 
-      <div className="relative w-full max-w-sm space-y-5 rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:max-w-md sm:space-y-6 sm:p-8">
+      <div className="relative w-full max-w-sm space-y-5 rounded-3xl border border-line bg-surface p-5 shadow-2xl sm:max-w-md sm:space-y-6 sm:p-8">
         <div className="flex flex-col items-center gap-4 pb-2">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-amber-500/20 shadow-lg shadow-amber-500/10 bg-slate-800/50 flex items-center justify-center">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-amber-500/20 shadow-lg shadow-amber-500/10 bg-surface-alt flex items-center justify-center">
             <img
               src="/logo-new.png"
               alt="NPP Hiệp Thành Logo"
@@ -182,22 +182,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <h1 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 tracking-widest uppercase">
               NPP Hiệp Thành
             </h1>
-            <h2 className="text-lg font-bold text-slate-100">
+            <h2 className="text-lg font-bold text-foreground">
               Hệ Thống Quản Lý Phân Phối
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted">
               Dành cho Nhà phân phối Bia & Nước giải khát Hiệp Thành
             </p>
           </div>
         </div>
 
-        <div className="border-t border-slate-800/60" />
+        <div className="border-t border-line" />
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
             <label
               htmlFor="employee-id-input"
-              className="block text-sm sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+              className="block text-sm sm:text-xs font-bold text-muted uppercase tracking-wider cursor-pointer"
             >
               Mã nhân viên
             </label>
@@ -216,12 +216,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder="Nhập mã nhân viên được ADMIN cấp"
                 aria-invalid={Boolean(fieldErrors.employeeId)}
                 aria-describedby={fieldErrors.employeeId ? 'employee-id-error' : undefined}
-                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-4 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 uppercase tracking-wider ${fieldErrors.employeeId
+                className={`w-full bg-surface-alt border rounded-xl pl-10 pr-4 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-foreground transition-all placeholder:text-muted uppercase tracking-wider ${fieldErrors.employeeId
                   ? 'border-rose-500/80 focus:ring-rose-500/40 animate-[pulse_1.2s_ease-in-out_1]'
-                  : 'border-slate-700/50 focus:ring-amber-500/50'
+                  : 'border-line-strong focus:ring-amber-500/50'
                   }`}
               />
-              <User className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500 pointer-events-none" />
+              <User className="absolute left-3.5 top-3.5 w-4 h-4 text-muted pointer-events-none" />
               <AnimatePresence>
                 {fieldErrors.employeeId && (
                   <motion.div
@@ -245,7 +245,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="space-y-1.5">
             <label
               htmlFor="password-input"
-              className="block text-sm sm:text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer"
+              className="block text-sm sm:text-xs font-bold text-muted uppercase tracking-wider cursor-pointer"
             >
               Mật khẩu
             </label>
@@ -265,19 +265,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder="Nhập mật khẩu"
                 aria-invalid={Boolean(fieldErrors.password)}
                 aria-describedby={fieldErrors.password ? 'password-error' : undefined}
-                className={`w-full bg-slate-800/80 border rounded-xl pl-10 pr-12 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-slate-100 transition-all placeholder:text-slate-500 ${fieldErrors.password
+                className={`w-full bg-surface-alt border rounded-xl pl-10 pr-12 py-3.5 sm:py-3 text-base sm:text-sm focus:outline-none focus:ring-2 text-foreground transition-all placeholder:text-muted ${fieldErrors.password
                   ? 'border-rose-500/80 focus:ring-rose-500/40 animate-[pulse_1.2s_ease-in-out_1]'
-                  : 'border-slate-700/50 focus:ring-amber-500/50'
+                  : 'border-line-strong focus:ring-amber-500/50'
                   }`}
               />
-              <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500 pointer-events-none" />
+              <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-muted pointer-events-none" />
               <button
                 type="button"
                 onClick={handleTogglePassword}
                 onMouseDown={(e) => e.preventDefault()}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 aria-pressed={showPassword}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-200 focus:outline-none focus:text-slate-100 p-0.5 rounded transition-colors cursor-pointer"
+                className="absolute right-3.5 top-3.5 text-muted hover:text-secondary focus:outline-none focus:text-foreground p-0.5 rounded transition-colors cursor-pointer"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />

@@ -96,7 +96,7 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={showCancel && onCancel ? onCancel : onConfirm}
-          className="fixed inset-0 bg-slate-950/90"
+          className="fixed inset-0 bg-bg/90"
         />
 
         {/* Modal Window */}
@@ -105,15 +105,15 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh]"
+          className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh]"
         >
           {/* Top Bar Accent */}
           <div className={`p-3.5 sm:p-4 border-b flex items-center gap-3.5 shrink-0 ${getHeaderBg()}`}>
-            <div className="p-2 rounded-xl bg-slate-900/80 shadow-inner shrink-0">
+            <div className="p-2 rounded-xl bg-surface/80 shadow-inner shrink-0">
               {getIcon()}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-slate-100 truncate">
+              <h3 className="text-base font-bold text-foreground truncate">
                 {title}
               </h3>
             </div>
@@ -122,7 +122,7 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
                 type="button"
                 aria-label="Đóng"
                 onClick={onCancel}
-                className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800/60 transition-colors cursor-pointer"
+                className="w-9 h-9 flex items-center justify-center text-muted hover:text-foreground rounded-lg hover:bg-surface-alt/60 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -131,18 +131,18 @@ export const ConfirmModal: React.FC<ModalOptions> = ({
 
           {/* Body */}
           <div className="p-5 sm:p-6 overflow-y-auto flex-1 overscroll-contain">
-            <div className="text-sm text-slate-300 whitespace-pre-line leading-relaxed">
+            <div className="text-sm text-secondary whitespace-pre-line leading-relaxed">
               {message}
             </div>
           </div>
 
           {/* Footer Buttons */}
-          <div className="p-3.5 sm:p-4 bg-slate-950/50 border-t border-slate-800/60 flex items-center justify-end gap-3 shrink-0 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))]">
+          <div className="p-3.5 sm:p-4 bg-bg/50 border-t border-line/60 flex items-center justify-end gap-3 shrink-0 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))]">
             {showCancel && onCancel && (
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 rounded-xl border border-slate-700/60 text-slate-300 hover:bg-slate-800/70 font-semibold text-xs transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-line-strong text-secondary hover:bg-surface-alt font-semibold text-xs transition-colors cursor-pointer"
               >
                 {cancelText}
               </button>

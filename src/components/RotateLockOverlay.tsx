@@ -38,7 +38,7 @@ export function RotateLockOverlay({ isAuthenticated }: RotateLockOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[99999] flex h-[100dvh] w-screen items-center justify-center bg-slate-950 px-6 text-center text-slate-100 select-none touch-none overscroll-none"
+      className="fixed inset-0 z-[99999] flex h-[100dvh] w-screen items-center justify-center bg-bg px-6 text-center text-foreground select-none touch-none overscroll-none"
       role="dialog"
       aria-modal="true"
       aria-label="Xoay thiết bị"
@@ -60,7 +60,7 @@ export function RotateLockOverlay({ isAuthenticated }: RotateLockOverlayProps) {
         </div>
         <div>
           <h2 className="text-xl font-bold">Vui lòng xoay ngang thiết bị</h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">
+          <p className="mt-2 text-sm leading-relaxed text-muted">
             Xoay ngang điện thoại hoặc máy tính bảng để tiếp tục sử dụng hệ thống.
           </p>
         </div>

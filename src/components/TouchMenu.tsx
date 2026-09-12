@@ -82,7 +82,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
         aria-expanded={isOpen}
         aria-controls="touch-menu"
         onClick={onToggle}
-        className="touch-target flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-slate-100 shadow-sm transition-colors hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/60 cursor-pointer"
+        className="touch-target flex h-10 w-10 items-center justify-center rounded-xl border border-line-strong bg-surface-alt text-foreground shadow-sm transition-colors hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-amber-500/60 cursor-pointer"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -97,7 +97,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-            className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-3.75rem)] overflow-y-auto overscroll-contain rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-xl shadow-black/30 touch-pan-y"
+            className="absolute left-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-3.75rem)] overflow-y-auto overscroll-contain rounded-2xl border border-line-strong bg-surface p-2 shadow-xl shadow-black/30 touch-pan-y"
           >
             <nav className={isSmallScreen ? 'space-y-0.5' : 'space-y-1'}>
               {allowedItems.map((item, index) => {
@@ -118,7 +118,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
                           ? 'min-h-[36px] gap-2.5 px-2.5 py-1.5 text-xs'
                           : 'min-h-11 gap-3 px-3 py-2.5 text-sm font-semibold'
                       } ${
-                        isActive ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-slate-200 hover:bg-slate-800'
+                        isActive ? 'bg-amber-500/20 text-amber-300 font-bold' : 'text-secondary hover:bg-surface-alt'
                       }`
                     }
                   >
@@ -128,7 +128,7 @@ export const TouchMenu: React.FC<TouchMenuProps> = ({
                 );
               })}
             </nav>
-            <div className={`border-t border-slate-800 ${isSmallScreen ? 'my-1.5' : 'my-2'}`} />
+            <div className={`border-t border-line ${isSmallScreen ? 'my-1.5' : 'my-2'}`} />
             <button
               type="button"
               role="menuitem"

@@ -76,7 +76,7 @@ const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
       onFocus={handleFocus}
       onBlur={handleBlur}
       tabIndex={0}
-      className={`flex items-center gap-3 bg-slate-900 text-slate-100 border shadow-xl px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 max-w-sm w-full cursor-default ${
+      className={`flex items-center gap-3 bg-surface text-foreground border shadow-xl px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 max-w-sm w-full cursor-default ${
         toast.type === 'warning'
           ? 'border-red-500/60 shadow-red-950/40 focus:ring-red-500/50'
           : 'border-emerald-500/40 shadow-emerald-950/30 focus:ring-emerald-500/50'
@@ -85,12 +85,12 @@ const SingleToast: React.FC<SingleToastProps> = ({ toast, onClose }) => {
       <div className={`p-1 rounded-lg flex-shrink-0 ${toast.type === 'warning' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
         {toast.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
       </div>
-      <p className="text-sm font-medium flex-1 text-slate-200 leading-snug">{toast.message}</p>
+      <p className="text-sm font-medium flex-1 text-secondary leading-snug">{toast.message}</p>
       <button
         type="button"
         onClick={handleClose}
         aria-label="Đóng thông báo"
-        className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+        className="text-muted hover:text-foreground p-1 rounded-lg hover:bg-surface-alt transition-colors cursor-pointer"
       >
         <X className="w-4 h-4" />
       </button>

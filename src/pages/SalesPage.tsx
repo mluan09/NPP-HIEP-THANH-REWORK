@@ -346,8 +346,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       {/* Product list selector */}
       <div className="lg:col-span-2 space-y-4">
         {/* Search header */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-3.5">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-surface p-5 rounded-3xl border border-line shadow-sm space-y-3.5">
+          <h3 className="text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-amber-500" />
             <span>Chọn sản phẩm bán hàng</span>
           </h3>
@@ -358,16 +358,16 @@ export const SalesPage: React.FC<SalesPageProps> = ({
               placeholder="Gõ tên sản phẩm, mã SKU để tìm kiếm..."
               value={productSearch}
               onChange={(e) => setProductSearch(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-850 rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 dark:text-slate-100"
+              className="w-full bg-surface-alt border border-line rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
             />
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-muted" />
           </div>
 
           {/* Searched item results dropdown panel */}
           {productSearch && (
-            <div className="border border-slate-200/60 dark:border-slate-800 rounded-2xl max-h-60 overflow-y-auto bg-slate-50/90 dark:bg-slate-950 divide-y divide-slate-200/40 dark:divide-slate-850 shadow-lg">
+            <div className="border border-line rounded-2xl max-h-60 overflow-y-auto bg-surface-alt divide-y divide-line shadow-lg">
               {filteredProducts.length === 0 ? (
-                <div className="p-4 text-center text-slate-400 text-xs font-medium">
+                <div className="p-4 text-center text-muted text-xs font-medium">
                   Không tìm thấy sản phẩm nào phù hợp
                 </div>
               ) : (
@@ -377,14 +377,14 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                     <div
                       key={p.id}
                       onClick={() => addToCart(p)}
-                      className="p-3 flex items-center justify-between hover:bg-amber-500/5 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                      className="p-3 flex items-center justify-between hover:bg-amber-500/5 dark:hover:bg-surface-alt cursor-pointer transition-colors"
                     >
                       <div>
-                        <span className="text-xs font-semibold text-slate-400 block">{p.sku}</span>
-                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{p.product_name}</span>
+                        <span className="text-xs font-semibold text-muted block">{p.sku}</span>
+                        <span className="text-sm font-bold text-foreground">{p.product_name}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-bold text-amber-600 dark:text-amber-450 block">
+                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400 block">
                           {p.selling_price.toLocaleString('vi-VN')}đ / {p.unit}
                         </span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${stock <= 0
@@ -403,9 +403,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({
         </div>
 
         {/* Selected Cart Items Table */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm overflow-hidden flex flex-col min-h-[350px]">
-          <div className="p-5 border-b border-slate-150 dark:border-slate-800">
-            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">
+        <div className="bg-surface rounded-3xl border border-line shadow-sm overflow-hidden flex flex-col min-h-[350px]">
+          <div className="p-5 border-b border-line">
+            <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">
               Danh sách sản phẩm xuất bán ({cart.length})
             </h3>
           </div>
@@ -413,7 +413,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
           <div className="flex-1 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/40 text-slate-400">
+                <tr className="border-b border-line bg-surface-alt text-muted">
                   <th className="p-4 text-xs font-bold uppercase tracking-wider">Sản phẩm</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-center">Số lượng</th>
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-right">Đơn giá bán</th>
@@ -421,27 +421,27 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                   <th className="p-4 text-xs font-bold uppercase tracking-wider text-center"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-line">
                 {cart.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-slate-400 text-sm font-semibold">
+                    <td colSpan={5} className="p-12 text-center text-muted text-sm font-semibold">
                       Chưa chọn sản phẩm nào. Dùng thanh tìm kiếm phía trên để thêm sản phẩm vào đơn.
                     </td>
                   </tr>
                 ) : (
                   cart.map((item) => (
-                    <tr key={item.product.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10">
+                    <tr key={item.product.id} className="hover:bg-surface-alt dark:hover:bg-surface-alt">
                       <td className="p-4">
-                        <span className="text-xs text-slate-400 block">{item.product.sku}</span>
-                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200">{item.product.product_name}</span>
-                        <span className="text-[10px] text-slate-400 font-semibold block mt-1">Đơn vị: {item.product.unit}</span>
+                        <span className="text-xs text-muted block">{item.product.sku}</span>
+                        <span className="text-sm font-bold text-foreground">{item.product.product_name}</span>
+                        <span className="text-[10px] text-muted font-semibold block mt-1">Đơn vị: {item.product.unit}</span>
                       </td>
                       <td className="p-4 text-center">
-                        <div className="inline-flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 border border-slate-250/20 dark:border-slate-700/30">
+                        <div className="inline-flex items-center bg-surface-alt rounded-lg p-0.5 border border-line-strong">
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.product.id, -1)}
-                            className="p-1 hover:bg-white dark:hover:bg-slate-700 rounded-md text-slate-500 dark:text-slate-400 cursor-pointer"
+                            className="p-1 hover:bg-surface dark:hover:bg-surface-alt rounded-md text-muted cursor-pointer"
                           >
                             <Minus className="w-3.5 h-3.5" />
                           </button>
@@ -454,12 +454,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                               // Nếu để trống hoặc 0 thì bỏ dòng khỏi đơn
                               setCart(prev => prev.filter(i => i.quantity > 0));
                             }}
-                            className="w-14 text-center text-base font-black text-slate-900 dark:text-slate-50 bg-transparent focus:outline-none focus:ring-1 focus:ring-amber-500/40 rounded-md"
+                            className="w-14 text-center text-base font-black text-foreground bg-transparent focus:outline-none focus:ring-1 focus:ring-amber-500/40 rounded-md"
                           />
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.product.id, 1)}
-                            className="p-1 hover:bg-white dark:hover:bg-slate-700 rounded-md text-slate-500 dark:text-slate-400 cursor-pointer"
+                            className="p-1 hover:bg-surface dark:hover:bg-surface-alt rounded-md text-muted cursor-pointer"
                           >
                             <Plus className="w-3.5 h-3.5" />
                           </button>
@@ -471,23 +471,23 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                           inputMode="numeric"
                           value={formatCurrencyInput(item.sellingPrice)}
                           onChange={(e) => updateCartPrice(item.product.id, parseCurrencyInput(e.target.value))}
-                          className={`w-24 bg-slate-50 dark:bg-slate-950 border rounded-lg px-2 py-1 text-xs text-right font-semibold focus:outline-none dark:text-slate-250 ${
+                          className={`w-24 bg-surface-alt border rounded-lg px-2 py-1 text-xs text-right font-semibold focus:outline-none ${
                             item.sellingPrice > 0 && item.sellingPrice < 1000
                               ? 'border-red-500'
-                              : 'border-slate-250 dark:border-slate-800'
+                              : 'border-line'
                           }`}
                         />
                         {item.sellingPrice > 0 && item.sellingPrice < 1000 && (
                           <span className="text-[10px] text-red-500 font-semibold block mt-0.5 text-right">Nhập ≥ 1.000đ</span>
                         )}
                       </td>
-                      <td className="p-4 text-right font-bold text-slate-850 dark:text-slate-100">
+                      <td className="p-4 text-right font-bold text-foreground">
                         {(item.quantity * item.sellingPrice).toLocaleString('vi-VN')}đ
                       </td>
                       <td className="p-4 text-center">
                         <button
                           onClick={() => removeFromCart(item.product.id)}
-                          className="p-1 text-slate-400 hover:text-red-500 rounded-lg cursor-pointer"
+                          className="p-1 text-muted hover:text-red-500 rounded-lg cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -504,8 +504,8 @@ export const SalesPage: React.FC<SalesPageProps> = ({
       {/* Customer and Checkout Box */}
       <div className="space-y-4">
         {/* Customer area */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-surface p-5 rounded-3xl border border-line shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
             <User className="w-5 h-5 text-amber-500" />
             <span>Thông tin Khách hàng</span>
           </h3>
@@ -513,12 +513,12 @@ export const SalesPage: React.FC<SalesPageProps> = ({
           <div className="space-y-3.5">
             {/* Custom Animated Customer Selector */}
             <div className="space-y-1 relative" ref={dropdownRef}>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Chọn Khách Hàng</label>
+              <label className="text-xs font-bold text-muted uppercase tracking-wider block">Chọn Khách Hàng</label>
 
               <button
                 type="button"
                 onClick={() => setIsCustomerDropdownOpen(!isCustomerDropdownOpen)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-left flex items-center justify-between hover:border-amber-500/50 transition-all cursor-pointer shadow-sm group"
+                className="w-full bg-surface-alt border border-line rounded-2xl px-4 py-3 text-left flex items-center justify-between hover:border-amber-500/50 transition-all cursor-pointer shadow-sm group"
               >
                 {selectedCustomerId ? (
                   <div className="flex items-center gap-3 min-w-0">
@@ -526,21 +526,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                       {customers.find(c => c.id === selectedCustomerId)?.customer_name.charAt(0)}
                     </div>
                     <div className="truncate">
-                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100 block truncate">
+                      <span className="text-sm font-bold text-foreground block truncate">
                         {customers.find(c => c.id === selectedCustomerId)?.customer_name}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold block">
+                      <span className="text-[10px] text-muted font-semibold block">
                         #{customers.findIndex(c => c.id === selectedCustomerId) + 1} • {customers.find(c => c.id === selectedCustomerId)?.phone || 'Không sđt'}
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2.5 text-slate-400 text-sm font-medium">
-                    <User className="w-4 h-4 text-slate-500" />
+                  <div className="flex items-center gap-2.5 text-muted text-sm font-medium">
+                    <User className="w-4 h-4 text-muted" />
                     <span>-- Chọn khách hàng mua hàng --</span>
                   </div>
                 )}
-                <span className="text-slate-400 text-xs group-hover:text-amber-500 transition-colors">
+                <span className="text-muted text-xs group-hover:text-amber-500 transition-colors">
                   {isCustomerDropdownOpen ? '▲' : '▼'}
                 </span>
               </button>
@@ -553,23 +553,23 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.98 }}
                     transition={{ duration: 0.15, ease: 'easeOut' }}
-                    className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-30 overflow-hidden"
+                    className="absolute left-0 right-0 top-full mt-2 bg-surface border border-line rounded-2xl shadow-2xl z-30 overflow-hidden"
                   >
-                    <div className="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
+                    <div className="p-3 border-b border-line bg-surface-alt">
                       <div className="relative">
                         <input
                           type="text"
                           placeholder="Tìm tên, sđt khách hàng..."
                           value={customerSearch}
                           onChange={(e) => setCustomerSearch(e.target.value)}
-                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none dark:text-slate-100"
+                          className="w-full bg-surface border border-line rounded-xl pl-9 pr-3 py-2 text-xs focus:outline-none"
                           autoFocus
                         />
-                        <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
+                        <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted" />
                       </div>
                     </div>
 
-                    <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-1">
+                    <div className="max-h-60 overflow-y-auto divide-y divide-line p-1">
                       {customers
                         .filter(c =>
                           c.customer_name.toLowerCase().includes(customerSearch.toLowerCase()) ||
@@ -586,14 +586,14 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                               }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs">
+                              <div className="w-7 h-7 rounded-full bg-surface-alt text-secondary flex items-center justify-center font-bold text-xs">
                                 {c.customer_name.charAt(0)}
                               </div>
                               <div className="truncate">
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block truncate">
+                                <span className="text-xs font-bold text-foreground block truncate">
                                   {c.customer_name}
                                 </span>
-                                <span className="text-[10px] text-slate-400 block truncate">
+                                <span className="text-[10px] text-muted block truncate">
                                   #{customers.findIndex(x => x.id === c.id) + 1} • {c.phone || 'Không sđt'}
                                 </span>
                               </div>
@@ -619,9 +619,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                   transition={{ duration: 0.22, ease: 'easeOut' }}
                   className="overflow-hidden"
                 >
-                  <div className="p-3.5 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-slate-950/70 dark:via-slate-900 dark:to-amber-950/20 rounded-2xl border border-amber-200/60 dark:border-amber-500/15 text-xs space-y-2 text-slate-600 dark:text-slate-300 shadow-sm shadow-amber-500/5">
-                    <p><span className="font-bold text-slate-800 dark:text-slate-100">Điện thoại:</span> {customers.find(c => c.id === selectedCustomerId)?.phone || '---'}</p>
-                    <p className="leading-relaxed"><span className="font-bold text-slate-800 dark:text-slate-100">Địa chỉ:</span> {customers.find(c => c.id === selectedCustomerId)?.address || '---'}</p>
+                  <div className="p-3.5 bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-bg dark:via-bg dark:to-amber-950/20 rounded-2xl border border-amber-200/60 dark:border-amber-500/15 text-xs space-y-2 text-secondary shadow-sm shadow-amber-500/5">
+                    <p><span className="font-bold text-foreground">Điện thoại:</span> {customers.find(c => c.id === selectedCustomerId)?.phone || '---'}</p>
+                    <p className="leading-relaxed"><span className="font-bold text-foreground">Địa chỉ:</span> {customers.find(c => c.id === selectedCustomerId)?.address || '---'}</p>
                   </div>
                 </motion.div>
               )}
@@ -630,21 +630,21 @@ export const SalesPage: React.FC<SalesPageProps> = ({
         </div>
 
         {/* Financial Summary */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-slate-700 dark:text-slate-350 uppercase tracking-wider">
+        <div className="bg-surface p-5 rounded-3xl border border-line shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">
             Chi tiết thanh toán đơn hàng
           </h3>
 
           <div className="space-y-3.5">
             <div className="flex justify-between items-center text-sm">
-              <span className="text-slate-500">Tổng doanh thu:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100 text-lg">
+              <span className="text-muted">Tổng doanh thu:</span>
+              <span className="font-bold text-foreground text-lg">
                 {totalRevenue.toLocaleString('vi-VN')}đ
               </span>
             </div>
 
             {canSeeFinancials && (
-              <div className="flex justify-between items-center text-xs text-slate-500 border-t border-slate-100 dark:border-slate-800/50 pt-2 bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-dashed border-slate-200 dark:border-slate-800">
+              <div className="flex justify-between items-center text-xs text-muted border-t border-line pt-2 bg-surface-alt p-2.5 rounded-lg border border-dashed border-line">
                 <span className="flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                   <span>Ước lượng lợi nhuận:</span>
@@ -655,17 +655,17 @@ export const SalesPage: React.FC<SalesPageProps> = ({
               </div>
             )}
 
-            <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800/50">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tiền khách trả trước (đ)</label>
+            <div className="space-y-1 pt-2 border-t border-line">
+              <label className="text-xs font-bold text-muted uppercase tracking-wider block">Tiền khách trả trước (đ)</label>
               <input
                 type="text"
                 inputMode="numeric"
                 value={formatCurrencyInput(paidAmount)}
                 onChange={(e) => setPaidAmount(parseCurrencyInput(e.target.value))}
-                className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm font-bold text-slate-900 dark:text-slate-100 focus:outline-none ${
+                className={`w-full bg-surface-alt border rounded-xl px-3.5 py-2 text-sm font-bold text-foreground focus:outline-none ${
                   paidAmount > 0 && paidAmount < 1000
                     ? 'border-red-500'
-                    : 'border-slate-250 dark:border-slate-850'
+                    : 'border-line'
                 }`}
               />
               {paidAmount > 0 && paidAmount < 1000 && (
@@ -675,35 +675,35 @@ export const SalesPage: React.FC<SalesPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setPaidAmount(totalRevenue)}
-                  className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-700 dark:text-slate-300 rounded cursor-pointer transition-colors"
+                  className="px-2.5 py-1 bg-surface-alt hover:bg-surface-alt text-[10px] font-bold text-secondary rounded cursor-pointer transition-colors"
                 >
                   Trả hết
                 </button>
                 <button
                   type="button"
                   onClick={() => setPaidAmount(0)}
-                  className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-[10px] font-bold text-slate-700 dark:text-slate-300 rounded cursor-pointer transition-colors"
+                  className="px-2.5 py-1 bg-surface-alt hover:bg-surface-alt text-[10px] font-bold text-secondary rounded cursor-pointer transition-colors"
                 >
                   Ghi nợ 100%
                 </button>
               </div>
             </div>
 
-            <div className="flex justify-between items-center text-sm pt-2 border-t border-slate-150 dark:border-slate-800">
-              <span className="text-slate-500 font-medium">Còn nợ lại:</span>
-              <span className={`font-extrabold ${remainingDebt > 0 ? 'text-rose-600 dark:text-rose-455' : 'text-slate-400'}`}>
+            <div className="flex justify-between items-center text-sm pt-2 border-t border-line">
+              <span className="text-muted font-medium">Còn nợ lại:</span>
+              <span className={`font-extrabold ${remainingDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-muted'}`}>
                 {remainingDebt.toLocaleString('vi-VN')}đ
               </span>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Ghi chú sổ sách</label>
+              <label className="text-xs font-bold text-muted uppercase tracking-wider block">Ghi chú sổ sách</label>
               <input
                 type="text"
                 placeholder="Ví dụ: Nợ thanh toán chuyển khoản, giao hàng..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none dark:text-slate-100"
+                className="w-full bg-surface-alt border border-line rounded-xl px-3.5 py-2 text-xs focus:outline-none"
               />
             </div>
 
@@ -719,9 +719,9 @@ export const SalesPage: React.FC<SalesPageProps> = ({
 
               <button
                 onClick={() => handleCheckout('DRAFT')}
-                className="w-full border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-850 text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                className="w-full border border-line-strong text-secondary font-bold py-2.5 px-4 rounded-2xl hover:bg-surface-alt dark:hover:bg-surface-alt text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
-                <FileCheck className="w-4 h-4 text-slate-400" />
+                <FileCheck className="w-4 h-4 text-muted" />
                 <span>LƯU ĐƠN NHÁP</span>
               </button>
             </div>

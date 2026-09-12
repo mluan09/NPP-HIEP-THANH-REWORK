@@ -169,7 +169,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
           className={`group flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-all duration-300 ease-out ${
             open || hasValue
               ? 'border-amber-400/70 bg-amber-50 text-amber-700 shadow-sm shadow-amber-500/10 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300'
-              : 'border-slate-800 bg-slate-950 text-slate-300 hover:border-amber-500/40 hover:text-amber-300'
+              : 'border-line bg-input text-secondary hover:border-amber-500/40 hover:text-amber-500'
           }`}
         >
           <CalendarDays className="h-4 w-4 shrink-0" />
@@ -196,7 +196,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
               animate={{ opacity: 1, scale: 1, width: 'auto' }}
               exit={{ opacity: 0, scale: 0.8, width: 0 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="flex items-center gap-1 overflow-hidden whitespace-nowrap rounded-xl px-2 py-1.5 text-xs font-semibold text-rose-500 cursor-pointer transition-colors hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30"
+              className="flex items-center gap-1 overflow-hidden whitespace-nowrap rounded-xl px-2 py-1.5 text-xs font-semibold text-rose-500 cursor-pointer transition-colors hover:bg-rose-500/10"
             >
               <X className="h-3 w-3 shrink-0" />
               Xóa lọc
@@ -215,7 +215,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 420, damping: 32, mass: 0.7 }}
             style={{ transformOrigin: 'top left' }}
-            className="absolute left-0 top-full z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-3 shadow-xl shadow-black/40"
+            className="absolute left-0 top-full z-50 mt-2 w-[19rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-line bg-surface p-3 shadow-xl shadow-black/40"
           >
             {/* Preset nhanh */}
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -226,7 +226,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                   onClick={preset.run}
                   whileTap={{ scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  className="rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1 text-[11px] font-semibold text-slate-300 cursor-pointer transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-300"
+                  className="rounded-lg border border-line-strong bg-input px-2.5 py-1 text-[11px] font-semibold text-secondary cursor-pointer transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
                 >
                   {preset.label}
                 </motion.button>
@@ -240,7 +240,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                 onClick={() => shiftMonth(-1)}
                 aria-label="Tháng trước"
                 whileTap={{ scale: 0.9 }}
-                className="rounded-lg p-1.5 text-slate-500 cursor-pointer transition-colors duration-200 hover:bg-slate-100 hover:text-amber-600 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="rounded-lg p-1.5 text-muted cursor-pointer transition-colors duration-200 hover:bg-surface-alt hover:text-amber-500"
               >
                 <ChevronLeft className="h-4 w-4" />
               </motion.button>
@@ -252,7 +252,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: direction >= 0 ? -18 : 18 }}
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 text-xs font-bold text-slate-100"
+                    className="absolute inset-0 text-xs font-bold text-foreground"
                   >
                     {MONTHS[view.month]} {view.year}
                   </motion.div>
@@ -263,7 +263,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                 onClick={() => shiftMonth(1)}
                 aria-label="Tháng sau"
                 whileTap={{ scale: 0.9 }}
-                className="rounded-lg p-1.5 text-slate-500 cursor-pointer transition-colors duration-200 hover:bg-slate-100 hover:text-amber-600 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="rounded-lg p-1.5 text-muted cursor-pointer transition-colors duration-200 hover:bg-surface-alt hover:text-amber-500"
               >
                 <ChevronRight className="h-4 w-4" />
               </motion.button>
@@ -272,7 +272,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
             {/* Thứ */}
             <div className="mb-1 grid grid-cols-7 gap-0.5">
               {WEEKDAYS.map(day => (
-                <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                <div key={day} className="py-1 text-center text-[10px] font-bold uppercase tracking-wide text-muted">
                   {day}
                 </div>
               ))}
@@ -304,13 +304,13 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                       onClick={() => handlePick(key)}
                       onMouseEnter={() => setHovered(key)}
                       className={`relative h-8 text-[11px] font-semibold cursor-pointer transition-colors duration-150 ease-out ${
-                        inRange && !isEdge ? 'bg-amber-100 dark:bg-amber-500/15' : ''
+                        inRange && !isEdge ? 'bg-amber-500/15' : ''
                       } ${
                         inRange && !isSingle && key === range.start ? 'rounded-l-lg' : ''
                       } ${
                         inRange && !isSingle && key === range.end ? 'rounded-r-lg' : ''
-                      } ${!inRange ? 'rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800' : ''} ${
-                        outside ? 'text-slate-600' : 'text-slate-200'
+                      } ${!inRange ? 'rounded-lg hover:bg-surface-alt' : ''} ${
+                        outside ? 'text-muted/50' : 'text-secondary'
                       }`}
                     >
                       {isEdge && (
@@ -323,7 +323,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
                       <span
                         className={`relative z-10 flex h-full w-full items-center justify-center tabular-nums ${
                           isEdge ? 'text-white' : ''
-                        } ${isToday && !isEdge ? 'text-amber-600 dark:text-amber-400' : ''}`}
+                        } ${isToday && !isEdge ? 'text-amber-500' : ''}`}
                       >
                         {day.getDate()}
                         {isToday && !isEdge && (
@@ -336,7 +336,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({ from, to, onCh
               </motion.div>
             </AnimatePresence>
 
-            <div className="mt-2 border-t border-slate-100 pt-2 text-center text-[11px] font-medium text-slate-400 dark:border-slate-800">
+            <div className="mt-2 border-t border-line pt-2 text-center text-[11px] font-medium text-muted">
               {anchor ? `Đã chọn ${formatVi(anchor)} — chọn ngày kết thúc` : 'Chọn ngày bắt đầu và ngày kết thúc'}
             </div>
           </motion.div>

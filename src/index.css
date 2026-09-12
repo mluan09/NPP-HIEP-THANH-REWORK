@@ -5,24 +5,117 @@
 /* Dark mode is class-controlled and never follows the operating system theme. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Map design tokens -> Tailwind utilities. `inline` giữ var() để 3 theme dùng chung utility. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-input: var(--input);
+  --color-foreground: var(--foreground);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-blue-fg: var(--tint-blue-fg);
+  --color-tint-pink: var(--tint-pink);
+  --color-tint-pink-fg: var(--tint-pink-fg);
+  --color-tint-green: var(--tint-green);
+  --color-tint-green-fg: var(--tint-green-fg);
+  --color-tint-amber: var(--tint-amber);
+  --color-tint-amber-fg: var(--tint-amber-fg);
+}
+
+/* ===== Theme tokens ===== */
+/* classic = UI hiện tại (dark), không đổi cho user cũ */
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color-scheme: dark;
-  background-color: #0b0f19;
+
+  --bg: #0b0f19;
+  --surface: #0f172a;
+  --surface-alt: #172033;
+  --input: #020617;
+  --foreground: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --line: #1e293b;
+  --line-strong: #334155;
+  --glass-bg: #0f172a;
+  --glass-border: #1e293b;
+  --scrollbar-track: #0b0f19;
+  --scrollbar-thumb: #334155;
+  --scrollbar-thumb-hover: #475569;
+  --skeleton-a: #334155;
+  --skeleton-b: #475569;
+  --tint-blue: #172554;   --tint-blue-fg: #93c5fd;
+  --tint-pink: #500724;   --tint-pink-fg: #f9a8d4;
+  --tint-green: #022c22;  --tint-green-fg: #6ee7b7;
+  --tint-amber: #451a03;  --tint-amber-fg: #fcd34d;
 }
 
-/* Luôn nền tối — không phụ thuộc prefers-color-scheme của hệ thống */
+/* modern-light = theo ảnh mockup (nền sáng) */
+.ui-modern {
+  color-scheme: light;
+
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --input: #ffffff;
+  --foreground: #0f172a;
+  --text-secondary: #475569;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --glass-bg: #ffffff;
+  --glass-border: #e2e8f0;
+  --scrollbar-track: #f5f7fb;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+  --skeleton-a: #e2e8f0;
+  --skeleton-b: #f1f5f9;
+  --tint-blue: #e0eaff;   --tint-blue-fg: #4338ca;
+  --tint-pink: #fce7f3;   --tint-pink-fg: #be185d;
+  --tint-green: #d1fae5;  --tint-green-fg: #047857;
+  --tint-amber: #fef3c7;  --tint-amber-fg: #b45309;
+}
+
+/* modern-dark = navy mềm, khác classic */
+.ui-modern.ui-dark {
+  color-scheme: dark;
+
+  --bg: #0f1420;
+  --surface: #1a2233;
+  --surface-alt: #232d42;
+  --input: #0b101b;
+  --foreground: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --line: #2a3550;
+  --line-strong: #3b4763;
+  --glass-bg: #1a2233;
+  --glass-border: #2a3550;
+  --scrollbar-track: #0f1420;
+  --scrollbar-thumb: #3b4763;
+  --scrollbar-thumb-hover: #4b5878;
+  --skeleton-a: #2a3550;
+  --skeleton-b: #3b4763;
+  --tint-blue: #1e2a52;   --tint-blue-fg: #93c5fd;
+  --tint-pink: #4a1530;   --tint-pink-fg: #f9a8d4;
+  --tint-green: #0d2f26;  --tint-green-fg: #6ee7b7;
+  --tint-amber: #3d2703;  --tint-amber-fg: #fcd34d;
+}
+
 html,
 body,
 #root {
-  background-color: #0b0f19;
-  color-scheme: dark;
+  background-color: var(--bg);
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  color: #f8fafc;
+  color: var(--foreground);
 }
 
 /* Custom Scrollbar */
@@ -32,31 +125,31 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--scrollbar-thumb);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Solid surface compatibility class for existing cards and panels. */
 .glass-panel {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
 }
 
-/* Keep all native controls aligned with forced dark mode. */
+/* Native controls follow the active theme. */
 select,
 option,
 input,
 textarea,
 button {
-  color-scheme: dark;
+  color-scheme: inherit;
 }
 
 /* Smooth transitions */
@@ -64,18 +157,18 @@ button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== #2: Tăng tương phản phân lớp nền tối ===== */
-.dark .layer-base { background-color: #0b0f19; }
-.dark .layer-card { background-color: #0f172a; }
-.dark .layer-card-alt { background-color: #172033; }
-.dark .layer-input { background-color: #020617; }
+/* ===== #2: Tăng tương phản phân lớp nền ===== */
+.layer-base { background-color: var(--bg); }
+.layer-card { background-color: var(--surface); }
+.layer-card-alt { background-color: var(--surface-alt); }
+.layer-input { background-color: var(--input); }
 
 /* ===== #3: Chuẩn hóa nút ===== */
 .btn-primary {
   @apply bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold shadow-lg shadow-amber-500/20 transition-all duration-200 cursor-pointer;
 }
 .btn-secondary {
-  @apply border border-slate-700 text-slate-300 hover:bg-slate-800 font-bold transition-colors cursor-pointer;
+  @apply border border-line-strong text-secondary hover:bg-surface-alt font-bold transition-colors cursor-pointer;
 }
 .btn-danger {
   @apply bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-sm transition-colors cursor-pointer;
@@ -91,7 +184,7 @@ button {
   z-index: 10;
 }
 .table-sticky-header thead th {
-  background-color: #0f172a;
+  background-color: var(--surface);
 }
 
 /* ===== #11: Số tiền dễ đọc ===== */
@@ -105,7 +198,7 @@ button {
   @apply text-rose-600 dark:text-rose-400 font-bold tabular-nums text-right;
 }
 .money-neutral {
-  @apply text-slate-100 font-bold tabular-nums text-right;
+  @apply text-foreground font-bold tabular-nums text-right;
 }
 
 /* ===== #14: Modal footer sticky & dynamic viewport height ===== */
@@ -124,14 +217,10 @@ button {
   position: sticky;
   bottom: 0;
   z-index: 10;
-  background: inherit;
-  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  background-color: var(--surface);
+  border-top: 1px solid var(--line);
   padding: 1rem 1.5rem;
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-}
-.dark .modal-footer {
-  background-color: #0f172a;
-  border-color: rgba(51, 65, 85, 0.5);
 }
 
 /* ===== #16: Skeleton loading ===== */
@@ -140,7 +229,7 @@ button {
   50% { opacity: 0.15; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+  background: linear-gradient(90deg, var(--skeleton-a) 25%, var(--skeleton-b) 50%, var(--skeleton-a) 75%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
   border-radius: 0.5rem;
@@ -171,7 +260,7 @@ button {
     display: flex;
     flex-direction: column;
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+    border-bottom: 1px solid var(--line);
     gap: 0.25rem;
   }
   .responsive-table tbody td {
@@ -187,7 +276,7 @@ button {
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #94a3b8;
+    color: var(--muted);
     flex-shrink: 0;
     margin-right: 0.75rem;
   }
@@ -195,7 +284,7 @@ button {
     justify-content: flex-end;
     gap: 0.5rem;
     padding-top: 0.5rem;
-    border-top: 1px solid rgba(51, 65, 85, 0.2);
+    border-top: 1px solid var(--line);
     margin-top: 0.25rem;
   }
   .responsive-table tbody td.td-actions::before {
@@ -203,12 +292,3 @@ button {
   }
 }
 
-/* Force background on any viewport state, including OS light mode. */
-@media (prefers-color-scheme: light), (prefers-color-scheme: dark) {
-  html,
-  body,
-  #root {
-    background-color: #0b0f19;
-    color-scheme: dark;
-  }
-}

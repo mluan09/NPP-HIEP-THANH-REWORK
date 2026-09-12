@@ -337,7 +337,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       return { label: 'Đã hủy', style: 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-400' };
     }
     if (sale.status === 'DRAFT') {
-      return { label: 'Nháp', style: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' };
+      return { label: 'Nháp', style: 'bg-surface-alt text-secondary' };
     }
     const debtAmount = getDebtForSale(sale.id, sale.customer_id);
     if (debtAmount > 0) {
@@ -366,35 +366,35 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
     <div className="space-y-6">
       {/* Top metrics summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
+        <div className="bg-surface p-5 rounded-2xl border border-line shadow-sm flex items-center gap-4">
           <div className="p-3 bg-blue-500/10 rounded-xl text-blue-600">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-semibold block">Tổng khách hàng</span>
-            <span className="text-xl font-bold dark:text-slate-100">{customers.length}</span>
+            <span className="text-xs text-muted font-semibold block">Tổng khách hàng</span>
+            <span className="text-xl font-bold">{customers.length}</span>
           </div>
         </div>
 
-        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
+        <div className="bg-surface p-5 rounded-2xl border border-line shadow-sm flex items-center gap-4">
           <div className="p-3 bg-amber-500/10 rounded-xl text-amber-600">
             <CreditCard className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-semibold block">Đang nợ tiền</span>
+            <span className="text-xs text-muted font-semibold block">Đang nợ tiền</span>
             <span className="text-xl font-bold text-amber-600 dark:text-amber-400">
               {customers.filter(c => getCustomerStats(c.id).remainingDebt > 0).length}
             </span>
           </div>
         </div>
 
-        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm flex items-center gap-4">
+        <div className="bg-surface p-5 rounded-2xl border border-line shadow-sm flex items-center gap-4">
           <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-600">
             <ShoppingBag className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs text-slate-400 font-semibold block">Tổng số lượng đơn hàng</span>
-            <span className="text-xl font-bold dark:text-slate-100">
+            <span className="text-xs text-muted font-semibold block">Tổng số lượng đơn hàng</span>
+            <span className="text-xl font-bold">
               {sales.filter(s => s.status !== 'CANCELLED').length}
             </span>
           </div>
@@ -402,7 +402,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-surface p-4 rounded-2xl border border-line shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search */}
         <div className="relative w-full md:w-80">
           <input
@@ -410,9 +410,9 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
             placeholder="Tìm theo Tên, Số điện thoại..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50 dark:text-slate-100"
+            className="w-full bg-bg border border-line rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
           />
-          <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-muted" />
         </div>
 
         {/* Add Customer Button */}
@@ -428,26 +428,26 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
       </div>
 
       {/* Main Table */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-surface rounded-2xl border border-line shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-950">
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">#</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Tên khách hàng</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Số điện thoại</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Địa chỉ</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Tổng mua</th>
-                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Còn nợ</th>
+              <tr className="border-b border-line bg-bg">
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">#</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">Tên khách hàng</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">Số điện thoại</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider">Địa chỉ</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Tổng mua</th>
+                <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-right">Còn nợ</th>
                 {canEdit && (
-                  <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Hành động</th>
+                  <th className="p-4 text-xs font-bold text-muted uppercase tracking-wider text-center">Hành động</th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-150 dark:divide-slate-800/60">
+            <tbody className="divide-y divide-line">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={canEdit ? 7 : 6} className="p-8 text-center text-slate-400 text-sm">
+                  <td colSpan={canEdit ? 7 : 6} className="p-8 text-center text-muted text-sm">
                     Không tìm thấy khách hàng nào
                   </td>
                 </tr>
@@ -459,18 +459,18 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     <tr
                       key={c.id}
                       onClick={() => setSelectedCustomer(c)}
-                      className="cursor-pointer transition-colors hover:bg-slate-800/50"
+                      className="cursor-pointer transition-colors hover:bg-surface-alt"
                       title="Nhấp để xem chi tiết lịch sử giao dịch"
                     >
-                      <td className="p-4 text-sm font-semibold text-slate-500 dark:text-slate-400">{index + 1}</td>
-                      <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100">{c.customer_name}</td>
-                      <td className="p-4 text-sm text-slate-600 dark:text-slate-400">{c.phone || '---'}</td>
-                      <td className="p-4 text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs">{c.address || '---'}</td>
-                      <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-100 text-right">
+                      <td className="p-4 text-sm font-semibold text-muted">{index + 1}</td>
+                      <td className="p-4 text-sm font-bold text-foreground">{c.customer_name}</td>
+                      <td className="p-4 text-sm text-secondary">{c.phone || '---'}</td>
+                      <td className="p-4 text-sm text-muted truncate max-w-xs">{c.address || '---'}</td>
+                      <td className="p-4 text-sm font-bold text-foreground text-right">
                         {stats.totalPurchased.toLocaleString('vi-VN')}đ
                       </td>
                       <td className="p-4 text-right">
-                        <span className={`text-sm font-bold ${stats.remainingDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'
+                        <span className={`text-sm font-bold ${stats.remainingDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-muted'
                           }`}>
                           {stats.remainingDebt > 0 ? `${stats.remainingDebt.toLocaleString('vi-VN')}đ` : '0đ'}
                         </span>
@@ -480,14 +480,14 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                           <div className="flex justify-center gap-1.5">
                             <button
                               onClick={(e) => openEditDialog(c, e)}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 rounded-lg cursor-pointer transition-colors"
+                              className="p-1.5 bg-surface-alt text-secondary hover:text-amber-500 dark:hover:text-amber-400 rounded-lg cursor-pointer transition-colors"
                               title="Sửa thông tin"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={(e) => handleDeleteCustomer(c.id, e)}
-                              className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
+                              className="p-1.5 bg-surface-alt text-secondary hover:text-red-500 dark:hover:text-red-400 rounded-lg cursor-pointer transition-colors"
                               title="Xóa"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -513,24 +513,24 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDialogOpen(false)}
-              className="fixed inset-0 bg-slate-950/90"
+              className="fixed inset-0 bg-bg"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative flex w-full max-w-md flex-col rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
+              className="relative flex w-full max-w-md flex-col rounded-2xl sm:rounded-3xl border border-line bg-surface shadow-2xl z-10 max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
             >
-              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-inherit">
-                <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line shrink-0 bg-inherit">
+                <h3 className="text-base sm:text-lg font-bold text-foreground">
                   {editingCustomer ? 'Cập Nhật Khách Hàng' : 'Thêm Khách Hàng Mới'}
                 </h3>
                 <button
                   type="button"
                   aria-label="Đóng"
                   onClick={() => setIsDialogOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-surface-alt dark:hover:bg-surface-alt rounded-xl cursor-pointer text-muted hover:text-secondary transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -539,31 +539,31 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               <form onSubmit={handleSave} className="flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 overscroll-contain">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Tên khách hàng</label>
+                    <label className="text-xs font-bold text-muted">Tên khách hàng</label>
                     <input
                       type="text"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Nhập tên đại lý, quán nhậu hoặc tạp hóa..."
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                      className="w-full rounded-xl border border-line bg-bg px-3.5 py-2 text-sm text-foreground focus:outline-none"
                       required
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Số điện thoại</label>
+                    <label className="text-xs font-bold text-muted">Số điện thoại</label>
                     <input
                       type="text"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Ví dụ: 0908123456"
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                      className="w-full rounded-xl border border-line bg-bg px-3.5 py-2 text-sm text-foreground focus:outline-none"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-3">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Địa chỉ giao hàng</label>
+                      <label className="text-xs font-bold text-muted">Địa chỉ giao hàng</label>
                       {addressError && (
                         <span className="text-[11px] font-semibold text-red-500">Vui lòng nhập địa chỉ</span>
                       )}
@@ -577,31 +577,31 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                       placeholder="Số nhà, tên đường, quận/huyện..."
                       rows={2}
                       aria-invalid={addressError}
-                      className={`w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-3.5 py-2 text-sm focus:outline-none dark:text-slate-100 ${
+                      className={`w-full bg-surface-alt border rounded-xl px-3.5 py-2 text-sm focus:outline-none ${
                         addressError
                           ? 'border-red-500 focus:ring-2 focus:ring-red-500/30'
-                          : 'border-slate-250 dark:border-slate-800'
+                          : 'border-line'
                       }`}
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400">Ghi chú bổ sung</label>
+                    <label className="text-xs font-bold text-muted">Ghi chú bổ sung</label>
                     <input
                       type="text"
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Yêu cầu giao hàng, phương thức thanh toán..."
-                      className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-sm text-slate-100 focus:outline-none"
+                      className="w-full rounded-xl border border-line bg-bg px-3.5 py-2 text-sm text-foreground focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-900 flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+                <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-line bg-surface flex gap-3 justify-end items-center shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
                   <button
                     type="button"
                     onClick={() => setIsDialogOpen(false)}
-                    className="px-4 py-2 border border-slate-250 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="px-4 py-2 border border-line-strong text-secondary rounded-xl text-xs cursor-pointer hover:bg-surface-alt dark:hover:bg-surface-alt"
                   >
                     Hủy bỏ
                   </button>
@@ -634,19 +634,19 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 24, scale: 0.96 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
+              className="relative bg-surface rounded-2xl sm:rounded-3xl border border-line w-full max-w-3xl shadow-2xl flex flex-col max-h-[calc(100dvh-1.5rem)] lg:max-h-[90vh] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-150 dark:border-slate-800 shrink-0 bg-inherit">
+              <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-line shrink-0 bg-inherit">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-sm">
                     {selectedCustomer.customer_name.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
                       Sổ giao dịch: {selectedCustomer.customer_name}
                     </h3>
-                    <span className="text-xs text-slate-400 font-semibold block">
+                    <span className="text-xs text-muted font-semibold block">
                       #{customers.findIndex(c => c.id === selectedCustomer.id) + 1}
                     </span>
                   </div>
@@ -655,7 +655,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                   type="button"
                   aria-label="Đóng"
                   onClick={() => setSelectedCustomer(null)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer text-slate-400 hover:text-slate-200 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-surface-alt dark:hover:bg-surface-alt rounded-xl cursor-pointer text-muted hover:text-secondary transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -665,47 +665,47 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
 
             {/* Profile body */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-1 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/40 dark:border-slate-800/40 p-4 rounded-2xl space-y-3.5 text-xs">
-                <h4 className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[10px]">Thông tin chi tiết</h4>
+              <div className="md:col-span-1 bg-surface-alt border border-line p-4 rounded-2xl space-y-3.5 text-xs">
+                <h4 className="font-bold text-foreground uppercase tracking-wider text-[10px]">Thông tin chi tiết</h4>
 
                 <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-700 dark:text-slate-300 font-medium">{selectedCustomer.phone || 'Chưa cung cấp'}</span>
+                  <Phone className="w-4 h-4 text-muted" />
+                  <span className="text-secondary font-medium">{selectedCustomer.phone || 'Chưa cung cấp'}</span>
                 </div>
 
                 <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-slate-600 dark:text-slate-400 font-medium leading-relaxed">{selectedCustomer.address || 'Chưa cung cấp'}</span>
+                  <MapPin className="w-4 h-4 text-muted mt-0.5 flex-shrink-0" />
+                  <span className="text-secondary font-medium leading-relaxed">{selectedCustomer.address || 'Chưa cung cấp'}</span>
                 </div>
 
-                <div className="flex items-start gap-2 pt-2 border-t border-slate-200/40 dark:border-slate-800/40">
-                  <FileText className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 pt-2 border-t border-line">
+                  <FileText className="w-4 h-4 text-muted mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="font-bold block text-slate-700 dark:text-slate-350">Ghi chú:</span>
-                    <span className="text-slate-500 dark:text-slate-400 mt-0.5 block italic">{selectedCustomer.notes || 'Không có ghi chú'}</span>
+                    <span className="font-bold block text-secondary">Ghi chú:</span>
+                    <span className="text-muted mt-0.5 block italic">{selectedCustomer.notes || 'Không có ghi chú'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Financial Box */}
               <div className="md:col-span-2 grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/40 p-5 rounded-2xl flex flex-col justify-between">
-                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Tổng sản lượng mua</span>
+                <div className="bg-surface-alt border border-line p-5 rounded-2xl flex flex-col justify-between">
+                  <span className="text-xs text-muted font-bold uppercase tracking-wider">Tổng sản lượng mua</span>
                   <div className="mt-3">
-                    <span className="text-2xl font-extrabold text-slate-950 dark:text-slate-100 block">
+                    <span className="text-2xl font-extrabold text-foreground block">
                       {details.stats.totalPurchased.toLocaleString('vi-VN')}đ
                     </span>
-                    <span className="text-xs text-slate-400 block mt-1">{details.stats.salesCount} đơn hàng giao dịch</span>
+                    <span className="text-xs text-muted block mt-1">{details.stats.salesCount} đơn hàng giao dịch</span>
                   </div>
                 </div>
 
                 <div className="bg-amber-500/5 border border-amber-500/10 p-5 rounded-2xl flex flex-col justify-between">
                   <span className="text-xs text-amber-600/70 dark:text-amber-400/70 font-bold uppercase tracking-wider">Số dư nợ còn lại</span>
                   <div className="mt-3">
-                    <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-450 block">
+                    <span className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 block">
                       {details.stats.remainingDebt.toLocaleString('vi-VN')}đ
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-1">Sẽ tự động khấu trừ khi thanh toán</span>
+                    <span className="text-[10px] text-muted block mt-1">Sẽ tự động khấu trừ khi thanh toán</span>
                   </div>
                 </div>
               </div>
@@ -713,12 +713,12 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
 
             {/* History Table */}
             <div className="flex-1 flex flex-col min-h-[200px] overflow-hidden">
-              <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2.5">
+              <h4 className="font-bold text-xs text-secondary uppercase tracking-wider mb-2.5">
                 Lịch sử giao dịch đơn hàng
               </h4>
-              <div className="flex-1 overflow-y-auto border border-slate-200/50 dark:border-slate-800/50 rounded-xl bg-white dark:bg-slate-900">
-                <table className="w-full text-xs text-left border-collapse bg-white dark:bg-slate-900">
-                  <thead className="bg-slate-100 dark:bg-slate-800 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex-1 overflow-y-auto border border-line rounded-xl bg-surface">
+                <table className="w-full text-xs text-left border-collapse bg-surface">
+                  <thead className="bg-surface-alt sticky top-0 z-10 border-b border-line-strong">
                     <tr>
                       <th className="p-2.5 font-bold">Sản phẩm mua</th>
                       <th className="p-2.5 font-bold">Ngày bán</th>
@@ -733,10 +733,10 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-line">
                     {details.salesList.length === 0 ? (
                       <tr>
-                        <td colSpan={canEdit ? 7 : 5} className="p-6 text-center text-slate-400">
+                        <td colSpan={canEdit ? 7 : 5} className="p-6 text-center text-muted">
                           Chưa phát sinh giao dịch nào
                         </td>
                       </tr>
@@ -746,13 +746,13 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                         const saleDebt = getDebtForSale(sale.id, sale.customer_id);
 
                         return (
-                          <tr key={sale.id} className="bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800">
-                            <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-300 max-w-[220px] align-top">
+                          <tr key={sale.id} className="bg-surface hover:bg-surface-alt dark:hover:bg-surface-alt">
+                            <td className="p-2.5 font-semibold text-foreground max-w-[220px] align-top">
                               <div className="whitespace-normal break-words leading-relaxed">
                                 {getProductsForSale(sale.id)}
                               </div>
                             </td>
-                            <td className="p-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">{sale.sale_date}</td>
+                            <td className="p-2.5 text-muted whitespace-nowrap">{sale.sale_date}</td>
                             <td className="p-2.5 text-center">
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${displayStatus.style}`}>
                                 {displayStatus.label === 'Hoàn thành' ? (
@@ -764,11 +764,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                               </span>
                             </td>
                             <td className="p-2.5 text-right whitespace-nowrap">
-                              <span className={`font-bold ${saleDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`}>
+                              <span className={`font-bold ${saleDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-muted'}`}>
                                 {saleDebt > 0 ? `${saleDebt.toLocaleString('vi-VN')}đ` : '0đ'}
                               </span>
                             </td>
-                            <td className="p-2.5 text-right font-bold text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                            <td className="p-2.5 text-right font-bold text-foreground whitespace-nowrap">
                               {sale.total_revenue.toLocaleString('vi-VN')}đ
                             </td>
                             {canEdit && (
@@ -784,7 +784,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                                     <span>Thu hồi</span>
                                   </button>
                                 ) : (
-                                  <span className="text-[10px] text-slate-400 italic">Đã thu hồi</span>
+                                  <span className="text-[10px] text-muted italic">Đã thu hồi</span>
                                 )}
                               </td>
                             )}
@@ -810,11 +810,11 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               </div>
             </div>
 
-            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+            <div className="sticky bottom-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-line bg-surface flex justify-end shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
               <button
                 type="button"
                 onClick={() => setSelectedCustomer(null)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                className="px-5 py-2.5 bg-surface-alt hover:bg-surface-alt dark:hover:bg-surface-alt text-secondary rounded-xl text-xs font-bold cursor-pointer transition-colors"
               >
                 Đóng sổ giao dịch
               </button>

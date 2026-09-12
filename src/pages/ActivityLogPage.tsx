@@ -23,7 +23,7 @@ const categoryMeta: Record<ActivityLogEntry['category'], { label: string; icon: 
   customer: {
     label: 'Khách hàng',
     icon: <Users className="w-4 h-4" />,
-    badge: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/40 dark:text-fuchsia-300',
+    badge: 'bg-tint-pink text-tint-pink-fg',
   },
   debt: {
     label: 'Công nợ',
@@ -89,9 +89,9 @@ const actionTypeMeta: Record<ActionType, { label: string; icon: React.ReactNode;
   other: {
     label: 'Khác',
     icon: <BadgeInfo className="w-3.5 h-3.5" />,
-    badge: 'bg-slate-800 text-slate-300',
-    border: 'border-l-slate-400',
-    bg: 'bg-slate-950',
+    badge: 'bg-surface-alt text-secondary',
+    border: 'border-l-muted',
+    bg: 'bg-bg',
     iconBg: 'bg-violet-500/10 text-violet-500',
   },
 };
@@ -185,21 +185,21 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
               <ClipboardList className="w-6 h-6" />
             </motion.div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100">Nhật Ký Hoạt Động</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <h2 className="text-xl font-bold text-foreground">Nhật Ký Hoạt Động</h2>
+              <p className="text-sm text-muted mt-1">
                 Theo dõi thao tác thành viên. Lưu tối đa {LOG_MAX_PAGES} trang gần nhất, mỗi trang {LOG_PAGE_SIZE} hoạt động.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
-            <div className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Tổng log</div>
-              <div className="text-lg font-bold text-slate-100">{entries.length}</div>
+            <div className="px-4 py-3 rounded-2xl bg-surface-alt border border-line">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">Tổng log</div>
+              <div className="text-lg font-bold text-foreground">{entries.length}</div>
             </div>
-            <div className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Trang hiện tại</div>
-              <div className="text-lg font-bold text-slate-100">{page}/{totalPages}</div>
+            <div className="px-4 py-3 rounded-2xl bg-surface-alt border border-line">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">Trang hiện tại</div>
+              <div className="text-lg font-bold text-foreground">{page}/{totalPages}</div>
             </div>
           </div>
         </div>
@@ -211,12 +211,12 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
         transition={{ duration: 0.35, delay: 0.08, ease: 'easeOut' }}
         className="glass-panel overflow-hidden rounded-3xl"
       >
-        <div className="px-6 py-4 border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="px-6 py-4 border-b border-line flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <motion.div animate={{ rotate: [0, -8, 8, 0] }} transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 3 }}>
               <BadgeInfo className="w-5 h-5 text-violet-500" />
             </motion.div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300">Hoạt động gần nhất</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-secondary">Hoạt động gần nhất</h3>
           </div>
 
           <div className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
               whileTap={{ scale: page > 1 ? 0.96 : 1 }}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page === 1}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-900 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-line text-xs font-bold text-secondary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Trước</span>
@@ -243,7 +243,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                     className={`w-9 h-9 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       active
                         ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
-                        : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                        : 'bg-surface text-secondary hover:bg-surface-alt'
                     }`}
                   >
                     {pageNumber}
@@ -257,7 +257,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
               whileTap={{ scale: page < totalPages ? 0.96 : 1 }}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={page === totalPages}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-900 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-line text-xs font-bold text-secondary disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface transition-colors cursor-pointer"
             >
               <span>Sau</span>
               <ChevronRight className="w-4 h-4" />
@@ -270,11 +270,11 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="h-[360px] rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 flex flex-col items-center justify-center text-center px-6"
+              className="h-[360px] rounded-3xl border border-dashed border-line flex flex-col items-center justify-center text-center px-6"
             >
-              <Clock3 className="w-10 h-10 text-slate-400 mb-4" />
-              <h4 className="text-base font-bold text-slate-100">Chưa có hoạt động nào</h4>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+              <Clock3 className="w-10 h-10 text-muted mb-4" />
+              <h4 className="text-base font-bold text-foreground">Chưa có hoạt động nào</h4>
+              <p className="text-sm text-muted mt-2 max-w-md">
                 Nhật ký sẽ xuất hiện khi thành viên thực hiện thao tác có ghi log trong hệ thống.
               </p>
             </motion.div>
@@ -298,7 +298,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.22, delay: index * 0.02 }}
-                      className={`rounded-2xl border border-slate-200/70 dark:border-slate-800/70 ${actionMeta.bg} p-4 border-l-4 ${actionMeta.border}`}
+                      className={`rounded-2xl border border-line ${actionMeta.bg} p-4 border-l-4 ${actionMeta.border}`}
                     >
                       <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
@@ -308,7 +308,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
 
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h4 className="text-sm font-bold text-slate-100">{entry.action}</h4>
+                              <h4 className="text-sm font-bold text-foreground">{entry.action}</h4>
                               <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${meta.badge}`}>
                                 {meta.icon}
                                 <span>{meta.label}</span>
@@ -319,10 +319,10 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                               </span>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-muted">
                               <span className="inline-flex items-center gap-1">
                                 <UserCircle2 className="w-3.5 h-3.5" />
-                                <span className="font-semibold text-slate-300">{entry.actor_name}</span>
+                                <span className="font-semibold text-secondary">{entry.actor_name}</span>
                               </span>
                               <span>•</span>
                               <span>{roleLabel(entry.actor_role)}</span>
@@ -334,7 +334,7 @@ export const ActivityLogPage: React.FC<ActivityLogPageProps> = ({ currentUser })
                             </div>
 
                             {entry.detail && (
-                              <p className="mt-2 break-words rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-300">
+                              <p className="mt-2 break-words rounded-lg border border-line-strong bg-surface px-3 py-1.5 text-sm text-secondary">
                                 {entry.detail}
                               </p>
                             )}
