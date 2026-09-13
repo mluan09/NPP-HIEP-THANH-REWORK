@@ -13,9 +13,11 @@ import { RotateLockOverlay } from './components/RotateLockOverlay';
 import { ConfirmModal } from './components/ConfirmModal';
 import { useModal } from './hooks/useModal';
 import { useDeviceMode } from './hooks/useDeviceMode';
+import { useTheme } from './context/ThemeContext';
 
 // Lazy-loaded pages
 const LoginPage = lazy(() => import('./pages/LoginPage').then((module) => ({ default: module.LoginPage })));
+const ModernDashboard = lazy(() => import('./pages/ModernDashboard').then((module) => ({ default: module.ModernDashboard })));
 const InventoryPage = lazy(() => import('./pages/InventoryPage').then((module) => ({ default: module.InventoryPage })));
 const CustomersPage = lazy(() => import('./pages/CustomersPage').then((module) => ({ default: module.CustomersPage })));
 const SalesPage = lazy(() => import('./pages/SalesPage').then((module) => ({ default: module.SalesPage })));
@@ -57,9 +59,10 @@ function AppInner() {
   const { showToast } = useToast();
   const { modalState, showConfirm } = useModal();
   const { isTouchPortrait } = useDeviceMode();
+  const { uiTheme } = useTheme();
 
   const isRotateLocked = Boolean(currentUser) && isTouchPortrait;
-  const activeTab = location.pathname.replace('/', '') || 'sales';
+  const activeTab = location.pathname.replace('/', '') || (uiTheme === 'modern' ? 'overview' : 'sales');
 
   useEffect(() => {
     if (isRotateLocked) {
@@ -347,7 +350,24 @@ function AppInner() {
             >
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location}>
-                  <Route path="/" element={<Navigate to="/sales" replace />} />
+                  <Route path="/" element={<Navigate to={uiTheme === 'modern' ? "/overview" : "/sales"} replace />} />
+
+                  <Route
+                    path="/overview"
+                    element={
+                      <ModernDashboard
+                        currentUser={currentUser}
+                        inventory={inventory}
+                        sales={sales}
+                        saleItems={saleItems}
+                        customers={customers}
+                        debts={debts}
+                        onNavigate={handleTabChange}
+                        isLoading={dbLoading}
+                      />
+                    }
+                  />
+                  <Route path="/dashboard" element={<Navigate to="/overview" replace />} />
 
                   <Route
                     path="/sales"
@@ -453,7 +473,7 @@ function AppInner() {
                     }
                   />
                   <Route path="/feedback" element={<FeedbackPage />} />
-                  <Route path="*" element={<Navigate to="/sales" replace />} />
+                  <Route path="*" element={<Navigate to={uiTheme === 'modern' ? "/overview" : "/sales"} replace />} />
                 </Routes>
               </Suspense>
             </motion.div>

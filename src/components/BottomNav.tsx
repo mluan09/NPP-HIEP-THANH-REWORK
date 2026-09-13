@@ -4,19 +4,25 @@ import { Plus } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { ALL_MENU_ITEMS } from './menuItems';
 
+import { useTheme } from '../context/ThemeContext';
+
 interface BottomNavProps {
   currentUser: Profile;
   onNavigate: (tab: string) => void;
 }
 
-const PRIMARY_TABS = ['sales', 'inventory', 'customers', 'debts'];
-
 export const BottomNav: FC<BottomNavProps> = ({ currentUser, onNavigate }) => {
   const navigate = useNavigate();
+  const { uiTheme } = useTheme();
   const [moreOpen, setMoreOpen] = useState(false);
   const allowed = ALL_MENU_ITEMS.filter((i) => i.allowed.includes(currentUser.role));
-  const primary = allowed.filter((i) => PRIMARY_TABS.includes(i.id)).slice(0, 4);
-  const overflow = allowed.filter((i) => !PRIMARY_TABS.includes(i.id));
+
+  const primaryTabs = uiTheme === 'modern'
+    ? ['overview', 'inventory', 'customers', 'debts']
+    : ['sales', 'inventory', 'customers', 'debts'];
+
+  const primary = allowed.filter((i) => primaryTabs.includes(i.id)).slice(0, 4);
+  const overflow = allowed.filter((i) => !primaryTabs.includes(i.id));
 
   const goSales = () => {
     setMoreOpen(false);

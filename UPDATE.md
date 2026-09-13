@@ -1,44 +1,67 @@
-# Cập nhật mới: Popup tìm kiếm trên Mobile
+# Đề xuất giao diện mới + bỏ nút sáng/tối
 
-## Mục tiêu
+## 1. Tổng quan
+- Giữ cố định dark mode, bỏ toggle trắng/tối.
+- Menu Profile giữ mục GIAO DIỆN: Giao diện hiện tại / Giao diện mới.
+- Giao diện mới theo hướng Extej: Sidebar + Hero Wallet + Top Tokens.
 
-Cải thiện trải nghiệm tìm kiếm trên thiết bị mobile: khi người dùng nhập
-từ khóa trong popup tìm kiếm, các sản phẩm phù hợp phải tự động xuất hiện
-để người dùng có thể chọn nhanh.
+## 2. Bỏ nút nền trắng và tối
+- Bỏ switch light/dark khỏi Header/Profile.
+- Xóa logic ThemeContext, chỉ giữ dark.
+- Lưu flag layout riêng, không dùng chung flag theme.
+- Kiểm tra Header, Sidebar, BottomNav không vỡ layout khi xóa theme.
 
-## Yêu cầu chức năng
+## 3. Menu Profile
+- Hiện tại trong `src/components/Header.tsx`: Giao diện hiện tại / Giao diện mới.
+- Map: hiện tại = layout cũ, mới = layout Extej.
+- Lưu trong `src/hooks/usePersistedState.ts`.
+- Giữ nguyên avatar, tên, vai trò, Đăng xuất.
+- Ảnh tham khảo: dropdown ADMIN / Chủ Cửa Hàng / #ADMIN.
 
-- Popup tìm kiếm chỉ áp dụng cho giao diện mobile.
-- Khi người dùng nhập hoặc thay đổi từ khóa, hệ thống tự động lọc và hiển
-  thị các sản phẩm phù hợp trong popup; không yêu cầu nhấn nút tìm kiếm.
-- Mỗi kết quả cần hiển thị thông tin đủ để nhận biết sản phẩm, gồm tối
-  thiểu tên sản phẩm và ảnh đại diện; hiển thị giá nếu dữ liệu có sẵn.
-- Người dùng có thể chạm vào một kết quả để chọn hoặc mở trang chi tiết
-  sản phẩm.
-- Hiển thị trạng thái phù hợp khi từ khóa trống và thông báo rõ ràng khi
-  không có sản phẩm khớp từ khóa.
+## 4. Giao diện mới
 
-## Danh sách kết quả
+### 4.1 Sidebar
+- Giữ: Markets, Trading, Wallet, Loans, Vaults, Portfolio, Swap.
+- Bỏ khỏi PAGES: Menu Styles, Tables, Charts, Forms, Pricing, Modals/Pop-Ups.
+- Chuyển nhóm UI ELEMENTS + DOCUMENTATION & SUPPORT xuống Settings / Dev only.
+- Active Wallet màu cam rõ, giữ icon + mũi tên >.
 
-- Ô nhập từ khóa luôn cố định ở phần trên của popup.
-- Khi có nhiều sản phẩm vượt quá không gian hiển thị, chỉ danh sách kết
-  quả được cuộn dọc.
-- Người dùng có thể kéo lên/xuống mượt mà bằng thao tác cảm ứng để xem và
-  chọn thêm sản phẩm.
-- Danh sách không được làm popup tràn khỏi màn hình hoặc che khuất thao
-  tác đóng popup.
+### 4.2 Header
+- Tăng contrast ô Search.
+- Bỏ bell, mail thừa.
+- Giữ avatar + tên + vai trò + trạng thái ví + mạng Bitcoin.
+- File: `src/components/Header.tsx`.
 
-## Accessibility
+### 4.3 Hero Wallet
+- Thay dòng Welcome to Ordinals Wallet bằng số dư, địa chỉ ví, nút Restore / Create.
+- Thu gọn ảnh NFT, làm carousel thay vì 3 ảnh lớn.
+- Phân cấp CTA: Create Wallet primary cam đậm, Restore Wallet outline.
+- File ảnh hưởng: `src/pages/*`, `src/assets/hero.png`.
 
-- Popup, ô tìm kiếm và danh sách kết quả phải có nhãn hoặc thuộc tính
-  ARIA phù hợp.
-- Có thể điều hướng đến và chọn kết quả bằng bàn phím khi sử dụng thiết
-  bị hỗ trợ bàn phím.
-- Kết quả đang được chọn hoặc focus phải có trạng thái trực quan rõ ràng.
-- Người dùng luôn có thể tiếp tục nhập từ khóa hoặc đóng popup.
+### 4.4 Khối Pepe & Pepita
+- Thêm sparkline Week Change, hiển thị -18.46% rõ.
+- Thêm nút Buy / View Collection.
+- Floor giữ màu cam: FLOOR 0.00100014 BTC.
 
-## Responsive
+### 4.5 Top Tokens (đổi tên từ Transactions)
+- Đổi nhãn Transactions -> Top Tokens / Markets vì đây là danh sách token.
+- Tabs ALL, DAO, XEN ECOSYSTEM, DEFI, GAMEFI, MEME: làm pill, active cam.
+- Thêm sort Price, Market Cap, Volume [24H], Supply, Holders.
+- Bảng: giá trị giữ trắng, chỉ % 24h/7d đỏ/xanh.
+- Tách ngày khỏi cột Token, chuyển sang cột Updated riêng.
+- Ví dụ dòng: ordi $7.29, VMPX $0.15, OXBT $0.06, Oshi $722.61, WHEE $0.29.
+- Thêm phân trang, skeleton load, empty state.
+- Mobile: table cuộn ngang, search + filter gọn.
 
-- Hoạt động tốt trên các kích thước màn hình mobile phổ biến.
-- Vùng kết quả đáp ứng thao tác vuốt, không gây cuộn ngoài ý muốn cho
-  trang nền khi người dùng đang xem danh sách sản phẩm.
+## 5. File ảnh hưởng dự kiến
+- `src/context/ThemeContext.tsx`: bỏ hoặc rút gọn.
+- `src/components/Header.tsx`: bỏ toggle, giữ menu GIAO DIỆN.
+- `src/components/Sidebar.tsx`: rút gọn PAGES.
+- `src/components/BottomNav.tsx`: đồng bộ mobile.
+- `src/hooks/usePersistedState.ts`: lưu layout.
+- `src/pages/*`: hero + bảng token.
+
+## 6. Bước tiếp theo
+- Chốt giữ/bỏ mục sidebar.
+- Chốt bỏ sáng/tối hoàn toàn.
+- Triển khai layout mới sau khi chốt.

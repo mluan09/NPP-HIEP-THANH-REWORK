@@ -1,72 +1,51 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
 
-export type UiTheme = 'classic' | 'modern';
-export type UiMode = 'light' | 'dark';
+export type LayoutMode = 'classic' | 'modern';
+export type UiTheme = LayoutMode;
 
-interface ThemeContextValue {
-  uiTheme: UiTheme;
-  uiMode: UiMode;
-  setUiTheme: (theme: UiTheme) => void;
-  setUiMode: (mode: UiMode) => void;
+interface LayoutContextValue {
+  layoutMode: LayoutMode;
+  setLayoutMode: (mode: LayoutMode | ((prev: LayoutMode) => LayoutMode)) => void;
 }
 
-const THEME_KEY = 'npp_ui_theme';
-const MODE_KEY = 'npp_ui_mode';
-
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-function readStoredTheme(): UiTheme {
-  try {
-    const stored = window.localStorage.getItem(THEME_KEY);
-    return stored === 'modern' ? 'modern' : 'classic';
-  } catch {
-    return 'classic';
-  }
-}
-
-function readStoredMode(): UiMode {
-  try {
-    const stored = window.localStorage.getItem(MODE_KEY);
-    return stored === 'dark' ? 'dark' : 'light';
-  } catch {
-    return 'light';
-  }
-}
+const LayoutContext = createContext<LayoutContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [uiTheme, setUiTheme] = useState<UiTheme>(readStoredTheme);
-  const [uiMode, setUiMode] = useState<UiMode>(readStoredMode);
+  const [layoutMode, setLayoutMode] = usePersistedState<LayoutMode>('npp_layout_mode', 'classic');
 
   useEffect(() => {
     const root = document.documentElement;
-    const isDark = uiTheme === 'classic' || (uiTheme === 'modern' && uiMode === 'dark');
-
-    // `dark:` variants fire only when the theme is dark, so light-first
-    // components (base light + dark: overrides) render correctly in modern-light.
-    root.classList.toggle('dark', isDark);
-    root.classList.toggle('ui-modern', uiTheme === 'modern');
-    root.classList.toggle('ui-dark', uiTheme === 'modern' && uiMode === 'dark');
-
-    try {
-      window.localStorage.setItem(THEME_KEY, uiTheme);
-      window.localStorage.setItem(MODE_KEY, uiMode);
-    } catch {
-      // Ignore storage failures; UI still works for current session.
-    }
-  }, [uiTheme, uiMode]);
+    // Luôn cố định dark mode
+    root.classList.add('dark');
+    root.classList.remove('ui-dark');
+    root.classList.toggle('ui-modern', layoutMode === 'modern');
+  }, [layoutMode]);
 
   const value = useMemo(
-    () => ({ uiTheme, uiMode, setUiTheme, setUiMode }),
-    [uiTheme, uiMode],
+    () => ({ layoutMode, setLayoutMode }),
+    [layoutMode, setLayoutMode],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>;
 }
 
-export function useTheme() {
-  const ctx = useContext(ThemeContext);
+export function useLayout() {
+  const ctx = useContext(LayoutContext);
   if (!ctx) {
-    throw new Error('useTheme must be used within ThemeProvider');
+    throw new Error('useLayout must be used within ThemeProvider');
   }
   return ctx;
+}
+
+// Giữ tương thích ngược cho useTheme
+export function useTheme() {
+  const { layoutMode, setLayoutMode } = useLayout();
+  return {
+    uiTheme: layoutMode,
+    setUiTheme: (theme: LayoutMode) => setLayoutMode(theme),
+    layoutMode,
+    setLayoutMode,
+    isDark: true,
+  };
 }

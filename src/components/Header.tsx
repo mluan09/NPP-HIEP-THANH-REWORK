@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronDown, LogOut, Moon, Palette, Search, Sparkles, Sun } from 'lucide-react';
+import { Check, ChevronDown, LogOut, Palette, Search, Sparkles } from 'lucide-react';
 import type { Profile } from '../lib/db';
 import { TouchMenu } from './TouchMenu';
 import { useDeviceMode } from '../hooks/useDeviceMode';
@@ -18,6 +18,8 @@ interface HeaderProps {
 
 const getTabTitle = (tab: string) => {
   switch (tab) {
+    case 'overview':
+    case 'dashboard': return 'Tổng Quan Hoạt Động';
     case 'sales': return 'Tạo Đơn Hàng Nhanh';
     case 'inventory': return 'Quản Lý Kho Hàng';
     case 'customers': return 'Danh Sách Khách Hàng';
@@ -52,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const { isTouchLandscape } = useDeviceMode();
-  const { uiTheme, uiMode, setUiTheme, setUiMode } = useTheme();
+  const { uiTheme, setUiTheme } = useTheme();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
@@ -98,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-20 flex h-12 min-w-0 shrink-0 items-center justify-between border-b border-line bg-surface px-4 shadow-sm shadow-black/20 lg:h-16 lg:px-8">
-      {/* Left section: menu and page title */}
+      {/* Left section: menu, search and page title */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {currentUser && (
           <TouchMenu
@@ -118,18 +120,27 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           data-palette-button="true"
-          aria-label="Tim nhanh chuc nang"
-          title="Tim nhanh (Ctrl+K)"
+          aria-label="Tìm nhanh chức năng"
+          title="Tìm nhanh (Ctrl+K)"
           onClick={() => document.dispatchEvent(new CustomEvent('npp:open-palette'))}
-          className="hidden shrink-0 items-center gap-2 rounded-xl border border-line bg-input px-2.5 py-2 text-[11px] text-muted hover:text-foreground md:flex touch-target"
+          className="hidden shrink-0 items-center gap-2.5 rounded-xl border border-line-strong bg-input px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:border-amber-500/50 hover:bg-surface-alt transition-colors md:flex touch-target"
         >
-          <Search className="h-4 w-4" aria-hidden="true" />
-          <span className="font-bold">Ctrl+K</span>
+          <Search className="h-4 w-4 text-amber-500" aria-hidden="true" />
+          <span className="text-muted font-medium">Tìm nhanh...</span>
+          <kbd className="rounded border border-line-strong bg-surface px-1.5 py-0.5 text-[10px] font-bold text-secondary">Ctrl+K</kbd>
         </button>
-        <div className="min-w-0 flex-1">
+
+        <div className="min-w-0 flex-1 flex items-center gap-3">
           <h1 className="truncate text-base font-bold text-foreground lg:text-xl">
             {getTabTitle(activeTab)}
           </h1>
+          <div className="hidden items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400 xl:flex">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span>Hệ thống online</span>
+          </div>
         </div>
       </div>
 
@@ -146,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="group flex items-center gap-2 lg:gap-3 rounded-full p-1 transition-all hover:bg-surface-alt/80 focus:outline-none focus:ring-2 focus:ring-amber-500/60 cursor-pointer"
           >
             <div className="hidden min-w-0 max-w-[12rem] text-right sm:block lg:max-w-[18rem]">
-              <p className="truncate text-sm font-bold leading-tight text-foreground group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors">
+              <p className="truncate text-sm font-bold leading-tight text-foreground group-hover:text-amber-500 transition-colors">
                 {currentUser.full_name}
               </p>
               <span className={`mt-0.5 inline-block max-w-full truncate rounded px-2 py-0.5 text-[10px] font-bold ${roleBadge(currentUser.role)}`}>
@@ -178,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-sm font-bold text-white shadow-sm">
                     {currentUser.full_name.charAt(0)}
                   </div>
-                          <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1">
                     <div className="truncate text-xs font-bold text-foreground">
                       {currentUser.full_name}
                     </div>
@@ -230,37 +241,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="flex-1 text-left">Giao diện mới</span>
                   {uiTheme === 'modern' && <Check className="h-3.5 w-3.5 shrink-0 text-amber-500" />}
                 </button>
-
-                {uiTheme === 'modern' && (
-                  <div className="mt-1 flex gap-1 rounded-xl bg-surface-alt p-1">
-                    <button
-                      type="button"
-                      aria-pressed={uiMode === 'light'}
-                      onClick={() => setUiMode('light')}
-                      className={`flex flex-1 min-h-[32px] items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-bold transition-colors cursor-pointer ${
-                        uiMode === 'light'
-                          ? 'bg-surface text-foreground shadow-sm'
-                          : 'text-muted hover:text-foreground'
-                      }`}
-                    >
-                      <Sun className="h-3.5 w-3.5" />
-                      Sáng
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={uiMode === 'dark'}
-                      onClick={() => setUiMode('dark')}
-                      className={`flex flex-1 min-h-[32px] items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-bold transition-colors cursor-pointer ${
-                        uiMode === 'dark'
-                          ? 'bg-surface text-foreground shadow-sm'
-                          : 'text-muted hover:text-foreground'
-                      }`}
-                    >
-                      <Moon className="h-3.5 w-3.5" />
-                      Tối
-                    </button>
-                  </div>
-                )}
 
                 <div className="my-1.5 border-t border-line" />
 

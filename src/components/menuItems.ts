@@ -1,4 +1,5 @@
 import {
+  LayoutDashboard,
   Package,
   Users,
   ShoppingCart,
@@ -18,6 +19,7 @@ export interface MenuItem {
 }
 
 export const ALL_MENU_ITEMS: MenuItem[] = [
+  { id: 'overview', label: 'Tổng Quan', icon: LayoutDashboard, allowed: ['owner', 'manager', 'staff'] },
   { id: 'sales', label: 'Tạo Đơn Hàng', icon: ShoppingCart, allowed: ['owner', 'manager', 'staff'] },
   { id: 'inventory', label: 'Kho Hàng', icon: Package, allowed: ['owner', 'manager', 'staff'] },
   { id: 'customers', label: 'Khách Hàng', icon: Users, allowed: ['owner', 'manager', 'staff'] },
@@ -27,3 +29,4 @@ export const ALL_MENU_ITEMS: MenuItem[] = [
   { id: 'activity-log', label: 'Nhật Ký Hoạt Động', icon: ClipboardList, allowed: ['owner'] },
   { id: 'feedback', label: 'Góp Ý & Báo Lỗi', icon: MessageCircle, allowed: ['owner', 'manager', 'staff'] },
 ];
+
