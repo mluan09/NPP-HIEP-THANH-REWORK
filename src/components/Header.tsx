@@ -127,8 +127,8 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => document.dispatchEvent(new CustomEvent('npp:open-palette'))}
           className={
             isModern
-              ? "hidden shrink-0 items-center gap-2.5 rounded-xl border border-line-strong bg-input px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:border-amber-500/50 hover:bg-surface-alt transition-colors md:flex touch-target"
-              : "hidden shrink-0 items-center gap-2 rounded-xl border border-line bg-input px-2.5 py-2 text-[11px] text-muted hover:text-foreground md:flex touch-target"
+              ? "hidden shrink-0 items-center gap-2.5 rounded-xl border border-line-strong bg-input px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:bg-surface-alt transition-colors md:flex touch-target focus:outline-none focus-visible:outline-none"
+              : "hidden shrink-0 items-center gap-2 rounded-xl border border-line bg-input px-2.5 py-2 text-[11px] text-muted hover:text-foreground md:flex touch-target focus:outline-none focus-visible:outline-none"
           }
         >
           <Search className={isModern ? "h-4 w-4 text-amber-500" : "h-4 w-4"} aria-hidden="true" />
