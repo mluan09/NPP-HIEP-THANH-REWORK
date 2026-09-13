@@ -18,8 +18,10 @@ import { formatCurrencyInput, parseCurrencyInput } from '../lib/currency';
 import { logActivity } from '../lib/activityLog';
 import { useModal } from '../hooks/useModal';
 import { useToast } from '../components/Toast';
+import { usePersistedState } from '../hooks/usePersistedState';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { ResponsiveSearchSheet } from '../components/ResponsiveSearchSheet';
+import { Money } from '../components/Money';
 
 interface InventoryPageProps {
   inventory: InventoryItem[];
@@ -36,7 +38,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchSheetOpen, setIsSearchSheetOpen] = useState(false);
-  const [filterTab, setFilterTab] = useState<'all' | 'low' | 'out'>('all');
+  const [filterTab, setFilterTab] = usePersistedState<'all' | 'low' | 'out'>('npp_inventory_filter', 'all');
   
   // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -581,11 +583,11 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
                       <td className="p-4 text-sm text-secondary">{item.unit}</td>
                       {canSeeCost && (
                         <td className="p-4 text-sm font-medium text-foreground text-right">
-                          {item.cost_price.toLocaleString('vi-VN')}đ
+                          <Money value={item.cost_price} />
                         </td>
                       )}
                       <td className="p-4 text-sm font-bold text-foreground text-right">
-                        {item.selling_price.toLocaleString('vi-VN')}đ
+                        <Money value={item.selling_price} />
                       </td>
                       <td className="p-4 text-sm text-muted text-center">{item.initial_stock}</td>
                       <td className="p-4 text-sm text-emerald-600 dark:text-emerald-400 text-center font-medium">+{item.import_qty}</td>
@@ -941,3 +943,5 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
     </div>
   );
 };
+
+

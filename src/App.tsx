@@ -5,6 +5,8 @@ import { getDb, deleteUserSession, checkSessionExists } from './lib/db';
 import type { Profile, InventoryItem, Customer, Sale, SaleItem, Debt, CashbookEntry } from './lib/db';
 import { supabase, supabaseConfigError } from './lib/supabase';
 import { Sidebar } from './components/Sidebar';
+import { BottomNav } from './components/BottomNav';
+import { CommandPalette } from './components/CommandPalette';
 import { Header } from './components/Header';
 import { ToastProvider, useToast } from './components/Toast';
 import { RotateLockOverlay } from './components/RotateLockOverlay';
@@ -330,7 +332,7 @@ function AppInner() {
         />
 
         <main
-          className={`p-4 lg:p-8 flex-1 overflow-x-hidden ${
+          className={`p-4 pb-24 lg:p-8 lg:pb-8 flex-1 overflow-x-hidden ${
             isRotateLocked ? 'overflow-hidden' : 'overflow-y-auto'
           }`}
         >
@@ -458,6 +460,8 @@ function AppInner() {
           </AnimatePresence>
         </main>
       </div>
+      {currentUser && <BottomNav currentUser={currentUser} onNavigate={handleTabChange} />}
+      <CommandPalette currentUser={currentUser} onNavigate={handleTabChange} />
       <ConfirmModal {...modalState} />
       <RotateLockOverlay isAuthenticated={Boolean(currentUser)} />
     </div>

@@ -53,7 +53,7 @@ export const SalesPage: React.FC<SalesPageProps> = ({
   currentUser
 }) => {
   const { modalState, showAlert } = useModal();
-  const { showToast } = useToast();
+  const { showToast, showUndoToast } = useToast();
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [productSearch, setProductSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
@@ -175,8 +175,15 @@ export const SalesPage: React.FC<SalesPageProps> = ({
     ));
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = (productId: string, silent?: boolean) => {
+    const removed = cart.find((i) => i.product.id === productId);
+    if (!removed) return;
     setCart(prev => prev.filter(i => i.product.id !== productId));
+    if (!silent) {
+      showUndoToast(`Da xoa ${removed.product.product_name} khoi gio.`, () => {
+        setCart((prev) => (prev.some((x) => x.product.id === productId) ? prev : [...prev, removed]));
+      });
+    }
   };
 
   // Calculations

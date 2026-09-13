@@ -19,6 +19,7 @@ import type { Debt, Customer, Profile, CashbookEntry, Sale, SaleItem, InventoryI
 import { useModal } from '../hooks/useModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useToast } from '../components/Toast';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 interface DebtsPageProps {
   debts: Debt[];
@@ -46,7 +47,7 @@ export const DebtsPage: React.FC<DebtsPageProps> = ({
   const { modalState, showAlert, showConfirm } = useModal();
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTab, setFilterTab] = useState<'all' | 'pending' | 'paid'>('pending');
+  const [filterTab, setFilterTab] = usePersistedState<'all' | 'pending' | 'paid'>('npp_debts_filter', 'pending');
 
   // Payment Dialog state
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
