@@ -185,6 +185,13 @@ function AppInner() {
     setTouchMenuOpen(false);
   }, [location.pathname]);
 
+  // Về tab tạo đơn khi chuyển sang giao diện cũ vì overview chỉ thuộc giao diện mới
+  useEffect(() => {
+    if (uiTheme === 'classic' && (location.pathname === '/overview' || location.pathname === '/dashboard')) {
+      navigate('/sales', { replace: true });
+    }
+  }, [uiTheme, location.pathname, navigate]);
+
   const handleLoginSuccess = (profile: Profile, sessionToken: string) => {
     sessionTokenRef.current = sessionToken;
     localStorage.setItem('npp_session_token', sessionToken);
