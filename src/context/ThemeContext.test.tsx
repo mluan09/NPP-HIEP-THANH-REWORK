@@ -36,7 +36,6 @@ describe('ThemeContext and LayoutMode', () => {
     );
 
     expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(document.documentElement.classList.contains('ui-dark')).toBe(false);
   });
 
   it('manages layout mode and sets ui-modern class when modern', () => {
@@ -58,6 +57,7 @@ describe('ThemeContext and LayoutMode', () => {
     expect(document.documentElement.classList.contains('ui-modern')).toBe(true);
     // Dark mode is still enforced
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.classList.contains('ui-dark')).toBe(true);
 
     act(() => {
       getByText('Set Classic').click();

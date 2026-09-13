@@ -4,18 +4,19 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/NPP HIEP THANH.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#0b0f19" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0f1420" />
     <script>
       (() => {
         try {
-          const theme = localStorage.getItem('npp_ui_theme');
-          const mode = localStorage.getItem('npp_ui_mode');
-          const isModern = theme === 'modern';
-          const isDark = !isModern || mode === 'dark';
+          const raw = localStorage.getItem('npp_layout_mode');
+          const legacyTheme = localStorage.getItem('npp_ui_theme');
+          const isModern = raw
+            ? JSON.parse(raw) === 'modern'
+            : legacyTheme === 'modern';
           document.documentElement.classList.toggle('ui-modern', isModern);
-          document.documentElement.classList.toggle('ui-dark', isModern && mode === 'dark');
-          document.documentElement.classList.toggle('dark', isDark);
+          document.documentElement.classList.toggle('ui-dark', isModern);
+          document.documentElement.classList.add('dark');
         } catch {
           document.documentElement.classList.add('dark');
         }

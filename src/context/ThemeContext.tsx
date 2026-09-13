@@ -16,10 +16,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    // Luôn cố định dark mode
+    // Luôn cố định dark mode, modern dùng token dark
     root.classList.add('dark');
-    root.classList.remove('ui-dark');
     root.classList.toggle('ui-modern', layoutMode === 'modern');
+    root.classList.toggle('ui-dark', layoutMode === 'modern');
   }, [layoutMode]);
 
   const value = useMemo(
