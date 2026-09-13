@@ -19,10 +19,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ setActiveTab, currentUser, onL
   const mainBusinessIds = ['overview', 'sales', 'inventory', 'customers', 'debts'];
   const businessItems = allowedItems.filter((item) => mainBusinessIds.includes(item.id));
   const systemItems = allowedItems.filter((item) => !mainBusinessIds.includes(item.id));
+  const classicItems = allowedItems.filter((item) => item.id !== 'overview');
 
   const renderNavGroup = (items: typeof allowedItems, groupLabel?: string) => (
     <div className="space-y-1">
-      {isModern && groupLabel && (
+      {groupLabel && (
         <div className="px-4 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-muted/70">
           {groupLabel}
         </div>
@@ -37,44 +38,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ setActiveTab, currentUser, onL
             className={({ isActive }) =>
               `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 cursor-pointer overflow-hidden ${
                 isActive
-                  ? isModern
-                    ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400 font-bold shadow-sm shadow-amber-500/10'
-                    : 'text-white font-bold'
+                  ? 'bg-amber-500/15 border border-amber-500/40 text-amber-400 font-bold shadow-sm shadow-amber-500/10'
                   : 'text-secondary hover:bg-surface-alt hover:text-foreground'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                {!isModern && isActive && (
-                  <motion.div
-                    layoutId="activeTabBadge"
-                    className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-600 rounded-xl shadow-md shadow-amber-500/20"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-                {isModern && isActive && (
+                {isActive && (
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-gradient-to-b from-amber-400 to-orange-500" />
                 )}
                 <span className="relative z-10 flex items-center gap-3 flex-1 min-w-0">
                   <Icon
                     className={`w-5 h-5 flex-shrink-0 transition-transform ${
-                      isActive
-                        ? isModern
-                          ? 'text-amber-400 scale-110'
-                          : 'text-white scale-110'
-                        : 'text-muted'
+                      isActive ? 'text-amber-400 scale-110' : 'text-muted'
                     }`}
                   />
                   <span className="truncate">{item.label}</span>
                 </span>
-                {isModern && (
-                  <ChevronRight
-                    className={`w-4 h-4 flex-shrink-0 transition-all ${
-                      isActive ? 'text-amber-400 translate-x-0 opacity-100' : 'text-muted/40 -translate-x-1 opacity-0 group-hover:opacity-100'
-                    }`}
-                  />
-                )}
+                <ChevronRight
+                  className={`w-4 h-4 flex-shrink-0 transition-all ${
+                    isActive ? 'text-amber-400 translate-x-0 opacity-100' : 'text-muted/40 -translate-x-1 opacity-0 group-hover:opacity-100'
+                  }`}
+                />
               </>
             )}
           </NavLink>
@@ -113,14 +99,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ setActiveTab, currentUser, onL
         </div>
       </div>
 
-      <nav className="p-4 space-y-3 flex-1 overflow-y-auto">
+      <nav className={`p-4 flex-1 overflow-y-auto ${isModern ? 'space-y-3' : 'space-y-1'}`}>
         {isModern ? (
           <>
             {renderNavGroup(businessItems, 'Nghiệp vụ')}
             {systemItems.length > 0 && renderNavGroup(systemItems, 'Hệ thống & Hỗ trợ')}
           </>
         ) : (
-          renderNavGroup(allowedItems)
+          classicItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.id}
+                to={`/${item.id}`}
+                onClick={() => setActiveTab(item.id)}
+                className={({ isActive }) =>
+                  `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 cursor-pointer overflow-hidden ${
+                    isActive
+                      ? 'text-white font-bold'
+                      : 'text-secondary hover:bg-surface-alt'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTabBadge"
+                        className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 dark:from-amber-600 dark:to-orange-600 rounded-xl shadow-md shadow-amber-500/20"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-3 w-full">
+                      <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white scale-110' : 'text-muted'}`} />
+                      <span>{item.label}</span>
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            );
+          })
         )}
       </nav>
 

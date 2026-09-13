@@ -98,6 +98,8 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [profileMenuOpen]);
 
+  const isModern = uiTheme === 'modern';
+
   return (
     <header className="sticky top-0 z-20 flex h-12 min-w-0 shrink-0 items-center justify-between border-b border-line bg-surface px-4 shadow-sm shadow-black/20 lg:h-16 lg:px-8">
       {/* Left section: menu, search and page title */}
@@ -120,27 +122,39 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           data-palette-button="true"
-          aria-label="Tìm nhanh chức năng"
-          title="Tìm nhanh (Ctrl+K)"
+          aria-label="Tim nhanh chuc nang"
+          title="Tim nhanh (Ctrl+K)"
           onClick={() => document.dispatchEvent(new CustomEvent('npp:open-palette'))}
-          className="hidden shrink-0 items-center gap-2.5 rounded-xl border border-line-strong bg-input px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:border-amber-500/50 hover:bg-surface-alt transition-colors md:flex touch-target"
+          className={
+            isModern
+              ? "hidden shrink-0 items-center gap-2.5 rounded-xl border border-line-strong bg-input px-3 py-2 text-xs font-semibold text-foreground shadow-sm hover:border-amber-500/50 hover:bg-surface-alt transition-colors md:flex touch-target"
+              : "hidden shrink-0 items-center gap-2 rounded-xl border border-line bg-input px-2.5 py-2 text-[11px] text-muted hover:text-foreground md:flex touch-target"
+          }
         >
-          <Search className="h-4 w-4 text-amber-500" aria-hidden="true" />
-          <span className="text-muted font-medium">Tìm nhanh...</span>
-          <kbd className="rounded border border-line-strong bg-surface px-1.5 py-0.5 text-[10px] font-bold text-secondary">Ctrl+K</kbd>
+          <Search className={isModern ? "h-4 w-4 text-amber-500" : "h-4 w-4"} aria-hidden="true" />
+          {isModern ? (
+            <>
+              <span className="text-muted font-medium">Tìm nhanh...</span>
+              <kbd className="rounded border border-line-strong bg-surface px-1.5 py-0.5 text-[10px] font-bold text-secondary">Ctrl+K</kbd>
+            </>
+          ) : (
+            <span className="font-bold">Ctrl+K</span>
+          )}
         </button>
 
         <div className="min-w-0 flex-1 flex items-center gap-3">
           <h1 className="truncate text-base font-bold text-foreground lg:text-xl">
             {getTabTitle(activeTab)}
           </h1>
-          <div className="hidden items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400 xl:flex">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span>Hệ thống online</span>
-          </div>
+          {isModern && (
+            <div className="hidden items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400 xl:flex">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span>Hệ thống online</span>
+            </div>
+          )}
         </div>
       </div>
 
