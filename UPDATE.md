@@ -65,3 +65,25 @@
 - Chốt giữ/bỏ mục sidebar.
 - Chốt bỏ sáng/tối hoàn toàn.
 - Triển khai layout mới sau khi chốt.
+
+---
+
+## 7. Cập nhật mới: Tab Dashboard (Home) Nền Sáng & Trung Tâm ADMIN
+
+- **Banner Ưu Đãi Toàn Khung (15s Auto-Rotate)**:
+  - Banner hiển thị toàn khung, tự động chuyển slide sau mỗi 15 giây.
+  - Có nút điều hướng thủ công, chấm tròn indicators, tự dừng khi rê chuột.
+- **Lưới Sản Phẩm Card Grid (Phương án 1) & Theo Dõi Giá**:
+  - Từng thẻ sản phẩm hiển thị giá bán, badge biến động giá % (xanh lá/đỏ), biểu đồ Mini Sparkline đường sóng.
+  - Thay thế nút "Thêm đơn hàng" thành **"Theo Dõi Giá Chi Tiết"**.
+  - Modal xem lịch sử biến động giá theo ngày: biểu đồ xu hướng nhiều ngày trước đó và bảng nhật ký chi tiết.
+- **Nâng Cấp Tab ADMIN (`/admin`)**:
+  - Đổi tên tab "Quản Lý Tài Khoản" thành **"ADMIN"** dành cho Chủ Cửa Hàng (Owner).
+  - Tích hợp 3 phân hệ:
+    1. Quản lý tài khoản (phân quyền, khóa tài khoản).
+    2. Quản lý ưu đãi (thêm/sửa/xóa, upload ảnh banner từ máy tính).
+    3. Quản lý giá bán (điều chỉnh giá theo ngày, tự động đồng bộ vào kho hàng `inventory` và lưu vết vào `price_history`).
+- **Nền Sáng Cho Giao Diện Mới (Light Theme)**:
+  - Nền `#f4f6fa`, thẻ card `#ffffff` đổ bóng nhẹ, chữ đen than `#0f172a` và `#334155` đạt chuẩn WCAG tương phản cao.
+  - Điểm nhấn cam rực rỡ `#ea580c` / `#f59e0b`. Giao diện cũ (`classic`) vẫn giữ nguyên nền tối mặc định.
+

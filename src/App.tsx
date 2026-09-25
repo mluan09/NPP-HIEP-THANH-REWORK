@@ -24,7 +24,7 @@ const SalesPage = lazy(() => import('./pages/SalesPage').then((module) => ({ def
 const DebtsPage = lazy(() => import('./pages/DebtsPage').then((module) => ({ default: module.DebtsPage })));
 const CashbookPage = lazy(() => import('./pages/CashbookPage').then((module) => ({ default: module.CashbookPage })));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage').then((module) => ({ default: module.FeedbackPage })));
-const AccountsPage = lazy(() => import('./pages/AccountsPage').then((module) => ({ default: module.AccountsPage })));
+const AdminPage = lazy(() => import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })));
 const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage').then((module) => ({ default: module.ActivityLogPage })));
 
 function PageLoader() {
@@ -302,7 +302,7 @@ function AppInner() {
   if (currentUser.role === 'staff' && location.pathname === '/cashbook') {
     return <Navigate to="/sales" replace />;
   }
-  if (currentUser.role !== 'owner' && (location.pathname === '/accounts' || location.pathname === '/activity-log')) {
+  if (currentUser.role !== 'owner' && (location.pathname === '/admin' || location.pathname === '/accounts' || location.pathname === '/activity-log')) {
     return <Navigate to="/sales" replace />;
   }
 
@@ -462,15 +462,18 @@ function AppInner() {
                   />
 
                   <Route
-                    path="/accounts"
+                    path="/admin"
                     element={
-                      <AccountsPage
+                      <AdminPage
                         currentUser={currentUser}
                         profiles={profiles}
                         onProfilesChange={setProfiles}
+                        inventory={inventory}
+                        setInventory={setInventory}
                       />
                     }
                   />
+                  <Route path="/accounts" element={<Navigate to="/admin" replace />} />
                   <Route
                     path="/activity-log"
                     element={

@@ -54,31 +54,30 @@
   --tint-amber: #451a03;  --tint-amber-fg: #fcd34d;
 }
 
-/* modern = dark mặc định, khóa dark để dễ nhìn số liệu */
-.ui-modern,
-.ui-modern.ui-dark {
-  color-scheme: dark;
+/* modern = nền sáng cao cấp, độ tương phản sắc nét, chống mỏi mắt */
+.ui-modern {
+  color-scheme: light;
 
-  --bg: #0f1420;
-  --surface: #1a2233;
-  --surface-alt: #232d42;
-  --input: #0b101b;
-  --foreground: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --muted: #94a3b8;
-  --line: #2a3550;
-  --line-strong: #3b4763;
-  --glass-bg: #1a2233;
-  --glass-border: #2a3550;
-  --scrollbar-track: #0f1420;
-  --scrollbar-thumb: #3b4763;
-  --scrollbar-thumb-hover: #4b5878;
-  --skeleton-a: #2a3550;
-  --skeleton-b: #3b4763;
-  --tint-blue: #1e2a52;   --tint-blue-fg: #93c5fd;
-  --tint-pink: #4a1530;   --tint-pink-fg: #f9a8d4;
-  --tint-green: #0d2f26;  --tint-green-fg: #6ee7b7;
-  --tint-amber: #3d2703;  --tint-amber-fg: #fcd34d;
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-alt: #eef2f7;
+  --input: #ffffff;
+  --foreground: #0f172a;
+  --text-secondary: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: #e2e8f0;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+  --skeleton-a: #e2e8f0;
+  --skeleton-b: #cbd5e1;
+  --tint-blue: #eff6ff;   --tint-blue-fg: #1d4ed8;
+  --tint-pink: #fdf2f8;   --tint-pink-fg: #be185d;
+  --tint-green: #ecfdf5;  --tint-green-fg: #047857;
+  --tint-amber: #fffbeb;  --tint-amber-fg: #b45309;
 }
 
 html,

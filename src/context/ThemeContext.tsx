@@ -16,10 +16,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    // Luôn cố định dark mode, modern dùng token dark
-    root.classList.add('dark');
-    root.classList.toggle('ui-modern', layoutMode === 'modern');
-    root.classList.toggle('ui-dark', layoutMode === 'modern');
+    if (layoutMode === 'modern') {
+      root.classList.remove('dark');
+      root.classList.remove('ui-dark');
+      root.classList.add('ui-modern');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('ui-modern');
+      root.classList.remove('ui-dark');
+    }
   }, [layoutMode]);
 
   const value = useMemo(

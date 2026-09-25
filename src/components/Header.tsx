@@ -24,8 +24,8 @@ const getTabTitle = (tab: string) => {
     case 'inventory': return 'Quản Lý Kho Hàng';
     case 'customers': return 'Danh Sách Khách Hàng';
     case 'debts': return 'Quản Lý & Thu Hồi Công Nợ';
-    case 'cashbook': return 'Nhật Ký Thu Chi';
-    case 'accounts': return 'Quản Lý Tài Khoản';
+    case 'admin':
+    case 'accounts': return 'Trung Tâm Quản Trị ADMIN';
     case 'activity-log': return 'Nhật Ký Hoạt Động';
     case 'feedback': return 'Góp Ý & Báo Lỗi';
     default: return 'Trang Chủ';

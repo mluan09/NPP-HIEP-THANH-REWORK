@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ModernDashboard } from './ModernDashboard';
 import type { Profile, InventoryItem, Sale, SaleItem, Customer, Debt } from '../lib/db';
@@ -93,7 +93,7 @@ const mockDebts: Debt[] = [
 describe('ModernDashboard', () => {
   afterEach(cleanup);
 
-  it('renders hero metrics with greeting and financial stats', () => {
+  it('renders promo banner and product cards with price tracking', () => {
     const onNavigate = vi.fn();
     render(
       <ModernDashboard
@@ -107,17 +107,16 @@ describe('ModernDashboard', () => {
       />
     );
 
-    expect(screen.getByText(/Xin chào, Nguyễn Văn A!/i)).toBeDefined();
-    const table = screen.getByRole('table');
-    expect(within(table).getByText('Bia Tiger 330ml')).toBeDefined();
-    expect(within(table).getByText('Bánh Chocopie Hộp 12')).toBeDefined();
+    // Kiểm tra tên các sản phẩm trên card
+    expect(screen.getAllByText('Bia Tiger 330ml').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Bánh Chocopie Hộp 12').length).toBeGreaterThan(0);
 
-    // CTA navigation
-    fireEvent.click(screen.getByText('Tạo Đơn Hàng Nhanh'));
-    expect(onNavigate).toHaveBeenCalledWith('sales');
+    // Kiểm tra nút Theo dõi giá chi tiết
+    const trackButtons = screen.getAllByText('Theo Dõi Giá Chi Tiết');
+    expect(trackButtons.length).toBeGreaterThan(0);
   });
 
-  it('filters items by search keyword in top products table', () => {
+  it('filters items by search keyword in product cards', () => {
     render(
       <ModernDashboard
         currentUser={mockProfile}
@@ -130,12 +129,12 @@ describe('ModernDashboard', () => {
       />
     );
 
-    const searchInput = screen.getByPlaceholderText(/Lọc theo tên hoặc mã SKU/i);
+    const searchInput = screen.getByPlaceholderText(/Tìm theo tên hoặc mã SKU/i);
     fireEvent.change(searchInput, { target: { value: 'Chocopie' } });
 
-    const table = screen.getByRole('table');
-    expect(within(table).getByText('Bánh Chocopie Hộp 12')).toBeDefined();
-    expect(within(table).queryByText('Bia Tiger 330ml')).toBeNull();
+    expect(screen.getAllByText('Bánh Chocopie Hộp 12').length).toBeGreaterThan(0);
+    // Sản phẩm Bia Tiger không còn trong danh sách card
+    expect(screen.queryByText('SP001')).toBeNull();
   });
 
   it('filters by category pills', () => {
@@ -152,8 +151,28 @@ describe('ModernDashboard', () => {
     );
 
     fireEvent.click(screen.getByText('ĐỒ UỐNG'));
-    const table = screen.getByRole('table');
-    expect(within(table).getByText('Bia Tiger 330ml')).toBeDefined();
-    expect(within(table).queryByText('Bánh Chocopie Hộp 12')).toBeNull();
+    expect(screen.getAllByText('Bia Tiger 330ml').length).toBeGreaterThan(0);
+    expect(screen.queryByText('SP002')).toBeNull();
+  });
+
+  it('opens price history modal when clicking on track price button', () => {
+    render(
+      <ModernDashboard
+        currentUser={mockProfile}
+        inventory={mockInventory}
+        sales={mockSales}
+        saleItems={mockSaleItems}
+        customers={mockCustomers}
+        debts={mockDebts}
+        onNavigate={vi.fn()}
+      />
+    );
+
+    const trackButtons = screen.getAllByText('Theo Dõi Giá Chi Tiết');
+    fireEvent.click(trackButtons[0]);
+
+    // Modal xuất hiện
+    expect(screen.getByText('Lịch Sử Biến Động Giá Bán')).toBeDefined();
+    expect(screen.getByText(/Xu hướng giá các ngày trước đó/i)).toBeDefined();
   });
 });

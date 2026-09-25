@@ -6,9 +6,9 @@ describe('menu authorization', () => {
     ALL_MENU_ITEMS.filter((item) => item.allowed.includes(role)).map((item) => item.id);
 
   it('shows administrative pages only to owners', () => {
-    expect(labelsFor('owner')).toEqual(expect.arrayContaining(['accounts', 'activity-log']));
-    expect(labelsFor('manager')).not.toEqual(expect.arrayContaining(['accounts', 'activity-log']));
-    expect(labelsFor('staff')).not.toEqual(expect.arrayContaining(['accounts', 'activity-log']));
+    expect(labelsFor('owner')).toEqual(expect.arrayContaining(['admin', 'activity-log']));
+    expect(labelsFor('manager')).not.toEqual(expect.arrayContaining(['admin', 'activity-log']));
+    expect(labelsFor('staff')).not.toEqual(expect.arrayContaining(['admin', 'activity-log']));
   });
 
   it('limits the cashbook to owner and manager roles', () => {

@@ -28,7 +28,7 @@ describe('ThemeContext and LayoutMode', () => {
     document.documentElement.className = '';
   });
 
-  it('always enforces dark mode on documentElement', () => {
+  it('enforces dark mode for classic layout', () => {
     render(
       <ThemeProvider>
         <ConsumerComponent />
@@ -36,9 +36,10 @@ describe('ThemeContext and LayoutMode', () => {
     );
 
     expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.classList.contains('ui-modern')).toBe(false);
   });
 
-  it('manages layout mode and sets ui-modern class when modern', () => {
+  it('manages layout mode and sets light ui-modern class when modern', () => {
     const { getByTestId, getByText } = render(
       <ThemeProvider>
         <ConsumerComponent />
@@ -55,9 +56,8 @@ describe('ThemeContext and LayoutMode', () => {
 
     expect(getByTestId('layout-mode').textContent).toBe('modern');
     expect(document.documentElement.classList.contains('ui-modern')).toBe(true);
-    // Dark mode is still enforced
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
-    expect(document.documentElement.classList.contains('ui-dark')).toBe(true);
+    // Modern uses the light theme (no dark class)
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
 
     act(() => {
       getByText('Set Classic').click();
